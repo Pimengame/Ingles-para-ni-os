@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Mágico</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+    <a href="index.html" class="btn-volver">⬅ Volver al Menú</a>
+
+<h1 style="color: #ff5722; text-shadow: 3px 3px 0 #ffd54f; font-size: 3.5rem;">🎹 Piano Mágico</h1>    <p>¡Toca tu canción favorita! (30 Teclas)</p>
+
+    <div class="contenedor-piano" id="miPiano"></div>
+
+    <div style="margin-top:20px; color:#666; text-align: center;">
+        💡 Pista: Usa el desplazamiento (scroll) horizontal si no ves todas las teclas.
+    </div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const pianoContainer = document.getElementById('miPiano');
+
+        // Estructura de notas y frecuencias
+        const notas = [
+            { nota: "Do", tipo: "b", freq: 130.81 }, { nota: "Do#", tipo: "n", freq: 138.59 },
+            { nota: "Re", tipo: "b", freq: 146.83 }, { nota: "Re#", tipo: "n", freq: 155.56 },
+            { nota: "Mi", tipo: "b", freq: 164.81 }, { nota: "Fa", tipo: "b", freq: 174.61 },
+            { nota: "Fa#", tipo: "n", freq: 185.00 }, { nota: "Sol", tipo: "b", freq: 196.00 },
+            { nota: "Sol#", tipo: "n", freq: 207.65 }, { nota: "La", tipo: "b", freq: 220.00 },
+            { nota: "La#", tipo: "n", freq: 233.08 }, { nota: "Si", tipo: "b", freq: 246.94 },
+            
+            { nota: "Do", tipo: "b", freq: 261.63 }, { nota: "Do#", tipo: "n", freq: 277.18 },
+            { nota: "Re", tipo: "b", freq: 293.66 }, { nota: "Re#", tipo: "n", freq: 311.13 },
+            { nota: "Mi", tipo: "b", freq: 329.63 }, { nota: "Fa", tipo: "b", freq: 349.23 },
+            { nota: "Fa#", tipo: "n", freq: 369.99 }, { nota: "Sol", tipo: "b", freq: 392.00 },
+            { nota: "Sol#", tipo: "n", freq: 415.30 }, { nota: "La", tipo: "b", freq: 440.00 },
+            { nota: "La#", tipo: "n", freq: 466.16 }, { nota: "Si", tipo: "b", freq: 493.88 },
+
+            { nota: "Do", tipo: "b", freq: 523.25 }, { nota: "Do#", tipo: "n", freq: 554.37 },
+            { nota: "Re", tipo: "b", freq: 587.33 }, { nota: "Re#", tipo: "n", freq: 622.25 },
+            { nota: "Mi", tipo: "b", freq: 659.25 }, { nota: "Fa", tipo: "b", freq: 698.46 }
+        ];
+
+        // --- 1. DIBUJAR EL PIANO ---
+        
+        // Primero, dibujamos SOLO las blancas
+        let blancasDibujadas = [];
+        notas.forEach((item) => {
+            if (item.tipo === 'b') {
+                const tecla = document.createElement('div');
+                tecla.className = 'tecla tecla-blanca';
+                tecla.innerText = item.nota;
+                pianoContainer.appendChild(tecla);
+                asignarEventos(tecla, item.freq);
+                blancasDibujadas.push(tecla);
+            }
+        });
+
+        // Segundo, dibujamos las negras y las colocamos
+        let contadorBlancas = 0;
+        const anchoBlanca = 50; // Debe coincidir con el CSS
+        const anchoNegra = 30;  // Debe coincidir con el CSS
+        
+        notas.forEach((item) => {
+            if (item.tipo === 'b') {
+                contadorBlancas++;
+            } else {
+                // Es negra. Calculamos su posición.
+                const tecla = document.createElement('div');
+                tecla.className = 'tecla tecla-negra';
+                pianoContainer.appendChild(tecla);
+                asignarEventos(tecla, item.freq);
+
+                // Cálculo mágico de posición:
+                // Se coloca después de la tecla blanca 'contadorBlancas'
+                const posicionLeft = (contadorBlancas * anchoBlanca) - (anchoNegra / 2);
+                tecla.style.left = posicionLeft + 'px';
+            }
+        });
+
+        // --- FUNCIÓN AUXILIAR PARA EVENTOS ---
+        function asignarEventos(tecla, freq) {
+            // Ratón
+            tecla.addEventListener('mousedown', () => tocarNota(freq, tecla));
+            tecla.addEventListener('mouseup', () => soltarTecla(tecla));
+            tecla.addEventListener('mouseleave', () => soltarTecla(tecla));
+            // Táctil
+            tecla.addEventListener('touchstart', (e) => { e.preventDefault(); tocarNota(freq, tecla); });
+            tecla.addEventListener('touchend', () => soltarTecla(tecla));
+        }
+
+
+        // --- 2. MOTOR DE SONIDO (Igual que antes) ---
+        function tocarNota(frecuencia, elemento) {
+            if(elemento.classList.contains('activa')) return; // Evita doble disparo
+
+            elemento.classList.add('activa');
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(frecuencia, audioCtx.currentTime);
+
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.6, audioCtx.currentTime + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.0);
+
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 2.0);
+            elemento.oscilador = osc; // Guardamos referencia
+        }
+
+        function soltarTecla(elemento) {
+            elemento.classList.remove('activa');
+            if (elemento.oscilador) {
+                try {
+                     // Detener suavemente si aún suena
+                    elemento.oscilador.stop(audioCtx.currentTime + 0.1);
+                } catch(e) {}
+                elemento.oscilador = null;
+            }
+        }
+
+    </script>
+
+</body>
+</html>
