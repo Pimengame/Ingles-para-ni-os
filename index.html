@@ -8,6 +8,8 @@
 </head>
 <body>
 
+    <button id="btn-musica" class="btn-musica-flotante" title="Activar/Desactivar Música">🔇</button>
+
     <div id="selector-personaje" class="modal-personaje">
         <h1 class="titulo-personaje">¿Quién eres?</h1>
         <div class="contenedor-opciones">
@@ -23,46 +25,45 @@
     </div>
 
     <div style="margin-top: 40px;">
-        <span id="icono-bienvenida" style="font-size: 80px;">🏰</span>
+        <span id="icono-bienvenida" style="font-size: 80px; display:block; animation: flotar 3s infinite;">🏰</span>
         <h1 id="titulo-bienvenida">Escuela de Inglés</h1>
         <p style="font-size: 1.2rem; color: #555;">¡Elige una aventura para comenzar!</p>
-        <button onclick="borrarMemoria()" style="background:none; border:none; color:#aaa; cursor:pointer; margin-top:10px;">(Cambiar personaje)</button>
+        <button onclick="borrarMemoria()" style="background:none; border:none; color:#aaa; cursor:pointer; margin-top:10px; font-family:'Nunito'; text-decoration:underline;">(Cambiar personaje)</button>
     </div>
 
     <div style="margin: 20px auto; max-width: 800px;">
-        <a href="album.html" class="tarjeta-menu" style="background: #fff9c4; border-color: #ffd700; display: block;">
-            <div style="font-size: 60px; display: inline-block;">🏆</div>
-            <span class="titulo-menu" style="display: inline-block; color: #fbc02d;">Mi Álbum de Premios</span>
-            <p style="margin: 0; color: #888; font-size: 0.9rem;">¡Colecciona todas las estampitas!</p>
+        <a href="album.html" class="tarjeta-menu" style="background: #fff9c4; border-color: #ffd700; display: flex;">
+            <div style="font-size: 60px;">🏆</div>
+            <span class="titulo-menu" style="color: #fbc02d;">Mi Álbum de Premios</span>
+            <p style="margin: 5px 0 0 0; color: #888; font-size: 0.9rem;">¡Colecciona todas las estampitas!</p>
         </a>
     </div>
-	<div style="margin: 20px auto; max-width: 800px;">
-        <a href="memoria.html" class="tarjeta-menu" style="background: #e1bee7; border-color: #ba68c8; display: block;">
-            <div style="font-size: 60px; display: inline-block;">🧠</div>
-            <span class="titulo-menu" style="display: inline-block; color: #8e24aa;">Juego de Memoria</span>
-            <p style="margin: 0; color: #666; font-size: 0.9rem;">Encuentra las parejas: Imagen y Palabra</p>
-        </a>
-    </div>
+
     <div style="margin: 20px auto; max-width: 800px;">
-        <a href="piano.html" class="tarjeta-menu" style="background: #333; border-color: #000; display: block;">
-            <div style="font-size: 60px; display: inline-block;">🎹</div>
-            <span class="titulo-menu" style="display: inline-block; color: white;">Piano Mágico</span>
-            <p style="margin: 0; color: #ccc; font-size: 0.9rem;">¡Crea tu propia música!</p>
+        <a href="memoria.html" class="tarjeta-menu" style="background: #e1bee7; border-color: #ba68c8; display: flex;">
+            <div style="font-size: 60px;">🧠</div>
+            <span class="titulo-menu" style="color: #8e24aa;">Juego de Memoria</span>
+            <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Encuentra las parejas: Imagen y Palabra</p>
+        </a>
+    </div>
+
+    <div style="margin: 20px auto; max-width: 800px;">
+        <a href="piano.html" class="tarjeta-menu" style="background: #37474f; border-color: #263238; display: flex;">
+            <div style="font-size: 60px;">🎹</div>
+            <span class="titulo-menu" style="color: #ffffff;">Piano Mágico</span>
+            <p style="margin: 5px 0 0 0; color: #ccc; font-size: 0.9rem;">¡Crea tu propia música!</p>
         </a>
     </div>
 
     <div class="menu-grid">
-
         <a href="temas/saludos.html" class="tarjeta-menu">
             <div style="font-size: 60px;">👋</div>
             <span class="titulo-menu">Saludos</span>
         </a>
-
         <a href="temas/conversacion.html" class="tarjeta-menu">
             <div style="font-size: 60px;">💬</div>
             <span class="titulo-menu">Frases</span>
         </a>
-
         <a href="temas/animales.html" class="tarjeta-menu">
             <div style="font-size: 60px;">🦁</div>
             <span class="titulo-menu">Animales</span>
@@ -83,13 +84,84 @@
             <div style="font-size: 60px;">🏠</div>
             <span class="titulo-menu">La Casa</span>
         </a>
-	<a href="temas/transportes.html" class="tarjeta-menu">
+        <a href="temas/transportes.html" class="tarjeta-menu">
             <div style="font-size: 60px;">🚗</div>
             <span class="titulo-menu">Transportes</span>
         </a>
     </div>
 
     <script>
+        // --- 1. CONFIGURACIÓN DE AUDIO ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = new AudioContext();
+        
+        // Música de fondo (Requiere archivo 'fondo.mp3' en la carpeta)
+        const musicaFondo = new Audio('fondo.mp3');
+        musicaFondo.loop = true; 
+        musicaFondo.volume = 0.2; // Volumen suave
+        let musicaActiva = false;
+
+        // --- 2. SINTETIZADOR DE EFECTOS (Sin archivos extra) ---
+        function playSound(tipo) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (tipo === 'hover') {
+                // Burbuja suave
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.linearRampToValueAtTime(600, now + 0.1);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+
+            } else if (tipo === 'click') {
+                // Pop agradable
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(50, now + 0.15);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                osc.start(now); osc.stop(now + 0.15);
+            }
+        }
+
+        // --- 3. LÓGICA DE MÚSICA ---
+        const btnMusica = document.getElementById('btn-musica');
+
+        function toggleMusica() {
+            if (musicaActiva) {
+                musicaFondo.pause();
+                musicaActiva = false;
+                btnMusica.innerHTML = "🔇";
+                btnMusica.classList.remove('sonando');
+                btnMusica.style.borderColor = "#ffca28";
+            } else {
+                musicaFondo.play().then(() => {
+                    musicaActiva = true;
+                    btnMusica.innerHTML = "🎵";
+                    btnMusica.classList.add('sonando');
+                    btnMusica.style.borderColor = "#00e676";
+                }).catch(e => console.log("Click necesario"));
+            }
+        }
+
+        btnMusica.addEventListener('click', () => {
+            playSound('click');
+            toggleMusica();
+        });
+
+        // Intentar iniciar música al primer clic en cualquier lado
+        document.body.addEventListener('click', function iniciarAudioForzado() {
+            if (!musicaActiva) toggleMusica();
+            document.body.removeEventListener('click', iniciarAudioForzado);
+        }, { once: true });
+
+        // --- 4. LÓGICA DE PERSONAJE (Tu código original + Sonidos) ---
         const usuarioGuardado = localStorage.getItem('miPersonaje');
         const modal = document.getElementById('selector-personaje');
 
@@ -101,6 +173,7 @@
         }
 
         function elegirPersonaje(tipo) {
+            playSound('click'); // ¡Sonido al elegir!
             localStorage.setItem('miPersonaje', tipo);
             modal.classList.add('ocultar-modal');
             setTimeout(() => {
@@ -132,10 +205,30 @@
 
         function borrarMemoria() {
             if(confirm('¿Quieres volver a elegir personaje?')) {
+                playSound('click');
                 localStorage.removeItem('miPersonaje');
                 location.reload();
             }
         }
+
+        // --- 5. APLICAR SONIDOS A TODAS LAS TARJETAS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const tarjetas = document.querySelectorAll('.tarjeta-menu, .opcion-avatar, button');
+            
+            tarjetas.forEach(tarjeta => {
+                tarjeta.addEventListener('mouseenter', () => playSound('hover'));
+                
+                // Si es un enlace, retrasamos un poco la navegación para oír el sonido
+                if(tarjeta.tagName === 'A') {
+                    tarjeta.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        playSound('click');
+                        const href = tarjeta.getAttribute('href');
+                        setTimeout(() => window.location.href = href, 200);
+                    });
+                }
+            });
+        });
     </script>
 
 </body>
