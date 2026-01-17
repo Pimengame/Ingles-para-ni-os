@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escuela de Inglés</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+    <div id="selector-personaje" class="modal-personaje">
+        <h1 class="titulo-personaje">¿Quién eres?</h1>
+        <div class="contenedor-opciones">
+            <div class="opcion-avatar" onclick="elegirPersonaje('nino')">
+                <span class="avatar-img">👦</span>
+                <span class="avatar-texto">Niño</span>
+            </div>
+            <div class="opcion-avatar" onclick="elegirPersonaje('nina')">
+                <span class="avatar-img">👧</span>
+                <span class="avatar-texto">Niña</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 40px;">
+        <span id="icono-bienvenida" style="font-size: 80px;">🏰</span>
+        <h1 id="titulo-bienvenida">Escuela de Inglés</h1>
+        <p style="font-size: 1.2rem; color: #555;">¡Elige una aventura para comenzar!</p>
+        <button onclick="borrarMemoria()" style="background:none; border:none; color:#aaa; cursor:pointer; margin-top:10px;">(Cambiar personaje)</button>
+    </div>
+
+    <div style="margin: 20px auto; max-width: 800px;">
+        <a href="album.html" class="tarjeta-menu" style="background: #fff9c4; border-color: #ffd700; display: block;">
+            <div style="font-size: 60px; display: inline-block;">🏆</div>
+            <span class="titulo-menu" style="display: inline-block; color: #fbc02d;">Mi Álbum de Premios</span>
+            <p style="margin: 0; color: #888; font-size: 0.9rem;">¡Colecciona todas las estampitas!</p>
+        </a>
+    </div>
+	<div style="margin: 20px auto; max-width: 800px;">
+        <a href="memoria.html" class="tarjeta-menu" style="background: #e1bee7; border-color: #ba68c8; display: block;">
+            <div style="font-size: 60px; display: inline-block;">🧠</div>
+            <span class="titulo-menu" style="display: inline-block; color: #8e24aa;">Juego de Memoria</span>
+            <p style="margin: 0; color: #666; font-size: 0.9rem;">Encuentra las parejas: Imagen y Palabra</p>
+        </a>
+    </div>
+
+    <div class="menu-grid">
+
+        <a href="temas/saludos.html" class="tarjeta-menu">
+            <div style="font-size: 60px;">👋</div>
+            <span class="titulo-menu">Saludos</span>
+        </a>
+
+        <a href="temas/conversacion.html" class="tarjeta-menu">
+            <div style="font-size: 60px;">💬</div>
+            <span class="titulo-menu">Frases</span>
+        </a>
+
+        <a href="temas/animales.html" class="tarjeta-menu">
+            <div style="font-size: 60px;">🦁</div>
+            <span class="titulo-menu">Animales</span>
+        </a>
+        <a href="temas/numeros.html" class="tarjeta-menu">
+            <div style="font-size: 60px;">🔢</div>
+            <span class="titulo-menu">Números</span>
+        </a>
+        <a href="temas/cuerpo.html" class="tarjeta-menu">
+            <div style="font-size: 60px;">👃</div>
+            <span class="titulo-menu">El Cuerpo</span>
+        </a>
+        <a href="temas/colores.html" class="tarjeta-menu">
+            <div style="font-size: 60px;">🎨</div>
+            <span class="titulo-menu">Colores</span>
+        </a>
+        <a href="temas/casa.html" class="tarjeta-menu">
+            <div style="font-size: 60px;">🏠</div>
+            <span class="titulo-menu">La Casa</span>
+        </a>
+	<a href="temas/transportes.html" class="tarjeta-menu">
+            <div style="font-size: 60px;">🚗</div>
+            <span class="titulo-menu">Transportes</span>
+        </a>
+    </div>
+
+    <script>
+        const usuarioGuardado = localStorage.getItem('miPersonaje');
+        const modal = document.getElementById('selector-personaje');
+
+        if (usuarioGuardado) {
+            modal.style.display = 'none';
+            aplicarPersonalizacion(usuarioGuardado);
+        } else {
+            modal.style.display = 'flex';
+        }
+
+        function elegirPersonaje(tipo) {
+            localStorage.setItem('miPersonaje', tipo);
+            modal.classList.add('ocultar-modal');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                aplicarPersonalizacion(tipo);
+            }, 500);
+        }
+
+        function aplicarPersonalizacion(tipo) {
+            const titulo = document.getElementById('titulo-bienvenida');
+            const icono = document.getElementById('icono-bienvenida');
+            const root = document.documentElement.style;
+
+            if (tipo === 'nino') {
+                titulo.innerText = "¡Bienvenido, Campeón!";
+                icono.innerText = "👦";
+                root.setProperty('--bg-color', '#e0f7fa');
+                root.setProperty('--dots-color', '#b2ebf2');
+                root.setProperty('--primary', '#00bcd4');
+            } else {
+                titulo.innerText = "¡Bienvenida, Campeona!";
+                icono.innerText = "👧";
+                root.setProperty('--bg-color', '#fce4ec');
+                root.setProperty('--dots-color', '#f8bbd0');
+                root.setProperty('--primary', '#ec407a');
+                root.setProperty('--accent', '#ab47bc');
+            }
+        }
+
+        function borrarMemoria() {
+            if(confirm('¿Quieres volver a elegir personaje?')) {
+                localStorage.removeItem('miPersonaje');
+                location.reload();
+            }
+        }
+    </script>
+
+</body>
+</html>

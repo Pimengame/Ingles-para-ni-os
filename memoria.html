@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Memoria</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+    <a href="index.html" class="btn-volver">⬅ Volver al Menú</a>
+
+    <h1>🧠 Memorice</h1>
+    <p>Encuentra las 10 parejas: Imagen ↔️ Palabra</p>
+
+    <div style="font-size: 1.5rem; margin-bottom: 20px; color: #555;">
+        Parejas encontradas: <span id="contador-parejas" style="color: #ff4081; font-weight: bold;">0</span> / 10
+    </div>
+
+    <div class="tablero-memoria" id="tablero-memoria"></div>
+
+    <script src="motor.js"></script> 
+
+    <script>
+        // 1. BANCO DE DATOS MIXTO (Animales, Transportes, Casa, Colores)
+        const bancoImagenes = [
+            { icon: "🦁", en: "Lion" },
+            { icon: "🐶", en: "Dog" },
+            { icon: "🚗", en: "Car" },
+            { icon: "✈️", en: "Plane" },
+            { icon: "🍎", en: "Red" },
+            { icon: "🐸", en: "Green" },
+            { icon: "🏠", en: "House" },
+            { icon: "🛏️", en: "Bed" },
+            { icon: "👃", en: "Nose" },
+            { icon: "🦵", en: "Leg" },
+            { icon: "🚀", en: "Rocket" },
+            { icon: "🐱", en: "Cat" },
+            { icon: "🍌", en: "Yellow" },
+            { icon: "🚂", en: "Train" },
+            { icon: "🚽", en: "Toilet" }
+        ];
+
+        let cartas = [];
+        let cartaVolteada = false;
+        let bloqueoTablero = false;
+        let primeraCarta, segundaCarta;
+        let parejasEncontradas = 0;
+        const META_PAREJAS = 10;
+
+        // 2. INICIAR EL JUEGO
+        iniciarMemorice();
+
+        function iniciarMemorice() {
+            const tablero = document.getElementById('tablero-memoria');
+            tablero.innerHTML = '';
+            parejasEncontradas = 0;
+            document.getElementById('contador-parejas').innerText = '0';
+            
+            // A. Seleccionar 10 parejas al azar del banco
+            const seleccion = bancoImagenes.sort(() => 0.5 - Math.random()).slice(0, 10);
+
+            // B. Crear las 20 cartas (10 con Icono, 10 con Texto)
+            cartas = [];
+            seleccion.forEach(item => {
+                // Carta 1: El Dibujo
+                cartas.push({ 
+                    id: item.en, 
+                    contenido: `<div style="font-size: 50px;">${item.icon}</div>`, 
+                    tipo: 'imagen' 
+                });
+                // Carta 2: La Palabra
+                cartas.push({ 
+                    id: item.en, 
+                    contenido: `<div style="font-size: 20px; font-weight:bold; color:#0277bd;">${item.en}</div>`, 
+                    tipo: 'texto' 
+                });
+            });
+
+            // C. Barajar las 20 cartas
+            cartas.sort(() => 0.5 - Math.random());
+
+            // D. Dibujar en pantalla
+            cartas.forEach(cartaData => {
+                const carta = document.createElement('div');
+                carta.classList.add('carta-memo');
+                carta.dataset.id = cartaData.id; // Guardamos el ID secreto (ej: Lion)
+
+                carta.innerHTML = `
+                    <div class="carta-inner">
+                        <div class="carta-frente">❓</div>
+                        <div class="carta-atras">${cartaData.contenido}</div>
+                    </div>
+                `;
+
+                carta.addEventListener('click', voltearCarta);
+                tablero.appendChild(carta);
+            });
+        }
+
+        // 3. LÓGICA DE VOLTEAR
+        function voltearCarta() {
+            if (bloqueoTablero) return;
+            if (this === primeraCarta) return; // No clickear la misma dos veces
+
+            this.classList.add('volteada');
+
+            if (!cartaVolteada) {
+                // Es la primera carta
+                cartaVolteada = true;
+                primeraCarta = this;
+                return;
+            }
+
+            // Es la segunda carta
+            segundaCarta = this;
+            verificarPareja();
+        }
+
+        // 4. VERIFICAR SI COINCIDEN
+        function verificarPareja() {
+            // Comparamos los ID secretos
+            let esPareja = primeraCarta.dataset.id === segundaCarta.dataset.id;
+
+            if (esPareja) {
+                desactivarCartas();
+            } else {
+                desvoltearCartas();
+            }
+        }
+
+        function desactivarCartas() {
+            // ¡ACIERTO!
+            playSound('win'); // Usamos el sonido del motor.js
+            
+            // Decir la palabra para reforzar
+            const palabra = primeraCarta.dataset.id;
+            hablar(palabra);
+
+            primeraCarta.classList.add('pareja-encontrada');
+            segundaCarta.classList.add('pareja-encontrada');
+            
+            // Quitar el evento click
+            primeraCarta.removeEventListener('click', voltearCarta);
+            segundaCarta.removeEventListener('click', voltearCarta);
+
+            resetearTablero();
+            
+            parejasEncontradas++;
+            document.getElementById('contador-parejas').innerText = parejasEncontradas;
+
+            if (parejasEncontradas === META_PAREJAS) {
+                setTimeout(() => {
+                    lanzarConfeti(); // Función de motor.js
+                    // Mostrar modal de victoria personalizado
+                    // Usamos un alert simple o el modal si quisieras integrarlo más, 
+                    // pero el confeti ya es buena celebración.
+                    alert("¡GANASTE! 🎉 Has encontrado todas las parejas.");
+                }, 500);
+            }
+        }
+
+        function desvoltearCartas() {
+            // ERROR
+            bloqueoTablero = true;
+            
+            setTimeout(() => {
+                primeraCarta.classList.remove('volteada');
+                segundaCarta.classList.remove('volteada');
+                resetearTablero();
+            }, 1000); // Esperar 1 segundo para que memorice
+        }
+
+        function resetearTablero() {
+            [cartaVolteada, bloqueoTablero] = [false, false];
+            [primeraCarta, segundaCarta] = [null, null];
+        }
+
+    </script>
+</body>
+</html>

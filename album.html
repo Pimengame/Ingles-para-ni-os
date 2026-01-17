@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Álbum de Premios</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+    <a href="index.html" class="btn-volver">⬅ Volver al Menú</a>
+
+    <h1>🏆 Mi Colección</h1>
+    <p>Completa los exámenes para desbloquear las estampitas.</p>
+    
+    <h2 id="contador-premios" style="color: #ff9800;">0 de 7 Desbloqueadas</h2>
+
+    <div class="grid-album" id="grid-album">
+        </div>
+
+    <script>
+        // LISTA DE TODOS LOS PREMIOS POSIBLES
+        // Importante: el 'id' debe coincidir con lo que pongamos en el motor
+        const listaPremios = [
+            { id: 'animales', icon: '🦁', titulo: 'Experta en Animales' },
+            { id: 'numeros', icon: '🔢', titulo: 'Genio Matemático' },
+            { id: 'cuerpo', icon: '👃', titulo: 'Doctora Cuerpo' },
+            { id: 'colores', icon: '🎨', titulo: 'Artista de Colores' },
+            { id: 'casa', icon: '🏠', titulo: 'Dueña de Casa' },
+            { id: 'saludos', icon: '👋', titulo: 'Reina de los Saludos' },
+            { id: 'conversacion', icon: '💬', titulo: 'Maestra del Habla' },
+	    { id: 'transportes', icon: '🚁', titulo: 'Piloto Experto' }
+        ];
+
+        const contenedor = document.getElementById('grid-album');
+        let desbloqueadas = 0;
+
+        listaPremios.forEach(premio => {
+            // Verificamos si existe el premio en la memoria del navegador
+            const ganado = localStorage.getItem('premio_' + premio.id);
+            
+            const div = document.createElement('div');
+            
+            if (ganado) {
+                // ESTADO: DESBLOQUEADO 🏆
+                desbloqueadas++;
+                div.className = 'estampita desbloqueada';
+                div.innerHTML = `
+                    <div class="icono-stamp">${premio.icon}</div>
+                    <div class="titulo-stamp" style="color:#f57f17">${premio.titulo}</div>
+                    <div class="estado-stamp">¡CONSEGUIDO!</div>
+                    <div style="font-size:30px; position:absolute; bottom:-15px;">🌟</div>
+                `;
+            } else {
+                // ESTADO: BLOQUEADO 🔒
+                div.className = 'estampita';
+                div.innerHTML = `
+                    <div class="candado">🔒</div>
+                    <div class="icono-stamp">❓</div>
+                    <div class="titulo-stamp">Bloqueado</div>
+                    <div class="estado-stamp">Juega en ${premio.id}</div>
+                `;
+                
+                // Si hacen clic en una bloqueada, les decimos qué hacer
+                div.onclick = () => alert(`Ve a la lección de ${premio.titulo} y gana 50 puntos para desbloquearme.`);
+            }
+
+            contenedor.appendChild(div);
+        });
+
+        // Actualizar el contador de arriba
+        document.getElementById('contador-premios').innerText = `${desbloqueadas} de ${listaPremios.length} Desbloqueadas`;
+
+        if (desbloqueadas === listaPremios.length) {
+            alert("¡FELICIDADES! ¡HAS COMPLETADO TODO EL ÁLBUM!");
+        }
+
+    </script>
+
+</body>
+</html>
