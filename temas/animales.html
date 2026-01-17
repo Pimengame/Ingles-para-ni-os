@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendiendo: Animales</title>
+    <link rel="stylesheet" href="../estilos.css">
+</head>
+<body>
+
+    <a href="../index.html" class="btn-volver">⬅ Volver al Menú</a>
+
+    <h1>🦁 El Reino Animal</h1>
+    <p>¡Descubre animales de la granja, la selva y el mar!</p>
+
+    <div id="marcador" class="marcador">Cargando...</div>
+    
+    <div class="panel-control">
+        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+    </div>
+
+    <div class="tablero" id="tablero"></div>
+
+    <script>
+        const datosAnimales = [
+            // --- MASCOTAS ---
+            { icon: "🐶", en: "Dog", es: "Perro" },
+            { icon: "🐱", en: "Cat", es: "Gato" },
+            { icon: "🐰", en: "Rabbit", es: "Conejo" },
+            { icon: "🐹", en: "Hamster", es: "Hámster" },
+            { icon: "🦜", en: "Parrot", es: "Loro" },
+            { icon: "🐢", en: "Turtle", es: "Tortuga" },
+
+            // --- GRANJA ---
+            { icon: "🐮", en: "Cow", es: "Vaca" },
+            { icon: "🐷", en: "Pig", es: "Cerdo" },
+            { icon: "🐑", en: "Sheep", es: "Oveja" },
+            { icon: "🐴", en: "Horse", es: "Caballo" },
+            { icon: "🐔", en: "Chicken", es: "Gallina" },
+            { icon: "🐓", en: "Rooster", es: "Gallo" },
+            { icon: "🦆", en: "Duck", es: "Pato" },
+            { icon: "🐐", en: "Goat", es: "Cabra" },
+            { icon: "🦃", en: "Turkey", es: "Pavo" },
+
+            // --- SELVA Y SALVAJES ---
+            { icon: "🦁", en: "Lion", es: "León" },
+            { icon: "🐯", en: "Tiger", es: "Tigre" },
+            { icon: "🐘", en: "Elephant", es: "Elefante" },
+            { icon: "🦒", en: "Giraffe", es: "Jirafa" },
+            { icon: "🐵", en: "Monkey", es: "Mono" },
+            { icon: "🦍", en: "Gorilla", es: "Gorila" },
+            { icon: "🦓", en: "Zebra", es: "Cebra" },
+            { icon: "🐻", en: "Bear", es: "Oso" },
+            { icon: "🐼", en: "Panda", es: "Panda" },
+            { icon: "🦛", en: "Hippo", es: "Hipopótamo" },
+            { icon: "🦏", en: "Rhino", es: "Rinoceronte" },
+            { icon: "🐺", en: "Wolf", es: "Lobo" },
+            { icon: "🦊", en: "Fox", es: "Zorro" },
+            { icon: "🦌", en: "Deer", es: "Ciervo" },
+            { icon: "🦘", en: "Kangaroo", es: "Canguro" },
+
+            // --- MARINOS ---
+            { icon: "🐳", en: "Whale", es: "Ballena" },
+            { icon: "🐬", en: "Dolphin", es: "Delfín" },
+            { icon: "🦈", en: "Shark", es: "Tiburón" },
+            { icon: "🐙", en: "Octopus", es: "Pulpo" },
+            { icon: "🦀", en: "Crab", es: "Cangrejo" },
+            { icon: "🐟", en: "Fish", es: "Pez" },
+            { icon: "🐧", en: "Penguin", es: "Pingüino" },
+            { icon: "🐊", en: "Crocodile", es: "Cocodrilo" },
+
+            // --- INSECTOS Y OTROS ---
+            { icon: "🦋", en: "Butterfly", es: "Mariposa" },
+            { icon: "🐝", en: "Bee", es: "Abeja" },
+            { icon: "🐜", en: "Ant", es: "Hormiga" },
+            { icon: "🕷️", en: "Spider", es: "Araña" },
+            { icon: "🐌", en: "Snail", es: "Caracol" },
+            { icon: "🐸", en: "Frog", es: "Rana" },
+            { icon: "🐍", en: "Snake", es: "Serpiente" },
+            { icon: "🦉", en: "Owl", es: "Búho" },
+            { icon: "🦇", en: "Bat", es: "Murciélago" },
+            { icon: "🦅", en: "Eagle", es: "Águila" },
+            { icon: "🦕", en: "Dinosaur", es: "Dinosaurio" }
+        ];
+    </script>
+
+    <script src="../motor.js"></script>
+
+    <script>
+        // Mantenemos 'animales' para que funcione el álbum
+        cargarCurso(datosAnimales, 'animales');
+    </script>
+
+</body>
+</html>
