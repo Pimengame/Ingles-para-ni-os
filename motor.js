@@ -1,4 +1,4 @@
-/* --- motor.js v12.0: MODO BLISS OS / ANDROID GENÉRICO --- */
+/* --- motor.js v11.0: ARRANQUE SEGURO Y COMPATIBILIDAD TOTAL --- */
 
 // --- 1. VARIABLES GLOBALES ---
 let jugando = false;
@@ -13,33 +13,24 @@ let idLeccionActual = '';
 let vocesDisponibles = [];
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
-let vozSistemaOperativo = false; // Nueva variable para detectar entorno difícil
 
-// --- 2. INICIALIZACIÓN ---
+// --- 2. INICIALIZACIÓN SEGURA ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Detectar si estamos en móvil/android para ajustar comportamiento
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-        vozSistemaOperativo = true;
-    }
-
-    crearPantallaInicio(); 
+    crearPantallaInicio(); // Bloqueamos el juego hasta que el usuario interactúe
     crearModalHTML();
     
-    // Intentar cargar voces repetidamente (Android a veces tarda)
+    // Cargar voces en segundo plano
     cargarVoces();
     if (window.speechSynthesis.onvoiceschanged !== undefined) {
         window.speechSynthesis.onvoiceschanged = cargarVoces;
     }
-    // Re-intentar a los 2 segundos por si Bliss es lento
-    setTimeout(cargarVoces, 2000);
 });
 
 function cargarVoces() {
     vocesDisponibles = window.speechSynthesis.getVoices();
-    console.log("Voces detectadas:", vocesDisponibles.length);
 }
 
-// --- 3. PANTALLA DE INICIO ---
+// --- 3. PANTALLA DE INICIO (EL TRUCO MAESTRO) ---
 function crearPantallaInicio() {
     if (document.getElementById('pantalla-inicio')) return;
 
@@ -49,31 +40,35 @@ function crearPantallaInicio() {
         <div style="font-size: 80px; margin-bottom: 20px;">🚀</div>
         <h1>¿Lista para aprender?</h1>
         <p style="font-size: 1.2rem; max-width: 80%; margin: 0 auto;">
-            Haz clic para activar el audio.
+            Haz clic abajo para activar los sonidos y voces.
         </p>
         <button id="btn-arranque" class="btn-inicio-gigante">¡ENTRAR!</button>
     `;
     document.body.appendChild(divInicio);
 
     document.getElementById('btn-arranque').onclick = () => {
-        // Desbloquear Audio
+        // 1. Desbloquear AudioContext
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
 
-        // FORZAR HABLA INICIAL (Vital para Android Webview)
-        // Usamos una frase corta y simple para "despertar" el motor
-        const despertar = new SpeechSynthesisUtterance('Hola');
+        // 2. Despertar Sintetizador de Voz (Hacer que hable en silencio)
+        // Esto es vital para Safari iOS
+        const despertar = new SpeechSynthesisUtterance('');
         window.speechSynthesis.speak(despertar);
 
+        // 3. Reproducir un sonido mudo para calentar el motor
         playSound('pop'); 
 
+        // 4. Quitar la pantalla y mostrar controles
         divInicio.style.opacity = '0';
         setTimeout(() => divInicio.remove(), 500);
+
+        // 5. Inyectar botones extra ahora que sabemos qué soporta el navegador
         inyectarBotonesExtra();
     };
 }
 
-// --- 4. MODALES ---
+// --- 4. MODALES Y CONTROLES ---
 function crearModalHTML() {
     if (document.getElementById('miModal')) return;
     const modalHTML = `
@@ -98,8 +93,7 @@ function crearModalHTML() {
 function inyectarBotonesExtra() {
     const panel = document.querySelector('.panel-control');
     if (panel && !document.getElementById('btn-voz')) {
-        // En Bliss/Android Webview el micro suele fallar, lo ocultamos si no es Chrome genuino
-        // o si el usuario quiere probar suerte.
+        // SOLO mostramos el micrófono si el navegador lo soporta
         if (SpeechRecognition) {
             const btnVoz = document.createElement('button');
             btnVoz.id = 'btn-voz';
@@ -107,6 +101,8 @@ function inyectarBotonesExtra() {
             btnVoz.innerHTML = '🎤 Pronunciación';
             btnVoz.onclick = iniciarRetoVoz;
             panel.appendChild(btnVoz);
+        } else {
+            console.log("Micrófono no soportado en este navegador. Botón oculto.");
         }
     }
 }
@@ -124,8 +120,6 @@ function mostrarModal(tipo, callback) {
     mensaje.style.display = 'block';
     boton.style.display = 'inline-block';
 
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-
     if (tipo === 'inicio') {
         icono.innerHTML = '🎧';
         titulo.innerText = '¿Estás lista?';
@@ -133,11 +127,10 @@ function mostrarModal(tipo, callback) {
         boton.innerText = '¡Sí, jugar!';
         boton.style.backgroundColor = '#4caf50';
         
-        // Si no hay voces cargadas, intentamos cargar de nuevo
+        // Asegurar carga de voces
         if(vocesDisponibles.length === 0) cargarVoces();
 
-        // Hablamos simple para asegurar compatibilidad
-        hablar("Ready?");
+        hablarBilingue("¡Vamos a jugar!", "Let's play!");
 
         boton.onclick = () => {
             modal.style.display = 'none';
@@ -155,7 +148,7 @@ function mostrarModal(tipo, callback) {
     } else if (tipo === 'derrota') {
         icono.innerHTML = '😢';
         titulo.innerText = '¡Oh no!';
-        mensaje.innerText = 'Has perdido tus vidas.';
+        mensaje.innerText = 'Has perdido tus vidas. ¡Inténtalo de nuevo!';
         boton.innerText = 'Reiniciar';
         boton.style.backgroundColor = '#f44336';
         boton.onclick = () => location.reload();
@@ -172,65 +165,43 @@ function mostrarModal(tipo, callback) {
     if(tipo !== 'derrota' && tipo !== 'voz') playSound('pop');
 }
 
-// --- 5. SISTEMA DE VOZ ROBUSTO (FIX BLISS OS) ---
+// --- 5. SISTEMA DE VOZ INTELIGENTE ---
+function buscarVoz(langCode) {
+    return vocesDisponibles.find(voz => voz.lang.includes(langCode));
+}
 
 function hablar(texto) {
     window.speechSynthesis.cancel();
     const msg = new SpeechSynthesisUtterance(texto);
-    
-    // Intento 1: Buscar voz en inglés
-    let vozEn = vocesDisponibles.find(voz => voz.lang.startsWith('en'));
-    
-    // FIX BLISS: Si encontramos voz, la asignamos. Si no, NO asignamos nada
-    // y dejamos que el sistema use la default (aunque suene robótica)
-    if (vozEn) {
-        msg.voice = vozEn;
-        msg.lang = 'en-US';
-    }
-    
-    // FIX BLISS: Algunos motores viejos se rompen si cambias el 'rate'
-    // Solo cambiamos velocidad si detectamos voces buenas
-    if (vocesDisponibles.length > 0) {
-        msg.rate = 0.8; 
-    }
-
+    const vozEn = buscarVoz('en');
+    if (vozEn) msg.voice = vozEn;
+    msg.lang = 'en-US';
+    msg.rate = 0.8;
     window.speechSynthesis.speak(msg);
 }
 
 function hablarBilingue(textoES, textoEN) {
     window.speechSynthesis.cancel(); 
     
-    // --- ESPAÑOL ---
     const msgES = new SpeechSynthesisUtterance(textoES);
-    let vozEs = vocesDisponibles.find(voz => voz.lang.startsWith('es'));
-    if (vozEs) {
-        msgES.voice = vozEs;
-        msgES.lang = 'es-ES';
-    }
-    // Si no hay voz español, Bliss usará la default (que puede ser inglés leyendo español)
-    // Es mejor que el silencio.
-
-    // --- INGLÉS ---
-    const msgEN = new SpeechSynthesisUtterance(textoEN);
-    let vozEn = vocesDisponibles.find(voz => voz.lang.startsWith('en'));
-    if (vozEn) {
-        msgEN.voice = vozEn;
-        msgEN.lang = 'en-US';
-    }
-    if (vocesDisponibles.length > 0) msgEN.rate = 0.8;
-
-    // Encadenar
-    msgES.onend = function() { window.speechSynthesis.speak(msgEN); };
+    const vozEs = buscarVoz('es');
+    if (vozEs) msgES.voice = vozEs;
+    msgES.lang = 'es-ES';
+    msgES.rate = 1;
     
-    // Manejo de errores: Si falla el español, intenta el inglés
-    msgES.onerror = function() { window.speechSynthesis.speak(msgEN); };
-
+    const msgEN = new SpeechSynthesisUtterance(textoEN);
+    const vozEn = buscarVoz('en');
+    if (vozEn) msgEN.voice = vozEn;
+    msgEN.lang = 'en-US';
+    msgEN.rate = 0.8; 
+    
+    msgES.onend = function() { window.speechSynthesis.speak(msgEN); };
     window.speechSynthesis.speak(msgES);
 }
 
-// --- 6. SONIDOS (Web Audio API) ---
+// --- 6. SONIDOS ---
 function playSound(tipo) {
-    if (!audioCtx) return;
+    if (!audioCtx) return; // Si no hay audioCtx, no hacemos nada
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.connect(gain);
@@ -250,38 +221,14 @@ function playSound(tipo) {
     }
 }
 
-// --- 7. LÓGICA GENERAL ---
-function gestionarBotonRepetir(mostrar) {
-    let btnRepetir = document.getElementById('btn-repetir');
-    if (!btnRepetir) {
-        const panel = document.querySelector('.panel-control');
-        if (panel) {
-            btnRepetir = document.createElement('button');
-            btnRepetir.id = 'btn-repetir';
-            btnRepetir.className = 'btn-repetir';
-            btnRepetir.innerHTML = '🔊 Repetir';
-            btnRepetir.onclick = repetirInstruccion;
-            panel.appendChild(btnRepetir);
-        }
-    }
-    if (btnRepetir) btnRepetir.style.display = mostrar ? 'inline-flex' : 'none';
-}
-
-function repetirInstruccion() {
-    if (palabraObjetivo && jugando) {
-        const btn = document.getElementById('btn-repetir');
-        btn.style.transform = "scale(0.95)";
-        setTimeout(() => btn.style.transform = "scale(1)", 100);
-        hablar("Find... " + palabraObjetivo.en);
-    }
-}
-
+// --- 7. LÓGICA DEL JUEGO ---
 function cargarCurso(datosRecibidos, idPremio) {
     listaActual = datosRecibidos;
     idLeccionActual = idPremio || '';
     const tablero = document.getElementById('tablero');
     if (!tablero) return;
     tablero.innerHTML = '';
+
     listaActual.forEach((item, index) => {
         const tarjeta = document.createElement('div');
         tarjeta.className = 'tarjeta';
@@ -331,7 +278,6 @@ function manejarClic(item, index) {
 }
 
 function iniciarJuego() {
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     mostrarModal('inicio', () => {
         jugando = true;
         aciertos = 0; 
@@ -380,9 +326,37 @@ function lanzarConfeti() {
     }
 }
 
-// --- 8. VOZ (Si no soporta, oculta) ---
+function gestionarBotonRepetir(mostrar) {
+    let btnRepetir = document.getElementById('btn-repetir');
+    if (!btnRepetir) {
+        const panel = document.querySelector('.panel-control');
+        if (panel) {
+            btnRepetir = document.createElement('button');
+            btnRepetir.id = 'btn-repetir';
+            btnRepetir.className = 'btn-repetir';
+            btnRepetir.innerHTML = '🔊 Repetir';
+            btnRepetir.onclick = repetirInstruccion;
+            panel.appendChild(btnRepetir);
+        }
+    }
+    if (btnRepetir) btnRepetir.style.display = mostrar ? 'inline-flex' : 'none';
+}
+
+function repetirInstruccion() {
+    if (palabraObjetivo && jugando) {
+        const btn = document.getElementById('btn-repetir');
+        btn.style.transform = "scale(0.95)";
+        setTimeout(() => btn.style.transform = "scale(1)", 100);
+        hablar("Find... " + palabraObjetivo.en);
+    }
+}
+
+// --- 8. RECONOCIMIENTO DE VOZ ---
 function iniciarRetoVoz() {
-    if (!SpeechRecognition) return; // Protección extra
+    if (!SpeechRecognition) {
+        alert("Tu navegador no soporta reconocimiento de voz. Prueba con Google Chrome.");
+        return;
+    }
     const item = listaActual[Math.floor(Math.random() * listaActual.length)];
     mostrarModal('voz');
     document.getElementById('icono-voz-grande').innerText = item.icon;
@@ -392,29 +366,89 @@ function iniciarRetoVoz() {
     setTimeout(() => { activarEscucha(item); }, 1500);
 }
 
+// --- SUSTITUYE ESTA FUNCIÓN AL FINAL DE TU MOTOR.JS ---
+
 function activarEscucha(itemObjetivo) {
-    if (!recognition) recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.start();
-    recognition.onresult = (event) => {
-        const loQueDijo = event.results[0][0].transcript.toLowerCase();
-        const loQueEsperaba = itemObjetivo.en.toLowerCase();
-        document.getElementById('texto-escuchado').innerText = `Dijiste: "${loQueDijo}"`;
-        document.getElementById('indicador-mic').style.display = 'none';
-        if (loQueDijo.includes(loQueEsperaba)) {
-            playSound('win'); hablar("Excellent!"); lanzarConfeti();
-            setTimeout(() => { document.getElementById('miModal').style.display = 'none'; }, 2000);
+    // Protección para navegadores sin soporte
+    if (!recognition) {
+        if (typeof SpeechRecognition !== 'undefined') {
+            recognition = new SpeechRecognition();
+        } else if (typeof webkitSpeechRecognition !== 'undefined') {
+            recognition = new webkitSpeechRecognition();
         } else {
-            playSound('lose'); hablar(`Try again.`);
+            return; 
+        }
+    }
+
+    recognition.lang = 'en-US'; // Escuchar en Inglés
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.start();
+
+    recognition.onresult = (event) => {
+        const loQueDijo = event.results[0][0].transcript.toLowerCase().trim();
+        const loQueEsperaba = itemObjetivo.en.toLowerCase().trim();
+        
+        const elementoTexto = document.getElementById('texto-escuchado');
+        const indicador = document.getElementById('indicador-mic');
+        
+        indicador.style.display = 'none'; // Apagar animación mic
+
+        // Lógica de Comparación (Aceptamos coincidencia parcial para ser amables)
+        if (loQueDijo === loQueEsperaba || loQueDijo.includes(loQueEsperaba) || loQueEsperaba.includes(loQueDijo)) {
+            
+            // --- ACIERTO ✅ ---
+            elementoTexto.style.color = "#4caf50"; // Verde
+            elementoTexto.innerHTML = `✅ ¡Dijiste: <b>"${loQueDijo}"</b>!`;
+            
+            playSound('win'); 
+            hablar(`Yes! ${itemObjetivo.en} is correct!`); // Feedback positivo explícito
+            lanzarConfeti();
+            
             setTimeout(() => { 
-                document.getElementById('indicador-mic').style.display = 'flex';
+                document.getElementById('miModal').style.display = 'none'; 
+                elementoTexto.style.color = "#555"; // Restaurar color
+            }, 3000);
+
+        } else {
+            
+            // --- ERROR ❌ ---
+            elementoTexto.style.color = "#f44336"; // Rojo
+            elementoTexto.innerHTML = `❌ Entendí: <b>"${loQueDijo}"</b>`;
+            
+            playSound('lose');
+            
+            // Feedback educativo: Le dice qué entendió y cuál era la correcta
+            hablar(`No... You said ${loQueDijo}. The word is ${itemObjetivo.en}. Try again.`);
+            
+            setTimeout(() => { 
+                // Reiniciar para que intente de nuevo automáticamente
+                elementoTexto.style.color = "#555";
+                elementoTexto.innerText = "Escuchando de nuevo...";
+                indicador.style.display = 'flex';
                 recognition.start();
-            }, 2500);
+            }, 4000); // Damos 4 segundos para que escuche la corrección
         }
     };
-    recognition.onerror = () => {
+
+    recognition.onerror = (event) => {
         document.getElementById('indicador-mic').style.display = 'none';
-        setTimeout(() => { document.getElementById('miModal').style.display = 'none'; }, 2000);
+        const elementoTexto = document.getElementById('texto-escuchado');
+        
+        if (event.error === 'no-speech') {
+            elementoTexto.innerText = "🔇 No escuché nada...";
+            hablar("I didn't hear you.");
+        } else {
+            elementoTexto.innerText = "⚠️ Error: " + event.error;
+        }
+        
+        setTimeout(() => { 
+            document.getElementById('miModal').style.display = 'none'; 
+        }, 3000);
     };
-    recognition.onspeechend = () => { recognition.stop(); };
+
+    recognition.onspeechend = () => {
+        recognition.stop();
+    };
 }
