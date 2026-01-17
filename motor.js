@@ -394,67 +394,70 @@ function iniciarRetoVoz() {
 
 // --- SUSTITUYE ESTA FUNCIÓN AL FINAL DE TU MOTOR.JS ---
 
+// --- REEMPLAZA ESTA FUNCIÓN EN TU motor.js ---
+
 function activarEscucha(itemObjetivo) {
-    // Protección para navegadores sin soporte
     if (!recognition) {
         if (typeof SpeechRecognition !== 'undefined') {
             recognition = new SpeechRecognition();
         } else if (typeof webkitSpeechRecognition !== 'undefined') {
             recognition = new webkitSpeechRecognition();
         } else {
+            alert("Tu navegador no tiene cerebro para escuchar. Usa Google Chrome.");
             return; 
         }
     }
 
-    recognition.lang = 'en-US'; // Escuchar en Inglés
-    recognition.interimResults = false;
+    // AJUSTES IMPORTANTES
+    recognition.lang = 'en-US'; 
+    recognition.interimResults = false; 
     recognition.maxAlternatives = 1;
+    // continuous = false ayuda a que corte apenas termine de hablar, 
+    // pero si se corta antes, el error 'no-speech' salta.
+    recognition.continuous = false; 
 
-    recognition.start();
+    try {
+        recognition.start();
+    } catch (e) {
+        // Si ya estaba escuchando, lo reiniciamos
+        recognition.stop();
+        setTimeout(() => recognition.start(), 200);
+    }
+
+    recognition.onstart = () => {
+        document.getElementById('texto-escuchado').innerText = "👂 Escuchando... ¡Habla ahora!";
+        document.getElementById('texto-escuchado').style.color = "#2196f3";
+    };
 
     recognition.onresult = (event) => {
         const loQueDijo = event.results[0][0].transcript.toLowerCase().trim();
         const loQueEsperaba = itemObjetivo.en.toLowerCase().trim();
         
         const elementoTexto = document.getElementById('texto-escuchado');
-        const indicador = document.getElementById('indicador-mic');
-        
-        indicador.style.display = 'none'; // Apagar animación mic
+        document.getElementById('indicador-mic').style.display = 'none';
 
-        // Lógica de Comparación (Aceptamos coincidencia parcial para ser amables)
+        // Lógica de Comparación flexible
         if (loQueDijo === loQueEsperaba || loQueDijo.includes(loQueEsperaba) || loQueEsperaba.includes(loQueDijo)) {
-            
-            // --- ACIERTO ✅ ---
-            elementoTexto.style.color = "#4caf50"; // Verde
-            elementoTexto.innerHTML = `✅ ¡Dijiste: <b>"${loQueDijo}"</b>!`;
-            
+            // ACIERTO
+            elementoTexto.style.color = "#4caf50";
+            elementoTexto.innerHTML = `✅ ¡SÍ! Dijiste: <b>"${loQueDijo}"</b>`;
             playSound('win'); 
-            hablar(`Yes! ${itemObjetivo.en} is correct!`); // Feedback positivo explícito
+            setTimeout(() => hablar(`Yes! ${itemObjetivo.en} is correct!`), 500);
             lanzarConfeti();
-            
-            setTimeout(() => { 
-                document.getElementById('miModal').style.display = 'none'; 
-                elementoTexto.style.color = "#555"; // Restaurar color
-            }, 3000);
-
+            setTimeout(() => { document.getElementById('miModal').style.display = 'none'; }, 3000);
         } else {
-            
-            // --- ERROR ❌ ---
-            elementoTexto.style.color = "#f44336"; // Rojo
-            elementoTexto.innerHTML = `❌ Entendí: <b>"${loQueDijo}"</b>`;
-            
+            // ERROR
+            elementoTexto.style.color = "#f44336";
+            elementoTexto.innerHTML = `❌ Oí: <b>"${loQueDijo}"</b>`;
             playSound('lose');
-            
-            // Feedback educativo: Le dice qué entendió y cuál era la correcta
-            hablar(`No... You said ${loQueDijo}. The word is ${itemObjetivo.en}. Try again.`);
+            setTimeout(() => hablar(`No... You said ${loQueDijo}. Try again.`), 500);
             
             setTimeout(() => { 
-                // Reiniciar para que intente de nuevo automáticamente
                 elementoTexto.style.color = "#555";
-                elementoTexto.innerText = "Escuchando de nuevo...";
-                indicador.style.display = 'flex';
+                elementoTexto.innerText = "Intenta de nuevo...";
+                document.getElementById('indicador-mic').style.display = 'flex';
                 recognition.start();
-            }, 4000); // Damos 4 segundos para que escuche la corrección
+            }, 4000);
         }
     };
 
@@ -462,20 +465,30 @@ function activarEscucha(itemObjetivo) {
         document.getElementById('indicador-mic').style.display = 'none';
         const elementoTexto = document.getElementById('texto-escuchado');
         
+        // Diagnóstico preciso de errores
         if (event.error === 'no-speech') {
-            elementoTexto.innerText = "🔇 No escuché nada...";
-            hablar("I didn't hear you.");
+            elementoTexto.innerText = "🔇 No detecté sonido.";
+            // No hablamos para no molestar, solo mostramos texto
+        } else if (event.error === 'audio-capture') {
+            elementoTexto.innerText = "🔌 No encuentro el micrófono.";
+        } else if (event.error === 'not-allowed') {
+            elementoTexto.innerText = "🔒 Permiso denegado. Revisa el candado arriba.";
+        } else if (event.error === 'network') {
+            elementoTexto.innerText = "📶 Error de red. Necesitas internet para esto.";
         } else {
             elementoTexto.innerText = "⚠️ Error: " + event.error;
         }
         
+        // Si fue un error leve, damos oportunidad de cerrar manual o reintentar
         setTimeout(() => { 
-            document.getElementById('miModal').style.display = 'none'; 
-        }, 3000);
+             // Si quieres que se cierre solo:
+             // document.getElementById('miModal').style.display = 'none'; 
+        }, 4000);
     };
 
     recognition.onspeechend = () => {
         recognition.stop();
     };
 }
+
 
