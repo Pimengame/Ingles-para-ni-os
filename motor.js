@@ -1,9 +1,9 @@
-/* --- motor.js v13.0: DESAFÍO DE VOZ (JUEGO DE 5) + MICROFIX --- */
+/* --- motor.js v14.0: MODO ANTI-CONGELAMIENTO (CLICK-TO-SPEAK) --- */
 
 // --- 1. VARIABLES GLOBALES ---
 let jugando = false;
 let aciertos = 0;
-const META_ACIERTOS = 20; // Meta del juego de tocar
+const META_ACIERTOS = 20;
 let errores = 0;          
 const MAX_ERRORES = 3;    
 let listaActual = [];
@@ -14,10 +14,10 @@ let vocesDisponibles = [];
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
 
-// VARIABLES NUEVAS PARA EL JUEGO DE VOZ
+// VARIABLES JUEGO DE VOZ
 let modoVozActivo = false;
 let rachaVoz = 0;
-const META_VOZ = 5; // ¡Hay que decir 5 palabras bien para ganar!
+const META_VOZ = 5; 
 
 // --- 2. INICIALIZACIÓN ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.speechSynthesis.onvoiceschanged !== undefined) {
         window.speechSynthesis.onvoiceschanged = cargarVoces;
     }
-    setTimeout(cargarVoces, 2000);
 });
 
 function cargarVoces() {
@@ -76,9 +75,11 @@ function crearModalHTML() {
                 </div>
                 
                 <div id="icono-voz-grande" style="font-size: 80px; margin: 10px 0;">🦁</div>
-                <div id="indicador-mic" class="microfono-activo" style="display:none;">🎤</div>
-                <p id="texto-escuchado" class="texto-escuchado">...</p>
-                <button id="btn-saltar-voz" style="background:#ddd; border:none; padding:5px 10px; border-radius:5px; margin-top:10px; cursor:pointer;">Saltar palabra</button>
+                
+                <div id="btn-mic-accion" class="microfono-activo" style="cursor:pointer; margin: 10px auto; background:#2196f3;">🎤</div>
+                
+                <p id="texto-escuchado" class="texto-escuchado">Toca el micrófono para hablar</p>
+                <button id="btn-saltar-voz" style="background:#ddd; border:none; padding:8px 20px; border-radius:5px; margin-top:15px; cursor:pointer; font-size:1rem;">Saltar palabra ⏭️</button>
             </div>
 
             <p id="modal-mensaje" style="font-size: 1.2rem; color: #666; margin-bottom: 20px;">
@@ -89,14 +90,24 @@ function crearModalHTML() {
     </div>`;
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     
-    // Asignar evento al botón saltar
+    // Eventos Manuales
     document.getElementById('btn-saltar-voz').onclick = siguientePalabraVoz;
+    document.getElementById('btn-mic-accion').onclick = () => {
+        if(modoVozActivo) activarEscucha(palabraObjetivo);
+    };
 }
 
 function cerrarModal() {
+    detenerMicrofono(); // Seguridad extra
     document.getElementById('miModal').style.display = 'none';
-    if(recognition) recognition.stop(); // Cortar micrófono al cerrar
     modoVozActivo = false;
+}
+
+function detenerMicrofono() {
+    if(recognition) {
+        try { recognition.abort(); } catch(e){}
+        recognition = null; // Destruir instancia
+    }
 }
 
 function inyectarBotonesExtra() {
@@ -106,7 +117,7 @@ function inyectarBotonesExtra() {
             const btnVoz = document.createElement('button');
             btnVoz.id = 'btn-voz';
             btnVoz.className = 'btn-voz';
-            btnVoz.innerHTML = '🎤 Desafío de Voz'; // Nombre cambiado
+            btnVoz.innerHTML = '🎤 Desafío de Voz';
             btnVoz.onclick = iniciarDesafioVoz;
             panel.appendChild(btnVoz);
         }
@@ -115,18 +126,24 @@ function inyectarBotonesExtra() {
 
 function mostrarModal(tipo, callback) {
     const modal = document.getElementById('miModal');
-    const titulo = document.getElementById('modal-titulo');
-    const mensaje = document.getElementById('modal-mensaje');
-    const icono = document.getElementById('modal-icono');
-    const boton = document.getElementById('btn-accion-modal');
     const contenidoVoz = document.getElementById('contenido-voz');
+    const elementosNormales = [
+        document.getElementById('modal-icono'),
+        document.getElementById('modal-titulo'),
+        document.getElementById('modal-mensaje'),
+        document.getElementById('btn-accion-modal')
+    ];
 
+    // Resetear visibilidad
     contenidoVoz.style.display = 'none';
-    icono.style.display = 'block';
-    mensaje.style.display = 'block';
-    boton.style.display = 'inline-block';
+    elementosNormales.forEach(el => el.style.display = 'block');
 
     if (tipo === 'inicio') {
+        const titulo = document.getElementById('modal-titulo');
+        const mensaje = document.getElementById('modal-mensaje');
+        const boton = document.getElementById('btn-accion-modal');
+        const icono = document.getElementById('modal-icono');
+        
         icono.innerHTML = '🎧';
         titulo.innerText = '¿Estás lista?';
         mensaje.innerText = `Meta: ${META_ACIERTOS} aciertos. Tienes 3 vidas.`;
@@ -139,6 +156,11 @@ function mostrarModal(tipo, callback) {
         };
 
     } else if (tipo === 'victoria') {
+        const titulo = document.getElementById('modal-titulo');
+        const mensaje = document.getElementById('modal-mensaje');
+        const boton = document.getElementById('btn-accion-modal');
+        const icono = document.getElementById('modal-icono');
+
         icono.innerHTML = '🏆';
         titulo.innerText = '¡GANASTE!';
         mensaje.innerText = '¡Has completado el desafío!';
@@ -147,145 +169,157 @@ function mostrarModal(tipo, callback) {
         boton.onclick = () => window.location.href = '../album.html';
 
     } else if (tipo === 'derrota') {
+        const titulo = document.getElementById('modal-titulo');
+        const mensaje = document.getElementById('modal-mensaje');
+        const boton = document.getElementById('btn-accion-modal');
+        const icono = document.getElementById('modal-icono');
+
         icono.innerHTML = '😢';
         titulo.innerText = '¡Oh no!';
-        mensaje.innerText = 'Has perdido tus vidas.';
+        mensaje.innerText = 'Inténtalo de nuevo.';
         boton.innerText = 'Reiniciar';
         boton.style.backgroundColor = '#f44336';
         boton.onclick = () => location.reload();
         
     } else if (tipo === 'voz') {
-        // --- MODO JUEGO DE VOZ ---
-        icono.style.display = 'none';
-        mensaje.style.display = 'none';
-        boton.style.display = 'none';
+        elementosNormales.forEach(el => el.style.display = 'none');
         contenidoVoz.style.display = 'block';
-        titulo.innerText = '¡Dilo fuerte!';
+        document.getElementById('modal-titulo').style.display = 'block';
+        document.getElementById('modal-titulo').innerText = '¡Dilo fuerte!';
     }
 
     modal.style.display = 'flex';
     if(tipo !== 'derrota' && tipo !== 'voz') playSound('pop');
 }
 
-// --- 5. LOGICA DEL JUEGO DE VOZ (NUEVA) ---
+// --- 5. LOGICA JUEGO DE VOZ (ANTI-CONGELAMIENTO) ---
 
 function iniciarDesafioVoz() {
     if (!SpeechRecognition) return;
     modoVozActivo = true;
-    rachaVoz = 0; // Reseteamos contador
+    rachaVoz = 0;
     actualizarBarraVoz();
     mostrarModal('voz');
-    
-    // Iniciar ronda
     siguientePalabraVoz();
 }
 
 function siguientePalabraVoz() {
     if (!modoVozActivo) return;
+    detenerMicrofono(); // LIMPIEZA TOTAL
 
-    // Detener reconocimiento anterior si existe
-    if(recognition) try { recognition.stop(); } catch(e){}
-
-    // Elegir palabra
     palabraObjetivo = listaActual[Math.floor(Math.random() * listaActual.length)];
     
-    // Actualizar UI
+    // UI: Estado Neutro
     document.getElementById('icono-voz-grande').innerText = palabraObjetivo.icon;
-    document.getElementById('texto-escuchado').innerText = "Escuchando...";
-    document.getElementById('texto-escuchado').style.color = "#555";
-    document.getElementById('indicador-mic').style.display = 'flex';
     document.getElementById('texto-progreso-voz').innerText = `Palabra ${rachaVoz + 1} de ${META_VOZ}`;
+    
+    // Botón en Azul (Listo para pulsar)
+    const btnMic = document.getElementById('btn-mic-accion');
+    btnMic.style.backgroundColor = '#2196f3'; // Azul
+    btnMic.style.animation = 'none'; // No parpadea
+    btnMic.innerHTML = '🎤';
 
-    // Hablar y luego escuchar
+    document.getElementById('texto-escuchado').style.color = "#555";
+    document.getElementById('texto-escuchado').innerText = "Escucha...";
+
+    // 1. Decir la palabra
     hablar("Say... " + palabraObjetivo.en);
+    
+    // 2. Esperar un poco y activar micro AUTOMÁTICAMENTE (solo la primera vez)
     setTimeout(() => {
-        activarEscucha(palabraObjetivo);
+        if(modoVozActivo) activarEscucha(palabraObjetivo);
     }, 1500);
 }
 
 function activarEscucha(itemObjetivo) {
     if (!modoVozActivo) return;
+    detenerMicrofono(); // Asegurar que no hay otro corriendo
 
-    // Crear nueva instancia para asegurar limpieza
+    // UI: Estado Escuchando
+    const btnMic = document.getElementById('btn-mic-accion');
+    btnMic.style.backgroundColor = '#f44336'; // Rojo
+    btnMic.style.animation = 'latido-mic 1.5s infinite'; // Parpadea
+    document.getElementById('texto-escuchado').innerText = "👂 Escuchando...";
+
     recognition = new SpeechRecognition();
     recognition.lang = 'en-US'; 
     recognition.interimResults = false; 
     recognition.maxAlternatives = 1;
-    recognition.continuous = false; // ¡IMPORTANTE! Esto evita que se quede pegado
+    recognition.continuous = false;
 
     try {
         recognition.start();
     } catch (e) {
         console.log("Error al iniciar mic:", e);
+        resetearBotonMic(); // Si falla, volver a estado manual
     }
 
     recognition.onresult = (event) => {
         const loQueDijo = event.results[0][0].transcript.toLowerCase().trim();
         const loQueEsperaba = itemObjetivo.en.toLowerCase().trim();
-        
         const elementoTexto = document.getElementById('texto-escuchado');
-        document.getElementById('indicador-mic').style.display = 'none';
 
-        // Detener inmediatamente para liberar el micro
-        recognition.stop(); 
+        // Detener animación inmediatamente
+        resetearBotonMic(); 
 
         if (loQueDijo === loQueEsperaba || loQueDijo.includes(loQueEsperaba)) {
-            // --- ACIERTO ---
+            // --- ACIERTO ✅ ---
             elementoTexto.style.color = "#4caf50";
             elementoTexto.innerHTML = `✅ ¡SÍ! Dijiste: <b>"${loQueDijo}"</b>`;
             playSound('win'); 
-            
             rachaVoz++;
             actualizarBarraVoz();
 
             if (rachaVoz >= META_VOZ) {
-                // GANÓ EL DESAFÍO DE VOZ
                 lanzarConfeti();
-                setTimeout(() => {
-                     hablar("You are amazing! Challenge complete!");
-                     mostrarModal('victoria');
-                }, 1000);
+                setTimeout(() => { hablar("Challenge complete!"); mostrarModal('victoria'); }, 1000);
             } else {
-                // SIGUIENTE PALABRA
                 hablar("Good!");
                 setTimeout(siguientePalabraVoz, 2000);
             }
 
         } else {
-            // --- ERROR ---
+            // --- ERROR ❌ (Aquí evitamos el bucle) ---
             elementoTexto.style.color = "#f44336";
             elementoTexto.innerHTML = `❌ Oí: <b>"${loQueDijo}"</b>`;
             playSound('lose');
             
-            // Le damos otra oportunidad con la MISMA palabra
+            // Feedback
             setTimeout(() => {
                 hablar(`No. Say: ${itemObjetivo.en}`);
+                
+                // CAMBIO IMPORTANTE: NO REINICIAMOS AUTOMÁTICAMENTE
                 setTimeout(() => {
-                    // Reiniciamos escucha
-                    document.getElementById('indicador-mic').style.display = 'flex';
-                    document.getElementById('texto-escuchado').innerText = "Intenta de nuevo...";
-                    document.getElementById('texto-escuchado').style.color = "#555";
-                    activarEscucha(itemObjetivo);
+                    elementoTexto.style.color = "#555";
+                    elementoTexto.innerText = "Toca el micrófono para intentar de nuevo 👇";
+                    
+                    // El botón vuelve a estar azul y quieto, esperando el click
+                    resetearBotonMic(); 
                 }, 2000);
             }, 500);
         }
     };
 
     recognition.onerror = (event) => {
-        document.getElementById('indicador-mic').style.display = 'none';
-        // Si no escuchó nada, reintentar automáticamente una vez
+        resetearBotonMic(); // Volver a manual
+        const texto = document.getElementById('texto-escuchado');
         if (event.error === 'no-speech') {
-             document.getElementById('texto-escuchado').innerText = "🔇 No te escuché...";
-             setTimeout(() => {
-                 if(modoVozActivo) activarEscucha(itemObjetivo);
-             }, 1000);
+            texto.innerText = "🔇 No escuché nada. Toca para intentar.";
+        } else {
+            texto.innerText = "⚠️ Error. Toca para intentar.";
         }
     };
     
-    // Asegurar que se detiene
     recognition.onspeechend = () => {
-        recognition.stop();
+        // Solo visual, el stop real se hace en onresult o error
+        if(recognition) recognition.stop();
     };
+}
+
+function resetearBotonMic() {
+    const btnMic = document.getElementById('btn-mic-accion');
+    btnMic.style.backgroundColor = '#2196f3'; // Azul
+    btnMic.style.animation = 'none'; // Quieto
 }
 
 function actualizarBarraVoz() {
@@ -293,8 +327,7 @@ function actualizarBarraVoz() {
     document.getElementById('barra-voz-relleno').style.width = `${porcentaje}%`;
 }
 
-
-// --- 6. FUNCIONES DE APOYO (VOZ SISTEMA, SONIDOS) ---
+// --- 6. FUNCIONES DE APOYO ---
 
 function hablar(texto) {
     window.speechSynthesis.cancel();
@@ -353,7 +386,7 @@ function lanzarConfeti() {
     }
 }
 
-// --- 7. LOGICA JUEGO NORMAL (TACTIL) ---
+// --- 7. LOGICA JUEGO NORMAL ---
 function gestionarBotonRepetir(mostrar) {
     let btnRepetir = document.getElementById('btn-repetir');
     if (!btnRepetir) {
