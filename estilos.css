@@ -564,3 +564,135 @@ h1 {
     border-color: #76ff03;
     box-shadow: 0 0 15px #76ff03;
 }
+/* --- ESTILOS DEL PIANO "JUGUETE MÁGICO" --- */
+
+.contenedor-piano {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding: 30px 10px; /* Más espacio alrededor */
+    padding-top: 50px;
+    overflow-x: auto;
+    /* NUEVO FONDO: Un degradado azul/morado brillante */
+    background: linear-gradient(to bottom, #42a5f5, #7e57c2);
+    /* Bordes muy redondeados y gruesos */
+    border-radius: 25px;
+    border: 8px solid #1565c0;
+    box-shadow: 
+        0 15px 30px rgba(0,0,0,0.3), /* Sombra realista */
+        inset 0 5px 10px rgba(255,255,255,0.3); /* Brillo superior */
+    margin: 30px auto;
+    max-width: 95%;
+    white-space: nowrap;
+    height: 260px;
+    align-items: flex-start;
+}
+
+.tecla {
+    position: relative;
+    cursor: pointer;
+    /* Bordes súper redondeados estilo "burbuja" */
+    border-radius: 0 0 20px 20px;
+    transition: all 0.1s cubic-bezier(0.4, 2.5, 0.55, 0.8); /* Efecto rebote */
+    user-select: none;
+    flex-shrink: 0;
+    /* Sombra para dar efecto 3D */
+    box-shadow: 0 5px 0px rgba(0,0,0,0.2);
+}
+
+/* Tecla Blanca */
+.tecla-blanca {
+    width: 50px;
+    height: 200px;
+    /* Un blanco hueso brillante en lugar de blanco plano */
+    background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+    border: 2px solid #eee;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #555;
+}
+
+/* Efecto al presionar Blanca: ¡EXPLOSIÓN DE COLOR! */
+.tecla-blanca:active, .tecla-blanca.activa {
+    background: #ffeb3b !important; /* Amarillo brillante */
+    height: 198px;
+    box-shadow: 
+        0 2px 0px rgba(0,0,0,0.2), /* Sombra se achica */
+        0 0 20px #ffeb3b; /* Resplandor amarillo alrededor */
+    transform: translateY(3px); /* Se hunde */
+    color: black;
+}
+
+/* Tecla Negra */
+.tecla-negra {
+    width: 32px; /* Un poquito más anchas para que se vean lindas */
+    height: 125px;
+    /* Negro azulado brillante */
+    background: linear-gradient(to bottom, #37474f, #263238);
+    position: absolute;
+    top: 50px; /* Ajustado al nuevo padding */
+    z-index: 10;
+    border: 2px solid #263238;
+}
+
+/* Efecto al presionar Negra: ¡EXPLOSIÓN ROSA! */
+.tecla-negra:active, .tecla-negra.activa {
+    background: #ff4081 !important; /* Rosa fuerte */
+    height: 123px;
+    box-shadow: 
+        0 2px 0px rgba(0,0,0,0.2),
+        0 0 20px #ff4081; /* Resplandor rosa */
+    transform: translateY(2px);
+}
+
+/* El texto de las notas */
+.nota-texto {
+    font-family: 'Fredoka One', cursive; /* Fuente divertida */
+    color: #039be5; /* Color azulito */
+}
+/* --- PANTALLA DE INICIO (Safe Start) --- */
+#pantalla-inicio {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #42a5f5, #7e57c2);
+    z-index: 9999; /* Encima de todo */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-family: 'Fredoka One', cursive;
+    text-align: center;
+}
+
+.btn-inicio-gigante {
+    background: #ffeb3b;
+    color: #d81b60;
+    font-size: 2rem;
+    padding: 20px 60px;
+    border: none;
+    border-radius: 50px;
+    border-bottom: 8px solid #f9a825;
+    cursor: pointer;
+    margin-top: 30px;
+    animation: palpito 1.5s infinite;
+}
+
+.btn-inicio-gigante:active {
+    transform: translateY(4px);
+    border-bottom-width: 4px;
+}
+
+@keyframes palpito {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
