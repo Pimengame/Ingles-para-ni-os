@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendiendo: La Casa</title>
+    <link rel="stylesheet" href="../estilos.css">
+</head>
+<body>
+
+    <a href="../index.html" class="btn-volver">⬅ Volver al Menú</a>
+
+    <h1>🏠 Mi Dulce Hogar</h1>
+    <p>¡Recorre todas las habitaciones de la casa!</p>
+
+    <div id="marcador" class="marcador">Cargando...</div>
+    
+    <div class="panel-control">
+        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+    </div>
+
+    <div class="tablero" id="tablero"></div>
+
+    <script>
+        const datosCasa = [
+            // --- ESTRUCTURA GENERAL (Gris Claro) ---
+            { icon: "🏠", en: "House", es: "Casa", hex: "#f5f5f5" },
+            { icon: "🚪", en: "Door", es: "Puerta", hex: "#f5f5f5" },
+            { icon: "🪟", en: "Window", es: "Ventana", hex: "#f5f5f5" },
+            { icon: "🧱", en: "Wall", es: "Pared", hex: "#f5f5f5" },
+            { icon: "👣", en: "Floor", es: "Piso/Suelo", hex: "#f5f5f5" },
+            { icon: "⛺", en: "Roof", es: "Techo", hex: "#f5f5f5" },
+            { icon: "🪜", en: "Stairs", es: "Escaleras", hex: "#f5f5f5" },
+            { icon: "🔑", en: "Key", es: "Llave", hex: "#f5f5f5" },
+            { icon: "🪴", en: "Garden", es: "Jardín", hex: "#e8f5e9" },
+
+            // --- SALA DE ESTAR (Verde Menta) ---
+            { icon: "🛋️", en: "Sofa", es: "Sofá", hex: "#e0f2f1" },
+            { icon: "🪑", en: "Armchair", es: "Sillón", hex: "#e0f2f1" },
+            { icon: "📺", en: "Television", es: "Televisión", hex: "#e0f2f1" },
+            { icon: "🧶", en: "Rug", es: "Alfombra", hex: "#e0f2f1" },
+            { icon: "🕰️", en: "Clock", es: "Reloj", hex: "#e0f2f1" },
+            { icon: "🖼️", en: "Picture", es: "Cuadro", hex: "#e0f2f1" },
+            { icon: "🏺", en: "Vase", es: "Florero", hex: "#e0f2f1" },
+            { icon: "🔥", en: "Fireplace", es: "Chimenea", hex: "#e0f2f1" },
+            { icon: "☎️", en: "Telephone", es: "Teléfono", hex: "#e0f2f1" },
+
+            // --- COCINA (Amarillo Suave) ---
+            { icon: "🍳", en: "Kitchen", es: "Cocina (Lugar)", hex: "#fffde7" },
+            { icon: "🧊", en: "Fridge", es: "Refrigerador", hex: "#fffde7" },
+            { icon: "🔥", en: "Stove", es: "Estufa / Cocina", hex: "#fffde7" },
+            { icon: "🥘", en: "Oven", es: "Horno", hex: "#fffde7" },
+            { icon: "🥪", en: "Microwave", es: "Microondas", hex: "#fffde7" },
+            { icon: "🪑", en: "Table", es: "Mesa", hex: "#fffde7" },
+            { icon: "🥣", en: "Bowl", es: "Tazón / Bol", hex: "#fffde7" },
+            { icon: "🍽️", en: "Plate", es: "Plato", hex: "#fffde7" },
+            { icon: "🍴", en: "Fork", es: "Tenedor", hex: "#fffde7" },
+            { icon: "🥄", en: "Spoon", es: "Cuchara", hex: "#fffde7" },
+            { icon: "🔪", en: "Knife", es: "Cuchillo", hex: "#fffde7" },
+            { icon: "🥛", en: "Glass", es: "Vaso", hex: "#fffde7" },
+            { icon: "☕", en: "Cup", es: "Taza", hex: "#fffde7" },
+            { icon: "🗑️", en: "Trash Can", es: "Basurero", hex: "#fffde7" },
+            { icon: "🥘", en: "Pot", es: "Olla", hex: "#fffde7" },
+            { icon: "🍳", en: "Pan", es: "Sartén", hex: "#fffde7" },
+
+            // --- DORMITORIO (Lila Suave) ---
+            { icon: "🛏️", en: "Bed", es: "Cama", hex: "#f3e5f5" },
+            { icon: "🛌", en: "Pillow", es: "Almohada", hex: "#f3e5f5" },
+            { icon: "🥶", en: "Blanket", es: "Manta / Cobija", hex: "#f3e5f5" },
+            { icon: "🚪", en: "Wardrobe", es: "Armario / Ropero", hex: "#f3e5f5" },
+            { icon: "💡", en: "Lamp", es: "Lámpara", hex: "#f3e5f5" },
+            { icon: "⏰", en: "Alarm Clock", es: "Despertador", hex: "#f3e5f5" },
+            { icon: "🧸", en: "Toy Box", es: "Caja de Juguetes", hex: "#f3e5f5" },
+            { icon: "🪞", en: "Mirror", es: "Espejo", hex: "#f3e5f5" },
+            { icon: "💻", en: "Computer", es: "Computadora", hex: "#f3e5f5" },
+
+            // --- BAÑO Y LIMPIEZA (Azul Cielo) ---
+            { icon: "🚽", en: "Toilet", es: "Inodoro / Váter", hex: "#e1f5fe" },
+            { icon: "🚿", en: "Shower", es: "Ducha", hex: "#e1f5fe" },
+            { icon: "🛁", en: "Bathtub", es: "Bañera", hex: "#e1f5fe" },
+            { icon: "🧼", en: "Soap", es: "Jabón", hex: "#e1f5fe" },
+            { icon: "🧴", en: "Shampoo", es: "Champú", hex: "#e1f5fe" },
+            { icon: "🧖", en: "Towel", es: "Toalla", hex: "#e1f5fe" },
+            { icon: "🪥", en: "Toothbrush", es: "Cepillo de dientes", hex: "#e1f5fe" },
+            { icon: "🧻", en: "Toilet Paper", es: "Papel Higiénico", hex: "#e1f5fe" },
+            { icon: "🧹", en: "Broom", es: "Escoba", hex: "#e1f5fe" },
+            { icon: "🧺", en: "Washing Machine", es: "Lavadora", hex: "#e1f5fe" },
+            { icon: "🧽", en: "Sponge", es: "Esponja", hex: "#e1f5fe" }
+        ];
+    </script>
+
+    <script src="../motor.js"></script>
+
+    <script>
+        // Recuerda: 'casa' es la clave para desbloquear la estampita en el álbum
+        cargarCurso(datosCasa, 'casa');
+    </script>
+
+</body>
+</html>

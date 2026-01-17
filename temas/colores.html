@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendiendo: Colores</title>
+    <link rel="stylesheet" href="../estilos.css">
+</head>
+<body>
+
+    <a href="../index.html" class="btn-volver">⬅ Volver al Menú</a>
+
+    <h1>🎨 El Mundo de Colores</h1>
+    <p>¡Explora todos los matices y tonos!</p>
+
+    <div id="marcador" class="marcador">Cargando...</div>
+    
+    <div class="panel-control">
+        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+    </div>
+
+    <div class="tablero" id="tablero"></div>
+
+    <script>
+        const datosColores = [
+            // --- LOS CLÁSICOS ---
+            { icon: "🍎", en: "Red", es: "Rojo", hex: "#ffcdd2" },
+            { icon: "🐳", en: "Blue", es: "Azul", hex: "#bbdefb" },
+            { icon: "🌻", en: "Yellow", es: "Amarillo", hex: "#fff9c4" },
+            { icon: "🐸", en: "Green", es: "Verde", hex: "#c8e6c9" },
+            { icon: "🍊", en: "Orange", es: "Naranja", hex: "#ffe0b2" },
+            
+            // --- ROSAS Y VIOLETAS ---
+            { icon: "🍇", en: "Purple", es: "Morado", hex: "#e1bee7" },
+            { icon: "🎀", en: "Pink", es: "Rosado", hex: "#f8bbd0" },
+            { icon: "🌺", en: "Magenta", es: "Magenta", hex: "#ff80ab" },
+            { icon: "🌷", en: "Fuchsia", es: "Fucsia", hex: "#ea80fc" },
+            { icon: "☂️", en: "Violet", es: "Violeta", hex: "#d1c4e9" },
+            { icon: "🧼", en: "Lavender", es: "Lavanda", hex: "#ede7f6" },
+            { icon: "🔮", en: "Lilac", es: "Lila", hex: "#e6ee9c" },
+
+            // --- AZULES Y VERDES ---
+            { icon: "🧊", en: "Light Blue", es: "Celeste", hex: "#b3e5fc" },
+            { icon: "👖", en: "Navy Blue", es: "Azul Marino", hex: "#9fa8da" }, // Tono suave para leer
+            { icon: "💎", en: "Turquoise", es: "Turquesa", hex: "#b2ebf2" },
+            { icon: "🌊", en: "Cyan", es: "Cian", hex: "#80deea" },
+            { icon: "👗", en: "Teal", es: "Verde Azulado", hex: "#80cbc4" },
+            { icon: "🍈", en: "Lime", es: "Lima", hex: "#f0f4c3" },
+            { icon: "🍃", en: "Mint", es: "Menta", hex: "#e0f2f1" },
+            { icon: "🫒", en: "Olive", es: "Oliva", hex: "#dce775" },
+            { icon: "🌲", en: "Dark Green", es: "Verde Oscuro", hex: "#a5d6a7" },
+
+            // --- CÁLIDOS Y TIERRA ---
+            { icon: "🐻", en: "Brown", es: "Café", hex: "#d7ccc8" },
+            { icon: "🥯", en: "Beige", es: "Beige", hex: "#f0f4c3" },
+            { icon: "🍑", en: "Peach", es: "Durazno", hex: "#ffccbc" },
+            { icon: "🍣", en: "Salmon", es: "Salmón", hex: "#ffab91" },
+            { icon: "🪸", en: "Coral", es: "Coral", hex: "#ff8a65" },
+            { icon: "🍷", en: "Maroon", es: "Burdeos", hex: "#ef9a9a" },
+            { icon: "🧱", en: "Brick", es: "Ladrillo", hex: "#e57373" },
+            { icon: "🍯", en: "Amber", es: "Ámbar", hex: "#ffe082" },
+
+            // --- NEUTROS Y METÁLICOS ---
+            { icon: "⚫", en: "Black", es: "Negro", hex: "#cfd8dc" },
+            { icon: "🐨", en: "Gray", es: "Gris", hex: "#f5f5f5" },
+            { icon: "🥚", en: "White", es: "Blanco", hex: "#ffffff" },
+            { icon: "🍦", en: "Cream", es: "Crema", hex: "#fffde7" },
+            { icon: "🐘", en: "Ivory", es: "Marfil", hex: "#fffff0" },
+            { icon: "🏆", en: "Gold", es: "Dorado", hex: "#fff59d" },
+            { icon: "🥈", en: "Silver", es: "Plateado", hex: "#e0e0e0" },
+            { icon: "🥉", en: "Bronze", es: "Bronce", hex: "#d7ccc8" },
+
+            // --- ESPECIAL ---
+            { icon: "🌈", en: "Rainbow", es: "Arcoíris", hex: "#ffffff" }
+        ];
+    </script>
+
+    <script src="../motor.js"></script>
+
+    <script>
+        // Etiqueta 'colores' para el álbum
+        cargarCurso(datosColores, 'colores');
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendiendo: Transportes</title>
+    <link rel="stylesheet" href="../estilos.css">
+</head>
+<body>
+
+    <a href="../index.html" class="btn-volver">⬅ Volver al Menú</a>
+
+    <h1>🚁 Medios de Transporte</h1>
+    <p>Por tierra, mar y aire... ¿Cómo viajas tú?</p>
+
+    <div id="marcador" class="marcador">Cargando...</div>
+    
+    <div class="panel-control">
+        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+    </div>
+
+    <div class="tablero" id="tablero"></div>
+
+    <script>
+        const datosTransportes = [
+            // --- CIUDAD Y CARRETERA (Gris Claro) ---
+            { icon: "🚗", en: "Car", es: "Auto / Coche", hex: "#f5f5f5" },
+            { icon: "🚕", en: "Taxi", es: "Taxi", hex: "#fff9c4" }, // Un poco amarillo
+            { icon: "🚌", en: "Bus", es: "Autobús", hex: "#f5f5f5" },
+            { icon: "🚲", en: "Bicycle", es: "Bicicleta", hex: "#f5f5f5" },
+            { icon: "🏍️", en: "Motorcycle", es: "Moto", hex: "#f5f5f5" },
+            { icon: "🛴", en: "Scooter", es: "Patinete", hex: "#f5f5f5" },
+            { icon: "🛹", en: "Skateboard", es: "Monopatín", hex: "#f5f5f5" },
+            { icon: "🚙", en: "Van", es: "Furgoneta", hex: "#f5f5f5" },
+            { icon: "🚙", en: "Jeep", es: "Todoterreno", hex: "#f5f5f5" },
+            { icon: "🚃", en: "Tram", es: "Tranvía", hex: "#f5f5f5" },
+
+            // --- VEHÍCULOS DE TRABAJO Y EMERGENCIA (Amarillo/Naranja) ---
+            { icon: "🚒", en: "Fire Truck", es: "Camión de Bomberos", hex: "#ffe0b2" },
+            { icon: "🚑", en: "Ambulance", es: "Ambulancia", hex: "#ffe0b2" },
+            { icon: "🚓", en: "Police Car", es: "Patrulla", hex: "#e3f2fd" }, // Azulito policía
+            { icon: "🚜", en: "Tractor", es: "Tractor", hex: "#fff9c4" },
+            { icon: "🏗️", en: "Crane", es: "Grúa", hex: "#fff9c4" },
+            { icon: "🚚", en: "Truck", es: "Camión", hex: "#fff9c4" },
+            { icon: "🚜", en: "Bulldozer", es: "Excavadora", hex: "#fff9c4" },
+            { icon: "🗑️", en: "Garbage Truck", es: "Camión de Basura", hex: "#fff9c4" },
+            { icon: "🚌", en: "School Bus", es: "Autobús Escolar", hex: "#fff9c4" },
+            { icon: "✉️", en: "Mail Truck", es: "Camión de Correo", hex: "#fff9c4" },
+
+            // --- VÍAS FÉRREAS (Trenes) ---
+            { icon: "🚂", en: "Train", es: "Tren", hex: "#e0e0e0" },
+            { icon: "🚇", en: "Subway", es: "Metro / Subterráneo", hex: "#e0e0e0" },
+            { icon: "🚄", en: "Bullet Train", es: "Tren Bala", hex: "#e0e0e0" },
+
+            // --- AIRE Y ESPACIO (Celeste) ---
+            { icon: "✈️", en: "Airplane", es: "Avión", hex: "#e1f5fe" },
+            { icon: "🚁", en: "Helicopter", es: "Helicóptero", hex: "#e1f5fe" },
+            { icon: "🚀", en: "Rocket", es: "Cohete", hex: "#e1f5fe" },
+            { icon: "🎈", en: "Hot Air Balloon", es: "Globo Aerostático", hex: "#e1f5fe" },
+            { icon: "🛸", en: "UFO", es: "OVNI", hex: "#e1f5fe" },
+            { icon: "🛩️", en: "Jet", es: "Avión Caza", hex: "#e1f5fe" },
+            { icon: "🛸", en: "Drone", es: "Dron", hex: "#e1f5fe" },
+            { icon: "🪂", en: "Parachute", es: "Paracaídas", hex: "#e1f5fe" },
+            { icon: "🛰️", en: "Satellite", es: "Satélite", hex: "#e1f5fe" },
+
+            // --- AGUA (Azul Agua) ---
+            { icon: "⛵", en: "Boat", es: "Bote", hex: "#e0f7fa" },
+            { icon: "🚢", en: "Ship", es: "Barco", hex: "#e0f7fa" },
+            { icon: "🛥️", en: "Speedboat", es: "Lancha", hex: "#e0f7fa" },
+            { icon: "⛴️", en: "Ferry", es: "Ferry", hex: "#e0f7fa" },
+            { icon: "🚤", en: "Canoe", es: "Canoa", hex: "#e0f7fa" },
+            { icon: "🛳️", en: "Cruise Ship", es: "Crucero", hex: "#e0f7fa" },
+            { icon: "⛵", en: "Sailboat", es: "Velero", hex: "#e0f7fa" },
+            { icon: "🛥️", en: "Yacht", es: "Yate", hex: "#e0f7fa" },
+            { icon: "🌊", en: "Submarine", es: "Submarino", hex: "#b2ebf2" },
+            { icon: "🏴‍☠️", en: "Pirate Ship", es: "Barco Pirata", hex: "#e0f7fa" }
+        ];
+    </script>
+
+    <script src="../motor.js"></script>
+
+    <script>
+        // Recuerda: 'transportes' es la clave del álbum
+        cargarCurso(datosTransportes, 'transportes');
+    </script>
+
+</body>
+</html>

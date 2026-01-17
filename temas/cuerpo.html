@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendiendo: El Cuerpo</title>
+    <link rel="stylesheet" href="../estilos.css">
+</head>
+<body>
+
+    <a href="../index.html" class="btn-volver">⬅ Volver al Menú</a>
+
+    <h1>👃 El Cuerpo Humano</h1>
+    <p>¡De la cabeza a los pies, y lo que hay dentro!</p>
+
+    <div id="marcador" class="marcador">Cargando...</div>
+    
+    <div class="panel-control">
+        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+    </div>
+
+    <div class="tablero" id="tablero"></div>
+
+    <script>
+        const datosCuerpo = [
+            // --- LA CARA (FACE) ---
+            { icon: "👱‍♀️", en: "Head", es: "Cabeza" },
+            { icon: "😀", en: "Face", es: "Cara" },
+            { icon: "💇‍♀️", en: "Hair", es: "Pelo" },
+            { icon: "🧠", en: "Forehead", es: "Frente" },
+            { icon: "🤨", en: "Eyebrow", es: "Ceja" },
+            { icon: "👁️", en: "Eye", es: "Ojo" },
+            { icon: "👁️", en: "Eyelashes", es: "Pestañas" },
+            { icon: "👂", en: "Ear", es: "Oreja" },
+            { icon: "👃", en: "Nose", es: "Nariz" },
+            { icon: "😊", en: "Cheek", es: "Mejilla" },
+            { icon: "👄", en: "Mouth", es: "Boca" },
+            { icon: "💋", en: "Lips", es: "Labios" },
+            { icon: "🦷", en: "Teeth", es: "Dientes" },
+            { icon: "👅", en: "Tongue", es: "Lengua" },
+            { icon: "🤔", en: "Chin", es: "Barbilla" },
+            { icon: "🧣", en: "Neck", es: "Cuello" },
+
+            // --- EL TRONCO Y BRAZOS ---
+            { icon: "🤷", en: "Shoulder", es: "Hombro" },
+            { icon: "👕", en: "Chest", es: "Pecho" },
+            { icon: "🎒", en: "Back", es: "Espalda" },
+            { icon: "🤰", en: "Stomach", es: "Estómago / Barriga" },
+            { icon: "🍩", en: "Belly Button", es: "Ombligo" },
+            { icon: "💪", en: "Arm", es: "Brazo" },
+            { icon: "💪", en: "Elbow", es: "Codo" },
+            { icon: "⌚", en: "Wrist", es: "Muñeca" },
+            { icon: "✋", en: "Hand", es: "Mano" },
+            { icon: "👆", en: "Finger", es: "Dedo de la mano" },
+            { icon: "👍", en: "Thumb", es: "Pulgar" },
+            { icon: "💅", en: "Nail", es: "Uña" },
+
+            // --- LAS PIERNAS ---
+            { icon: "🦵", en: "Leg", es: "Pierna" },
+            { icon: "🦵", en: "Knee", es: "Rodilla" },
+            { icon: "🦶", en: "Ankle", es: "Tobillo" },
+            { icon: "🦶", en: "Foot", es: "Pie" },
+            { icon: "👣", en: "Feet", es: "Pies" },
+            { icon: "🦶", en: "Heel", es: "Talón" },
+            { icon: "🦶", en: "Toes", es: "Dedos de los pies" },
+
+            // --- ÓRGANOS Y ESQUELETO (Nivel Experto) ---
+            { icon: "🧠", en: "Brain", es: "Cerebro" },
+            { icon: "❤️", en: "Heart", es: "Corazón" },
+            { icon: "🫁", en: "Lungs", es: "Pulmones" },
+            { icon: "🦴", en: "Bone", es: "Hueso" },
+            { icon: "💀", en: "Skull", es: "Cráneo" },
+            { icon: "🏋️", en: "Muscle", es: "Músculo" },
+            { icon: "🩸", en: "Blood", es: "Sangre" },
+            { icon: "☠️", en: "Skeleton", es: "Esqueleto" },
+            { icon: "🦵", en: "Skin", es: "Piel" }
+        ];
+    </script>
+
+    <script src="../motor.js"></script>
+
+    <script>
+        // Etiqueta 'cuerpo' para que funcione el álbum de premios
+        cargarCurso(datosCuerpo, 'cuerpo');
+    </script>
+
+</body>
+</html>

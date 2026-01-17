@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendiendo: Saludos</title>
+    <link rel="stylesheet" href="../estilos.css">
+</head>
+<body>
+
+    <a href="../index.html" class="btn-volver">⬅ Volver al Menú</a>
+
+    <h1>👋 Saludos y Despedidas</h1>
+    <p>¡Aprende a saludar a tus amigos!</p>
+
+    <div id="marcador" class="marcador">Puntos: 0</div>
+    
+    <div class="panel-control">
+        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+    </div>
+
+    <div class="tablero" id="tablero"></div>
+
+    <script>
+        const datosSaludos = [
+            { icon: "👋", en: "Hello", es: "Hola" },
+            { icon: "🚶", en: "Goodbye", es: "Adiós" },
+            { icon: "🌅", en: "Good morning", es: "Buenos días" },
+            { icon: "☀️", en: "Good afternoon", es: "Buenas tardes" },
+            { icon: "🌙", en: "Good night", es: "Buenas noches" },
+            { icon: "🤝", en: "Nice to meet you", es: "Gusto en conocerte" },
+            { icon: "🔜", en: "See you later", es: "Nos vemos luego" },
+            { icon: "🖐", en: "Hi", es: "Hola (Casual)" },
+            { icon: "🙋", en: "Bye", es: "Chao" }
+        ];
+    </script>
+
+    <script src="../motor.js"></script>
+
+    <script>
+        cargarCurso(datosSaludos, 'saludos');
+    </script>
+
+</body>
+</html>

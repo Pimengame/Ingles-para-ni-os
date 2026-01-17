@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendiendo: Números</title>
+    <link rel="stylesheet" href="../estilos.css">
+</head>
+<body>
+
+    <a href="../index.html" class="btn-volver">⬅ Volver al Menú</a>
+
+    <h1>🔢 Los Números</h1>
+    <p>Aprende a contar del 1 al 100</p>
+
+    <div id="marcador" class="marcador">Puntos: 0</div>
+    
+    <div class="panel-control">
+        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+    </div>
+
+    <div class="tablero" id="tablero"></div>
+
+    <script>
+        const datosNumeros = [
+            { icon: "1️⃣", en: "One", es: "Uno" },
+            { icon: "2️⃣", en: "Two", es: "Dos" },
+            { icon: "3️⃣", en: "Three", es: "Tres" },
+            { icon: "4️⃣", en: "Four", es: "Cuatro" },
+            { icon: "5️⃣", en: "Five", es: "Cinco" },
+            { icon: "6️⃣", en: "Six", es: "Seis" },
+            { icon: "7️⃣", en: "Seven", es: "Siete" },
+            { icon: "8️⃣", en: "Eight", es: "Ocho" },
+            { icon: "9️⃣", en: "Nine", es: "Nueve" },
+            { icon: "🔟", en: "Ten", es: "Diez" },
+            { icon: "1️⃣1️⃣", en: "Eleven", es: "Once" },
+            { icon: "1️⃣2️⃣", en: "Twelve", es: "Doce" },
+            { icon: "1️⃣3️⃣", en: "Thirteen", es: "Trece" },
+            { icon: "1️⃣4️⃣", en: "Fourteen", es: "Catorce" },
+            { icon: "1️⃣5️⃣", en: "Fifteen", es: "Quince" },
+            { icon: "2️⃣0️⃣", en: "Twenty", es: "Veinte" },
+            { icon: "3️⃣0️⃣", en: "Thirty", es: "Treinta" },
+            { icon: "4️⃣0️⃣", en: "Forty", es: "Cuarenta" },
+            { icon: "5️⃣0️⃣", en: "Fifty", es: "Cincuenta" },
+            { icon: "💯", en: "One Hundred", es: "Cien" }
+        ];
+    </script>
+
+    <script src="../motor.js"></script>
+
+    <script>
+        cargarCurso(datosNumeros, 'numeros');
+    </script>
+
+</body>
+</html>

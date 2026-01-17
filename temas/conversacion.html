@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendiendo: Conversación</title>
+    <link rel="stylesheet" href="../estilos.css">
+</head>
+<body>
+
+    <a href="../index.html" class="btn-volver">⬅ Volver al Menú</a>
+
+    <h1>💬 Conversación Total</h1>
+    <p>Frases para la escuela, la casa y la vida diaria.</p>
+
+    <div id="marcador" class="marcador">Cargando...</div>
+    
+    <div class="panel-control">
+        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+    </div>
+
+    <div class="tablero" id="tablero"></div>
+
+    <script>
+        const datosConversacion = [
+            // --- 1. CONOCIENDO GENTE ---
+            { icon: "👋", en: "What is your name?", es: "¿Cómo te llamas?" },
+            { icon: "📛", en: "My name is...", es: "Me llamo..." },
+            { icon: "🎂", en: "How old are you?", es: "¿Cuántos años tienes?" },
+            { icon: "🖐", en: "I am ... years old", es: "Tengo ... años" },
+            { icon: "🏡", en: "Where do you live?", es: "¿Dónde vives?" },
+            { icon: "🏫", en: "Where do you go to school?", es: "¿A qué escuela vas?" },
+            { icon: "👫", en: "Do you have brothers?", es: "¿Tienes hermanos?" },
+            { icon: "📱", en: "What is your phone number?", es: "¿Cuál es tu número de teléfono?" },
+
+            // --- 2. RUTINA DIARIA (NUEVO) ---
+            { icon: "☀️", en: "Time to wake up", es: "Hora de despertar" },
+            { icon: "🪥", en: "Brush your teeth", es: "Cepíllate los dientes" },
+            { icon: "🚿", en: "Take a shower", es: "Toma una ducha" },
+            { icon: "👕", en: "Put on your clothes", es: "Ponte la ropa" },
+            { icon: "👟", en: "Put on your shoes", es: "Ponte los zapatos" },
+            { icon: "🍳", en: "Breakfast is ready", es: "El desayuno está listo" },
+            { icon: "🎒", en: "Is your backpack ready?", es: "¿Está lista tu mochila?" },
+            { icon: "🌙", en: "Time to go to sleep", es: "Hora de ir a dormir" },
+
+            // --- 3. EN LA ESCUELA (NUEVO) ---
+            { icon: "✏️", en: "Can I have a pencil?", es: "¿Me prestas un lápiz?" },
+            { icon: "✋", en: "Teacher, I have a question", es: "Maestra, tengo una pregunta" },
+            { icon: "🚽", en: "May I go to the bathroom?", es: "¿Puedo ir al baño?" },
+            { icon: "📚", en: "I finished my homework", es: "Terminé mi tarea" },
+            { icon: "✂️", en: "Can I use the scissors?", es: "¿Puedo usar las tijeras?" },
+            { icon: "🔔", en: "It is recess time", es: "Es hora del recreo" },
+            { icon: "🥪", en: "Let's eat lunch", es: "Vamos a almorzar" },
+            { icon: "🤝", en: "Do you want to be my friend?", es: "¿Quieres ser mi amigo?" },
+
+            // --- 4. SENTIMIENTOS Y SALUD ---
+            { icon: "😃", en: "I am happy", es: "Estoy feliz" },
+            { icon: "😢", en: "I am sad", es: "Estoy triste" },
+            { icon: "😡", en: "I am angry", es: "Estoy enojado" },
+            { icon: "😱", en: "I am scared", es: "Tengo miedo" },
+            { icon: "😴", en: "I am tired", es: "Estoy cansado" },
+            { icon: "🤕", en: "My head hurts", es: "Me duele la cabeza" },
+            { icon: "🤰", en: "My tummy hurts", es: "Me duele la barriga" },
+            { icon: "🤧", en: "I have a cold", es: "Tengo resfriado" },
+            { icon: "🩹", en: "I need a band-aid", es: "Necesito un parche curita" },
+
+            // --- 5. COMIDA Y GUSTOS ---
+            { icon: "🍽️", en: "I am hungry", es: "Tengo hambre" },
+            { icon: "🥤", en: "I am thirsty", es: "Tengo sed" },
+            { icon: "🍎", en: "I want a snack", es: "Quiero una merienda" },
+            { icon: "🥦", en: "I don't like vegetables", es: "No me gustan los vegetales" },
+            { icon: "🍫", en: "Can I have chocolate?", es: "¿Puedo comer chocolate?" },
+            { icon: "😋", en: "It is delicious", es: "Está delicioso" },
+            { icon: "🤢", en: "It is yucky", es: "Está asqueroso" },
+
+            // --- 6. MODALES Y EXPRESIONES ---
+            { icon: "🙏", en: "Please", es: "Por favor" },
+            { icon: "🎁", en: "Thank you very much", es: "Muchas gracias" },
+            { icon: "🤝", en: "You are welcome", es: "De nada" },
+            { icon: "👋", en: "See you tomorrow", es: "Nos vemos mañana" },
+            { icon: "🌞", en: "Have a nice day", es: "Que tengas un buen día" },
+            { icon: "😔", en: "I am sorry", es: "Lo siento / Perdón" },
+            { icon: "🤧", en: "Bless you", es: "Salud (estornudo)" },
+            { icon: "🍀", en: "Good luck", es: "Buena suerte" },
+            { icon: "👍", en: "Good job!", es: "¡Buen trabajo!" },
+            { icon: "🤷", en: "I don't know", es: "No lo sé" },
+            
+            // --- 7. PREGUNTAS CLAVE ---
+            { icon: "⌚", en: "What time is it?", es: "¿Qué hora es?" },
+            { icon: "📍", en: "Where is my mom?", es: "¿Dónde está mi mamá?" },
+            { icon: "🧸", en: "Where is my toy?", es: "¿Dónde está mi juguete?" },
+            { icon: "🤔", en: "What happened?", es: "¿Qué pasó?" },
+            { icon: "👂", en: "Can you repeat?", es: "¿Puedes repetir?" },
+            { icon: "❓", en: "Why?", es: "¿Por qué?" }
+        ];
+    </script>
+
+    <script src="../motor.js"></script>
+
+    <script>
+        cargarCurso(datosConversacion, 'conversacion');
+    </script>
+
+</body>
+</html>
