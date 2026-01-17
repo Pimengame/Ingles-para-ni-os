@@ -166,18 +166,31 @@
         const btnPlay = document.getElementById('btn-reproducir');
         const txtEstado = document.getElementById('estado-grabacion');
 
-        btnGrabar.onclick = async () => {
-            despertarAudio(); // Asegurar audio activo
+// --- BUSCA ESTA PARTE EN TU CÓDIGO Y REEMPLÁZALA ---
 
-            // Pedir Micrófono
+        btnGrabar.onclick = async () => {
+            despertarAudio(); 
+
             try {
-                const streamMic = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // AQUÍ ESTÁ EL TRUCO: Configuración "Pro" para música
+                // Desactivamos la cancelación de eco y supresión de ruido
+                // para que no corte la voz cuando suena el piano.
+                const constraints = {
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false,
+                        latency: 0
+                    }
+                };
+
+                const streamMic = await navigator.mediaDevices.getUserMedia(constraints);
                 const sourceMic = audioCtx.createMediaStreamSource(streamMic);
                 
-                // Conectar Micro a Grabadora (NO a parlantes)
+                // Conectar Micro a Grabadora
                 sourceMic.connect(destinoGrabacion);
 
-                // Preparar Grabadora con el Mix (Piano + Voz)
+                // --- RESTO DEL CÓDIGO IGUAL QUE ANTES ---
                 mediaRecorder = new MediaRecorder(destinoGrabacion.stream);
                 chunks = [];
 
@@ -188,7 +201,6 @@
                     audioUrl = window.URL.createObjectURL(blob);
                     grabacionAudio.src = audioUrl;
                     
-                    // Liberar micrófono
                     streamMic.getTracks().forEach(track => track.stop());
                     
                     btnPlay.style.display = 'inline-block';
@@ -200,7 +212,6 @@
                 mediaRecorder.start();
                 grabando = true;
                 
-                // Actualizar Botones
                 btnGrabar.style.display = 'none';
                 btnDetener.style.display = 'inline-block';
                 btnPlay.style.display = 'none';
@@ -208,7 +219,7 @@
                 txtEstado.classList.add('parpadeo');
 
             } catch (err) {
-                alert("Debes permitir el micrófono para grabar.");
+                alert("Error al acceder al micrófono: " + err.message);
                 console.error(err);
             }
         };
@@ -230,3 +241,4 @@
     </script>
 </body>
 </html>
+
