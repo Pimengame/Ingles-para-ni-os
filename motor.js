@@ -1,4 +1,4 @@
-/* --- motor.js v9.0: CON RECONOCIMIENTO DE VOZ 🎤 --- */
+/* --- motor.js v10.0: COMPATIBILIDAD UNIVERSAL (Safari, Firefox, Chrome) --- */
 
 // --- 1. VARIABLES GLOBALES ---
 let jugando = false;
@@ -11,14 +11,34 @@ let palabraObjetivo = null;
 let audioCtx = null;
 let idLeccionActual = '';
 
-// Variable para el reconocimiento de voz
+// Variables para compatibilidad de voz
+let vocesDisponibles = [];
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null; // Se inicializa si el navegador es compatible
+let recognition = null;
 
-// --- 2. AUTO-GENERADOR DE MODALES ---
+// --- 2. SISTEMA DE CARGA DE VOCES (CRUCIAL PARA SAFARI/FIREFOX) ---
+function cargarVoces() {
+    vocesDisponibles = window.speechSynthesis.getVoices();
+    console.log("Voces cargadas:", vocesDisponibles.length);
+}
+
+// Intentar cargar voces al inicio
+cargarVoces();
+
+// Chrome y otros cargan voces asincrónicamente, así que esperamos el evento
+if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = cargarVoces;
+}
+
+// --- 3. AUTO-GENERADOR DE MODALES ---
 document.addEventListener('DOMContentLoaded', () => {
     crearModalHTML();
-    inyectarBotonesExtra(); // Inyectamos el botón de micrófono
+    inyectarBotonesExtra();
+    
+    // Inicializar AudioContext (necesario para Safari)
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
 });
 
 function crearModalHTML() {
@@ -46,11 +66,9 @@ function crearModalHTML() {
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
-// Inyecta el botón azul de micrófono al lado del verde
 function inyectarBotonesExtra() {
     const panel = document.querySelector('.panel-control');
     if (panel && !document.getElementById('btn-voz')) {
-        // Verificar si el navegador soporta voz
         if (SpeechRecognition) {
             const btnVoz = document.createElement('button');
             btnVoz.id = 'btn-voz';
@@ -58,8 +76,6 @@ function inyectarBotonesExtra() {
             btnVoz.innerHTML = '🎤 Pronunciación';
             btnVoz.onclick = iniciarRetoVoz;
             panel.appendChild(btnVoz);
-        } else {
-            console.log("Este navegador no soporta reconocimiento de voz.");
         }
     }
 }
@@ -72,11 +88,13 @@ function mostrarModal(tipo, callback) {
     const boton = document.getElementById('btn-accion-modal');
     const contenidoVoz = document.getElementById('contenido-voz');
 
-    // Reseteamos visuales
     contenidoVoz.style.display = 'none';
     icono.style.display = 'block';
     mensaje.style.display = 'block';
     boton.style.display = 'inline-block';
+
+    // Desbloqueo de Audio para Safari al hacer clic en cualquier modal
+    desbloquearAudio();
 
     if (tipo === 'inicio') {
         icono.innerHTML = '🎧';
@@ -84,6 +102,15 @@ function mostrarModal(tipo, callback) {
         mensaje.innerText = `Debes conseguir ${META_ACIERTOS} aciertos. Tienes 3 vidas.`;
         boton.innerText = '¡Sí, jugar!';
         boton.style.backgroundColor = '#4caf50';
+        
+        // Cargar voces de nuevo por si acaso
+        if(vocesDisponibles.length === 0) cargarVoces();
+
+        hablarBilingue(
+            "¡Vamos a jugar! Consigue veinte aciertos.", 
+            "Let's play! Get twenty correct answers."
+        );
+
         boton.onclick = () => {
             modal.style.display = 'none';
             if (callback) callback();
@@ -106,12 +133,10 @@ function mostrarModal(tipo, callback) {
         boton.onclick = () => location.reload();
         
     } else if (tipo === 'voz') {
-        // --- MODO MODAL PARA VOZ ---
-        icono.style.display = 'none'; // Ocultamos icono normal
-        mensaje.style.display = 'none'; // Ocultamos mensaje normal
-        boton.style.display = 'none';   // Ocultamos botón
-        contenidoVoz.style.display = 'block'; // Mostramos UI de voz
-        
+        icono.style.display = 'none';
+        mensaje.style.display = 'none';
+        boton.style.display = 'none';
+        contenidoVoz.style.display = 'block';
         titulo.innerText = 'Dí esta palabra:';
     }
 
@@ -119,117 +144,20 @@ function mostrarModal(tipo, callback) {
     if(tipo !== 'derrota' && tipo !== 'voz') playSound('pop');
 }
 
-// --- 3. LÓGICA DE RECONOCIMIENTO DE VOZ ---
-function iniciarRetoVoz() {
-    if (!SpeechRecognition) {
-        alert("Tu navegador no soporta reconocimiento de voz. Prueba con Google Chrome.");
-        return;
-    }
-
-    // Seleccionar palabra al azar
-    const item = listaActual[Math.floor(Math.random() * listaActual.length)];
-    
-    // Mostrar Modal Especial
-    mostrarModal('voz');
-    
-    // Actualizar elementos del modal voz
-    document.getElementById('icono-voz-grande').innerText = item.icon;
-    document.getElementById('texto-escuchado').innerText = "Escuchando...";
-    document.getElementById('indicador-mic').style.display = 'flex';
-
-    // Decir la palabra primero
-    hablar("Say... " + item.en);
-
-    // Iniciar escucha después de 1 segundo
-    setTimeout(() => {
-        activarEscucha(item);
-    }, 1500);
+// --- 4. SISTEMA DE VOZ MEJORADO (BUSCADOR INTELIGENTE) ---
+function buscarVoz(langCode) {
+    // Intenta encontrar una voz que coincida con el idioma (ej: 'en-US', 'es-MX')
+    return vocesDisponibles.find(voz => voz.lang.includes(langCode));
 }
 
-function activarEscucha(itemObjetivo) {
-    recognition = new SpeechRecognition();
-    recognition.lang = 'en-US'; // Escuchar en Inglés
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.start();
-
-    recognition.onresult = (event) => {
-        const loQueDijo = event.results[0][0].transcript.toLowerCase();
-        const loQueEsperaba = itemObjetivo.en.toLowerCase();
-        
-        document.getElementById('texto-escuchado').innerText = `Dijiste: "${loQueDijo}"`;
-        document.getElementById('indicador-mic').style.display = 'none';
-
-        // Comparación simple
-        if (loQueDijo.includes(loQueEsperaba) || loQueEsperaba.includes(loQueDijo)) {
-            // ACIERTO
-            playSound('win');
-            hablar("Excellent!");
-            lanzarConfeti();
-            setTimeout(() => {
-                document.getElementById('miModal').style.display = 'none';
-            }, 2000);
-        } else {
-            // ERROR
-            playSound('lose');
-            hablar(`Try again. Say: ${itemObjetivo.en}`);
-            setTimeout(() => {
-                // Reintentar misma palabra
-                document.getElementById('indicador-mic').style.display = 'flex';
-                document.getElementById('texto-escuchado').innerText = "Escuchando...";
-                recognition.start();
-            }, 2500);
-        }
-    };
-
-    recognition.onerror = (event) => {
-        document.getElementById('indicador-mic').style.display = 'none';
-        document.getElementById('texto-escuchado').innerText = "No te escuché bien 😕";
-        setTimeout(() => {
-            document.getElementById('miModal').style.display = 'none';
-        }, 2000);
-    };
-    
-    recognition.onspeechend = () => {
-        recognition.stop();
-    };
-}
-
-
-// --- 4. CARGADOR DE CURSO (Igual que antes) ---
-function cargarCurso(datosRecibidos, idPremio) {
-    listaActual = datosRecibidos;
-    idLeccionActual = idPremio || '';
-    
-    const tablero = document.getElementById('tablero');
-    if (!tablero) return;
-    tablero.innerHTML = '';
-
-    listaActual.forEach((item, index) => {
-        const tarjeta = document.createElement('div');
-        tarjeta.className = 'tarjeta';
-        tarjeta.id = `card-${index}`;
-        tarjeta.onclick = () => manejarClic(item, index);
-        
-        if(item.hex) {
-            tarjeta.style.backgroundColor = item.hex;
-            if(item.en === 'Black') tarjeta.style.borderColor = '#555';
-        }
-        
-        tarjeta.innerHTML = `
-            <div class="icono">${item.icon}</div>
-            <div class="palabra-en">${item.en}</div>
-            <div class="palabra-es">${item.es}</div>
-        `;
-        tablero.appendChild(tarjeta);
-    });
-}
-
-// --- 5. SISTEMA DE VOZ (TTS) ---
 function hablar(texto) {
     window.speechSynthesis.cancel();
     const msg = new SpeechSynthesisUtterance(texto);
+    
+    // Buscar voz en Inglés
+    const vozEn = buscarVoz('en');
+    if (vozEn) msg.voice = vozEn;
+    
     msg.lang = 'en-US';
     msg.rate = 0.8;
     window.speechSynthesis.speak(msg);
@@ -237,17 +165,62 @@ function hablar(texto) {
 
 function hablarBilingue(textoES, textoEN) {
     window.speechSynthesis.cancel(); 
+    
+    // Configurar Español
     const msgES = new SpeechSynthesisUtterance(textoES);
+    const vozEs = buscarVoz('es'); // Busca cualquier voz español
+    if (vozEs) msgES.voice = vozEs;
     msgES.lang = 'es-ES';
     msgES.rate = 1;
+    
+    // Configurar Inglés
     const msgEN = new SpeechSynthesisUtterance(textoEN);
+    const vozEn = buscarVoz('en'); // Busca cualquier voz inglés
+    if (vozEn) msgEN.voice = vozEn;
     msgEN.lang = 'en-US';
     msgEN.rate = 0.8; 
+    
+    msgES.onend = function() {
+        window.speechSynthesis.speak(msgEN);
+    };
+    
     window.speechSynthesis.speak(msgES);
-    window.speechSynthesis.speak(msgEN);
 }
 
-// --- 6. GESTIÓN BOTÓN REPETIR ---
+// --- 5. SONIDOS Y DESBLOQUEO SAFARI ---
+function desbloquearAudio() {
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().then(() => {
+            console.log("Audio desbloqueado para Safari");
+        });
+    }
+}
+
+function playSound(tipo) {
+    // Intento de desbloqueo extra
+    desbloquearAudio();
+
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    const now = audioCtx.currentTime;
+
+    if (tipo === 'win') {
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(523, now); osc.frequency.linearRampToValueAtTime(880, now + 0.1); gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.5); osc.start(now); osc.stop(now + 0.5);
+    } else if (tipo === 'lose') {
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2); gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.3); osc.start(now); osc.stop(now + 0.3);
+    } else if (tipo === 'pop') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1); osc.start(now); osc.stop(now + 0.1);
+    } else if (tipo === 'fanfarria') {
+        const notas = [523.25, 659.25, 783.99, 1046.50]; notas.forEach((nota, i) => { const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.type = 'square'; o.frequency.value = nota; g.gain.setValueAtTime(0.1, now + i*0.15); g.gain.exponentialRampToValueAtTime(0.001, now + i*0.15 + 0.3); o.start(now + i*0.15); o.stop(now + i*0.15 + 0.3); });
+    } else if (tipo === 'gameover') {
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(100, now + 1); gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 1); osc.start(now); osc.stop(now + 1);
+    }
+}
+
+// --- 6. FUNCIONES DEL JUEGO (REPETIR, ETC) ---
 function gestionarBotonRepetir(mostrar) {
     let btnRepetir = document.getElementById('btn-repetir');
     if (!btnRepetir) {
@@ -275,29 +248,32 @@ function repetirInstruccion() {
     }
 }
 
-// --- 7. SONIDOS ---
-function playSound(tipo) {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    const now = audioCtx.currentTime;
+function cargarCurso(datosRecibidos, idPremio) {
+    listaActual = datosRecibidos;
+    idLeccionActual = idPremio || '';
+    
+    const tablero = document.getElementById('tablero');
+    if (!tablero) return;
+    tablero.innerHTML = '';
 
-    if (tipo === 'win') {
-        osc.type = 'triangle'; osc.frequency.setValueAtTime(523, now); osc.frequency.linearRampToValueAtTime(880, now + 0.1); gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.5); osc.start(now); osc.stop(now + 0.5);
-    } else if (tipo === 'lose') {
-        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2); gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.3); osc.start(now); osc.stop(now + 0.3);
-    } else if (tipo === 'pop') {
-        osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1); osc.start(now); osc.stop(now + 0.1);
-    } else if (tipo === 'fanfarria') {
-        const notas = [523.25, 659.25, 783.99, 1046.50]; notas.forEach((nota, i) => { const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.type = 'square'; o.frequency.value = nota; g.gain.setValueAtTime(0.1, now + i*0.15); g.gain.exponentialRampToValueAtTime(0.001, now + i*0.15 + 0.3); o.start(now + i*0.15); o.stop(now + i*0.15 + 0.3); });
-    } else if (tipo === 'gameover') {
-        osc.type = 'triangle'; osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(100, now + 1); gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 1); osc.start(now); osc.stop(now + 1);
-    }
+    listaActual.forEach((item, index) => {
+        const tarjeta = document.createElement('div');
+        tarjeta.className = 'tarjeta';
+        tarjeta.id = `card-${index}`;
+        tarjeta.onclick = () => manejarClic(item, index);
+        if(item.hex) {
+            tarjeta.style.backgroundColor = item.hex;
+            if(item.en === 'Black') tarjeta.style.borderColor = '#555';
+        }
+        tarjeta.innerHTML = `
+            <div class="icono">${item.icon}</div>
+            <div class="palabra-en">${item.en}</div>
+            <div class="palabra-es">${item.es}</div>
+        `;
+        tablero.appendChild(tarjeta);
+    });
 }
 
-// --- 8. LÓGICA DEL JUEGO (CLICS) ---
 function manejarClic(item, index) {
     const tarjeta = document.getElementById(`card-${index}`);
     
@@ -337,14 +313,16 @@ function manejarClic(item, index) {
 }
 
 function iniciarJuego() {
+    // Importante: Desbloquear audio al primer toque humano
+    desbloquearAudio();
+    
     mostrarModal('inicio', () => {
         jugando = true;
         aciertos = 0; 
         errores = 0;
         document.getElementById('btn-jugar').style.display = 'none';
         const btnVoz = document.getElementById('btn-voz');
-        if(btnVoz) btnVoz.style.display = 'none'; // Ocultar botón voz durante examen
-        
+        if(btnVoz) btnVoz.style.display = 'none';
         gestionarBotonRepetir(true); 
         document.getElementById('marcador').style.display = 'block';
         actualizarMarcador();
@@ -378,7 +356,6 @@ function finDelJuego() {
     }, 2000);
 }
 
-// --- 9. CONFETI ---
 function lanzarConfeti() {
     const colores = ['#ff4081', '#76ff03', '#00bcd4', '#ffff00'];
     for(let i=0; i<100; i++) {
@@ -394,4 +371,52 @@ function lanzarConfeti() {
         }, 50);
         setTimeout(() => c.remove(), 4000);
     }
+}
+
+// Funciones para el Reto de Voz (Speech Recognition)
+function iniciarRetoVoz() {
+    if (!SpeechRecognition) {
+        alert("Tu navegador no soporta reconocimiento de voz. Prueba con Google Chrome.");
+        return;
+    }
+    const item = listaActual[Math.floor(Math.random() * listaActual.length)];
+    mostrarModal('voz');
+    document.getElementById('icono-voz-grande').innerText = item.icon;
+    document.getElementById('texto-escuchado').innerText = "Escuchando...";
+    document.getElementById('indicador-mic').style.display = 'flex';
+    hablar("Say... " + item.en);
+    setTimeout(() => {
+        activarEscucha(item);
+    }, 1500);
+}
+
+function activarEscucha(itemObjetivo) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.start();
+    recognition.onresult = (event) => {
+        const loQueDijo = event.results[0][0].transcript.toLowerCase();
+        const loQueEsperaba = itemObjetivo.en.toLowerCase();
+        document.getElementById('texto-escuchado').innerText = `Dijiste: "${loQueDijo}"`;
+        document.getElementById('indicador-mic').style.display = 'none';
+        if (loQueDijo.includes(loQueEsperaba) || loQueEsperaba.includes(loQueDijo)) {
+            playSound('win'); hablar("Excellent!"); lanzarConfeti();
+            setTimeout(() => { document.getElementById('miModal').style.display = 'none'; }, 2000);
+        } else {
+            playSound('lose'); hablar(`Try again. Say: ${itemObjetivo.en}`);
+            setTimeout(() => { 
+                document.getElementById('indicador-mic').style.display = 'flex';
+                document.getElementById('texto-escuchado').innerText = "Escuchando...";
+                recognition.start();
+            }, 2500);
+        }
+    };
+    recognition.onerror = () => {
+        document.getElementById('indicador-mic').style.display = 'none';
+        document.getElementById('texto-escuchado').innerText = "No te escuché bien 😕";
+        setTimeout(() => { document.getElementById('miModal').style.display = 'none'; }, 2000);
+    };
+    recognition.onspeechend = () => { recognition.stop(); };
 }
