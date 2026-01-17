@@ -3,26 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Piano Mágico</title>
+    <title>Piano Estudio</title>
     <link rel="stylesheet" href="estilos.css">
 </head>
 <body>
 
     <a href="index.html" class="btn-volver">⬅ Volver al Menú</a>
 
-<h1 style="color: #ff5722; text-shadow: 3px 3px 0 #ffd54f; font-size: 3.5rem;">🎹 Piano Mágico</h1>    <p>¡Toca tu canción favorita! (30 Teclas)</p>
+    <h1>🎹 Piano Estudio</h1>
+    <p>¡Graba tus canciones cantando!</p>
 
-    <div class="contenedor-piano" id="miPiano"></div>
+    <div class="mueble-piano">
+        
+        <div class="panel-control-piano">
+            <button id="btn-grabar" class="btn-rec btn-grabar" title="Grabar">🔴</button>
+            <button id="btn-detener" class="btn-rec btn-stop" title="Detener" style="display:none;">⬛</button>
+            <button id="btn-reproducir" class="btn-rec btn-play" title="Escuchar" style="display:none;">▶️</button>
+            <div id="estado-grabacion" style="color:white; align-self: center; font-weight:bold;">Listo para grabar</div>
+        </div>
 
-    <div style="margin-top:20px; color:#666; text-align: center;">
-        💡 Pista: Usa el desplazamiento (scroll) horizontal si no ves todas las teclas.
+        <div class="contenedor-teclas" id="miPiano"></div>
     </div>
 
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const pianoContainer = document.getElementById('miPiano');
 
-        // Estructura de notas y frecuencias
+        // Variables de Grabación
+        let mediaRecorder;
+        let chunks = [];
+        let audioBlob;
+        let audioUrl;
+        let grabacionAudio = new Audio();
+        
+        // NODO DE DESTINO (Aquí mezclamos piano + voz para grabar)
+        const destinoGrabacion = audioCtx.createMediaStreamDestination();
+
+        // --- 1. CONFIGURACIÓN DEL PIANO (Escalas y Notas) ---
         const notas = [
             { nota: "Do", tipo: "b", freq: 130.81 }, { nota: "Do#", tipo: "n", freq: 138.59 },
             { nota: "Re", tipo: "b", freq: 146.83 }, { nota: "Re#", tipo: "n", freq: 155.56 },
@@ -43,60 +60,36 @@
             { nota: "Mi", tipo: "b", freq: 659.25 }, { nota: "Fa", tipo: "b", freq: 698.46 }
         ];
 
-        // --- 1. DIBUJAR EL PIANO ---
-        
-        // Primero, dibujamos SOLO las blancas
-        let blancasDibujadas = [];
-        notas.forEach((item) => {
+        // --- 2. DIBUJAR TECLAS (Lógica visual corregida) ---
+        let blancasCount = 0;
+        const anchoBlanca = 62; // 60px ancho + 2px margen
+        const anchoNegra = 38;
+
+        notas.forEach(item => {
+            const tecla = document.createElement('div');
+            
             if (item.tipo === 'b') {
-                const tecla = document.createElement('div');
-                tecla.className = 'tecla tecla-blanca';
+                tecla.className = 'tecla-blanca';
                 tecla.innerText = item.nota;
                 pianoContainer.appendChild(tecla);
                 asignarEventos(tecla, item.freq);
-                blancasDibujadas.push(tecla);
-            }
-        });
-
-        // Segundo, dibujamos las negras y las colocamos
-        let contadorBlancas = 0;
-        const anchoBlanca = 50; // Debe coincidir con el CSS
-        const anchoNegra = 30;  // Debe coincidir con el CSS
-        
-        notas.forEach((item) => {
-            if (item.tipo === 'b') {
-                contadorBlancas++;
+                blancasCount++;
             } else {
-                // Es negra. Calculamos su posición.
-                const tecla = document.createElement('div');
-                tecla.className = 'tecla tecla-negra';
+                tecla.className = 'tecla-negra';
+                // Cálculo de posición: (Teclas Blancas Anteriores * Ancho) - (Mitad de Negra)
+                // Ajuste fino: -4px para centrar visualmente
+                const leftPos = (blancasCount * anchoBlanca) - (anchoNegra / 2) - 2; 
+                tecla.style.left = leftPos + 'px';
                 pianoContainer.appendChild(tecla);
                 asignarEventos(tecla, item.freq);
-
-                // Cálculo mágico de posición:
-                // Se coloca después de la tecla blanca 'contadorBlancas'
-                const posicionLeft = (contadorBlancas * anchoBlanca) - (anchoNegra / 2);
-                tecla.style.left = posicionLeft + 'px';
             }
         });
 
-        // --- FUNCIÓN AUXILIAR PARA EVENTOS ---
-        function asignarEventos(tecla, freq) {
-            // Ratón
-            tecla.addEventListener('mousedown', () => tocarNota(freq, tecla));
-            tecla.addEventListener('mouseup', () => soltarTecla(tecla));
-            tecla.addEventListener('mouseleave', () => soltarTecla(tecla));
-            // Táctil
-            tecla.addEventListener('touchstart', (e) => { e.preventDefault(); tocarNota(freq, tecla); });
-            tecla.addEventListener('touchend', () => soltarTecla(tecla));
-        }
-
-
-        // --- 2. MOTOR DE SONIDO (Igual que antes) ---
+        // --- 3. MOTOR DE SONIDO (Conexión a Grabadora) ---
         function tocarNota(frecuencia, elemento) {
-            if(elemento.classList.contains('activa')) return; // Evita doble disparo
-
+            if(elemento.classList.contains('activa')) return;
             elemento.classList.add('activa');
+
             const osc = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
 
@@ -104,29 +97,102 @@
             osc.frequency.setValueAtTime(frecuencia, audioCtx.currentTime);
 
             gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.6, audioCtx.currentTime + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.05);
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.0);
 
-            osc.connect(gainNode);
+            // CONEXIÓN DOBLE:
+            // 1. A los parlantes (para que escuches)
             gainNode.connect(audioCtx.destination);
+            // 2. A la grabadora (si está grabando)
+            gainNode.connect(destinoGrabacion);
 
             osc.start();
             osc.stop(audioCtx.currentTime + 2.0);
-            elemento.oscilador = osc; // Guardamos referencia
+            elemento.oscilador = osc;
         }
 
         function soltarTecla(elemento) {
-            elemento.classList.remove('activa');
+            setTimeout(() => elemento.classList.remove('activa'), 100);
             if (elemento.oscilador) {
-                try {
-                     // Detener suavemente si aún suena
-                    elemento.oscilador.stop(audioCtx.currentTime + 0.1);
-                } catch(e) {}
-                elemento.oscilador = null;
+                try { elemento.oscilador.stop(audioCtx.currentTime + 0.1); } catch(e) {}
             }
         }
 
-    </script>
+        function asignarEventos(tecla, freq) {
+            tecla.addEventListener('mousedown', () => tocarNota(freq, tecla));
+            tecla.addEventListener('mouseup', () => soltarTecla(tecla));
+            tecla.addEventListener('mouseleave', () => soltarTecla(tecla));
+            tecla.addEventListener('touchstart', (e) => { e.preventDefault(); tocarNota(freq, tecla); });
+            tecla.addEventListener('touchend', () => soltarTecla(tecla));
+        }
 
+        // --- 4. SISTEMA DE GRABACIÓN (PIANO + VOZ) ---
+        const btnGrabar = document.getElementById('btn-grabar');
+        const btnDetener = document.getElementById('btn-detener');
+        const btnPlay = document.getElementById('btn-reproducir');
+        const txtEstado = document.getElementById('estado-grabacion');
+
+        btnGrabar.onclick = async () => {
+            // Activar AudioContext si estaba suspendido
+            if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+            // Pedir permiso para Micrófono
+            try {
+                const streamMic = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const sourceMic = audioCtx.createMediaStreamSource(streamMic);
+                
+                // Conectar Micrófono SOLO a la grabadora (no a parlantes para evitar acople/chillido)
+                sourceMic.connect(destinoGrabacion);
+
+                // Iniciar Grabadora
+                mediaRecorder = new MediaRecorder(destinoGrabacion.stream);
+                chunks = [];
+
+                mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+                
+                mediaRecorder.onstop = () => {
+                    // Al detener, crear el audio
+                    const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+                    audioUrl = window.URL.createObjectURL(blob);
+                    grabacionAudio.src = audioUrl;
+                    
+                    // Apagar micrófono
+                    streamMic.getTracks().forEach(track => track.stop());
+                    
+                    btnPlay.style.display = 'inline-block';
+                    txtEstado.innerText = "¡Grabación lista!";
+                };
+
+                mediaRecorder.start();
+                
+                // UI
+                btnGrabar.style.display = 'none';
+                btnDetener.style.display = 'inline-block';
+                btnPlay.style.display = 'none';
+                txtEstado.innerText = "🔴 GRABANDO... (¡Canta!)";
+                txtEstado.classList.add('parpadeo');
+
+            } catch (err) {
+                alert("Necesitas dar permiso al micrófono para grabar tu voz.");
+                console.error(err);
+            }
+        };
+
+        btnDetener.onclick = () => {
+            if(mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                btnDetener.style.display = 'none';
+                btnGrabar.style.display = 'inline-block';
+                txtEstado.classList.remove('parpadeo');
+            }
+        };
+
+        btnPlay.onclick = () => {
+            txtEstado.innerText = "▶️ Reproduciendo...";
+            grabacionAudio.play();
+            grabacionAudio.onended = () => txtEstado.innerText = "¡Grabación lista!";
+        };
+
+    </script>
 </body>
 </html>
