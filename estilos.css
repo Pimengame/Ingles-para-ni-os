@@ -442,3 +442,128 @@ p {
 }
 .btn-inicio-gigante:active { transform: translateY(4px); border-bottom-width: 4px; }
 @keyframes palpito { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+/* =========================================
+   10. ÁLBUM DE PREMIOS Y ESTAMPITAS 🏆
+   ========================================= */
+
+/* Contenedor principal del álbum */
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 25px;
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: 4px solid #fff;
+}
+
+/* Casilla vacía (cuando no has ganado) */
+.slot {
+    background-color: #f0f0f0;
+    border: 3px dashed #ccc;
+    border-radius: 15px;
+    aspect-ratio: 1 / 1; /* Mantiene la forma cuadrada */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #aaa;
+    transition: transform 0.2s;
+    position: relative;
+    padding: 10px;
+}
+
+.slot:hover {
+    background-color: #e0e0e0;
+}
+
+/* El candado de bloqueado */
+.candado {
+    font-size: 3rem;
+    margin-bottom: 5px;
+    opacity: 0.5;
+}
+
+/* Título de la estampita (ej: "Animales") */
+.slot-titulo {
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* --- ESTAMPITA DESBLOQUEADA ✨ --- */
+.estampita {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    animation: popEstampita 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efecto rebote al aparecer */
+    position: relative;
+    overflow: hidden;
+    border: 3px solid white;
+}
+
+/* Brillo que pasa por encima de la estampita */
+.estampita::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    animation: brillo 3s infinite;
+}
+
+@keyframes brillo {
+    0% { left: -100%; }
+    20% { left: 200%; }
+    100% { left: 200%; }
+}
+
+@keyframes popEstampita {
+    0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.icono-premio {
+    font-size: 4rem;
+    margin-bottom: 5px;
+    z-index: 2; /* Para que quede encima del brillo */
+}
+
+.texto-premio {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    z-index: 2;
+    background: rgba(0,0,0,0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* Colores específicos para cada premio (opcional, si los usas en el JS) */
+.premio-animales { background: linear-gradient(135deg, #ff9a9e, #fecfef); }
+.premio-colores { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
+.premio-numeros { background: linear-gradient(135deg, #84fab0, #8fd3f4); }
+
+/* Botón especial para reiniciar álbum (si lo necesitas) */
+.btn-reset {
+    background: #ff5252;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    margin-top: 30px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+.btn-reset:hover { opacity: 1; }
