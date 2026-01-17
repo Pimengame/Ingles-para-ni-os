@@ -243,23 +243,43 @@ function cargarCurso(datosRecibidos, idPremio) {
     });
 }
 
+// --- REEMPLAZA ESTA FUNCIÓN EN TU motor.js ---
+
 function manejarClic(item, index) {
     const tarjeta = document.getElementById(`card-${index}`);
+    
     if (jugando) {
         if (item.en === palabraObjetivo.en) {
+            // --- ACIERTO ✅ ---
             tarjeta.classList.add('correcto');
+            
+            // 1. Primero el sonido "Ting"
             playSound('win');
-            hablar("Very Good!"); 
+            
+            // 2. Esperamos medio segundo (500ms) antes de hablar
+            // Esto evita que el sonido tape a la voz
+            setTimeout(() => {
+                hablar("Very Good!"); 
+            }, 500);
+
             aciertos++; 
             actualizarMarcador();
+
             if (aciertos >= META_ACIERTOS) {
                 finDelJuego();
             } else {
-                setTimeout(() => { tarjeta.classList.remove('correcto'); nuevoTurno(); }, 1500);
+                // Damos un poco más de tiempo antes del siguiente turno
+                // para que alcance a terminar de decir "Very Good"
+                setTimeout(() => {
+                    tarjeta.classList.remove('correcto');
+                    nuevoTurno();
+                }, 2000); 
             }
         } else {
+            // --- ERROR ❌ ---
             tarjeta.classList.add('incorrecto');
             errores++; 
+            
             if (errores >= MAX_ERRORES) {
                 jugando = false;
                 gestionarBotonRepetir(false);
@@ -267,12 +287,18 @@ function manejarClic(item, index) {
                 setTimeout(() => mostrarModal('derrota'), 1000);
             } else {
                 playSound('lose');
-                hablar("Oh no. Try again."); 
+                
+                // También damos una pausita aquí
+                setTimeout(() => {
+                    hablar("Oh no. Try again."); 
+                }, 500);
+
                 actualizarMarcador(); 
                 setTimeout(() => tarjeta.classList.remove('incorrecto'), 1000);
             }
         }
     } else {
+        // Modo Estudio
         hablarBilingue(item.es, item.en);
     }
 }
@@ -452,3 +478,4 @@ function activarEscucha(itemObjetivo) {
         recognition.stop();
     };
 }
+
