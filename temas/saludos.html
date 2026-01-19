@@ -13,32 +13,62 @@
     <h1>👋 Saludos y Despedidas</h1>
     <p>¡Aprende a saludar a tus amigos!</p>
 
-    <div id="marcador" class="marcador">Puntos: 0</div>
-    
     <div class="panel-control">
-        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+        <button class="btn-accion btn-jugar" id="btn-jugar" onclick="iniciarJuego()">¡Jugar!</button>
+        <div class="marcador" id="marcador"></div>
     </div>
 
     <div class="tablero" id="tablero"></div>
 
-    <script>
-        const datosSaludos = [
-            { icon: "👋", en: "Hello", es: "Hola" },
-            { icon: "🚶", en: "Goodbye", es: "Adiós" },
-            { icon: "🌅", en: "Good morning", es: "Buenos días" },
-            { icon: "☀️", en: "Good afternoon", es: "Buenas tardes" },
-            { icon: "🌙", en: "Good night", es: "Buenas noches" },
-            { icon: "🤝", en: "Nice to meet you", es: "Gusto en conocerte" },
-            { icon: "🔜", en: "See you later", es: "Nos vemos luego" },
-            { icon: "🖐", en: "Hi", es: "Hola (Casual)" },
-            { icon: "🙋", en: "Bye", es: "Chao" }
-        ];
-    </script>
-
     <script src="../motor.js"></script>
 
     <script>
-        cargarCurso(datosSaludos, 'saludos');
+        // --- BASE DE DATOS MULTILINGÜE (SALUDOS) ---
+        const baseDatosSaludos = {
+            // 🇺🇸 INGLÉS
+            'en': [
+                { es: "Hola", target: "Hello", icon: "👋" },
+                { es: "Adiós", target: "Goodbye", icon: "🚶" },
+                { es: "Buenos días", target: "Good morning", icon: "🌅" },
+                { es: "Buenas tardes", target: "Good afternoon", icon: "☀️" },
+                { es: "Buenas noches", target: "Good night", icon: "🌙" },
+                { es: "Gusto en conocerte", target: "Nice to meet you", icon: "🤝" },
+                { es: "Nos vemos luego", target: "See you later", icon: "🔜" },
+                { es: "Hola (Casual)", target: "Hi", icon: "🖐" },
+                { es: "Chao", target: "Bye", icon: "🙋" }
+            ],
+
+            // 🇧🇷 PORTUGUÉS
+            'pt': [
+                { es: "Hola", target: "Olá", icon: "👋" },
+                { es: "Adiós", target: "Adeus", icon: "🚶" },
+                { es: "Buenos días", target: "Bom dia", icon: "🌅" },
+                { es: "Buenas tardes", target: "Boa tarde", icon: "☀️" },
+                { es: "Buenas noches", target: "Boa noite", icon: "🌙" },
+                { es: "Gusto en conocerte", target: "Prazer em conhecê-lo", icon: "🤝" },
+                { es: "Nos vemos luego", target: "Até logo", icon: "🔜" },
+                { es: "Hola (Casual)", target: "Oi", icon: "🖐" },
+                { es: "Chao", target: "Tchau", icon: "🙋" }
+            ],
+
+            // 🇨🇳 CHINO (Simplificado + Pinyin)
+            'zh': [
+                { es: "Hola", target: "Nǐ hǎo (你好)", icon: "👋" },
+                { es: "Adiós", target: "Zàijiàn (再见)", icon: "🚶" },
+                { es: "Buenos días", target: "Zǎoshang hǎo (早上好)", icon: "🌅" },
+                { es: "Buenas tardes", target: "Xiàwǔ hǎo (下午好)", icon: "☀️" },
+                { es: "Buenas noches", target: "Wǎn'ān (晚安)", icon: "🌙" },
+                { es: "Gusto en conocerte", target: "Hěn gāoxìng rènshi nǐ (很高兴认识你)", icon: "🤝" },
+                { es: "Nos vemos luego", target: "Dāihuǐ jiàn (待会见)", icon: "🔜" },
+                { es: "Hola (Casual)", target: "Hāi (嗨)", icon: "🖐" },
+                { es: "Chao", target: "Bàibài (拜拜)", icon: "🙋" }
+            ]
+        };
+
+        // --- CARGA INTELIGENTE ---
+        // Le pasamos la base de datos de SALUDOS y la clave 'saludos' para el álbum
+        iniciarCursoInteligente(baseDatosSaludos, 'saludos');
+
     </script>
 
 </body>
