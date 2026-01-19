@@ -13,75 +13,188 @@
     <h1>🚁 Medios de Transporte</h1>
     <p>Por tierra, mar y aire... ¿Cómo viajas tú?</p>
 
-    <div id="marcador" class="marcador">Cargando...</div>
-    
     <div class="panel-control">
-        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+        <button class="btn-accion btn-jugar" id="btn-jugar" onclick="iniciarJuego()">¡Jugar!</button>
+        <div class="marcador" id="marcador"></div>
     </div>
 
     <div class="tablero" id="tablero"></div>
 
-    <script>
-        const datosTransportes = [
-            // --- CIUDAD Y CARRETERA (Gris Claro) ---
-            { icon: "🚗", en: "Car", es: "Auto / Coche", hex: "#f5f5f5" },
-            { icon: "🚕", en: "Taxi", es: "Taxi", hex: "#fff9c4" }, // Un poco amarillo
-            { icon: "🚌", en: "Bus", es: "Autobús", hex: "#f5f5f5" },
-            { icon: "🚲", en: "Bicycle", es: "Bicicleta", hex: "#f5f5f5" },
-            { icon: "🏍️", en: "Motorcycle", es: "Moto", hex: "#f5f5f5" },
-            { icon: "🛴", en: "Scooter", es: "Patinete", hex: "#f5f5f5" },
-            { icon: "🛹", en: "Skateboard", es: "Monopatín", hex: "#f5f5f5" },
-            { icon: "🚙", en: "Van", es: "Furgoneta", hex: "#f5f5f5" },
-            { icon: "🚙", en: "Jeep", es: "Todoterreno", hex: "#f5f5f5" },
-            { icon: "🚃", en: "Tram", es: "Tranvía", hex: "#f5f5f5" },
-
-            // --- VEHÍCULOS DE TRABAJO Y EMERGENCIA (Amarillo/Naranja) ---
-            { icon: "🚒", en: "Fire Truck", es: "Camión de Bomberos", hex: "#ffe0b2" },
-            { icon: "🚑", en: "Ambulance", es: "Ambulancia", hex: "#ffe0b2" },
-            { icon: "🚓", en: "Police Car", es: "Patrulla", hex: "#e3f2fd" }, // Azulito policía
-            { icon: "🚜", en: "Tractor", es: "Tractor", hex: "#fff9c4" },
-            { icon: "🏗️", en: "Crane", es: "Grúa", hex: "#fff9c4" },
-            { icon: "🚚", en: "Truck", es: "Camión", hex: "#fff9c4" },
-            { icon: "🚜", en: "Bulldozer", es: "Excavadora", hex: "#fff9c4" },
-            { icon: "🗑️", en: "Garbage Truck", es: "Camión de Basura", hex: "#fff9c4" },
-            { icon: "🚌", en: "School Bus", es: "Autobús Escolar", hex: "#fff9c4" },
-            { icon: "✉️", en: "Mail Truck", es: "Camión de Correo", hex: "#fff9c4" },
-
-            // --- VÍAS FÉRREAS (Trenes) ---
-            { icon: "🚂", en: "Train", es: "Tren", hex: "#e0e0e0" },
-            { icon: "🚇", en: "Subway", es: "Metro / Subterráneo", hex: "#e0e0e0" },
-            { icon: "🚄", en: "Bullet Train", es: "Tren Bala", hex: "#e0e0e0" },
-
-            // --- AIRE Y ESPACIO (Celeste) ---
-            { icon: "✈️", en: "Airplane", es: "Avión", hex: "#e1f5fe" },
-            { icon: "🚁", en: "Helicopter", es: "Helicóptero", hex: "#e1f5fe" },
-            { icon: "🚀", en: "Rocket", es: "Cohete", hex: "#e1f5fe" },
-            { icon: "🎈", en: "Hot Air Balloon", es: "Globo Aerostático", hex: "#e1f5fe" },
-            { icon: "🛸", en: "UFO", es: "OVNI", hex: "#e1f5fe" },
-            { icon: "🛩️", en: "Jet", es: "Avión Caza", hex: "#e1f5fe" },
-            { icon: "🛸", en: "Drone", es: "Dron", hex: "#e1f5fe" },
-            { icon: "🪂", en: "Parachute", es: "Paracaídas", hex: "#e1f5fe" },
-            { icon: "🛰️", en: "Satellite", es: "Satélite", hex: "#e1f5fe" },
-
-            // --- AGUA (Azul Agua) ---
-            { icon: "⛵", en: "Boat", es: "Bote", hex: "#e0f7fa" },
-            { icon: "🚢", en: "Ship", es: "Barco", hex: "#e0f7fa" },
-            { icon: "🛥️", en: "Speedboat", es: "Lancha", hex: "#e0f7fa" },
-            { icon: "⛴️", en: "Ferry", es: "Ferry", hex: "#e0f7fa" },
-            { icon: "🚤", en: "Canoe", es: "Canoa", hex: "#e0f7fa" },
-            { icon: "🛳️", en: "Cruise Ship", es: "Crucero", hex: "#e0f7fa" },
-            { icon: "⛵", en: "Sailboat", es: "Velero", hex: "#e0f7fa" },
-            { icon: "🛥️", en: "Yacht", es: "Yate", hex: "#e0f7fa" },
-            { icon: "🌊", en: "Submarine", es: "Submarino", hex: "#b2ebf2" },
-            { icon: "🏴‍☠️", en: "Pirate Ship", es: "Barco Pirata", hex: "#e0f7fa" }
-        ];
-    </script>
-
     <script src="../motor.js"></script>
 
     <script>
-        // Recuerda: 'transportes' es la clave del álbum
-        cargarCurso(datosTransportes, 'transportes');
+        // --- BASE DE DATOS MULTILINGÜE (TRANSPORTES) ---
+        const baseDatosTransportes = {
+            // 🇺🇸 INGLÉS
+            'en': [
+                // CIUDAD Y CARRETERA
+                { es: "Auto / Coche", target: "Car", icon: "🚗", hex: "#f5f5f5" },
+                { es: "Taxi", target: "Taxi", icon: "🚕", hex: "#fff9c4" },
+                { es: "Autobús", target: "Bus", icon: "🚌", hex: "#f5f5f5" },
+                { es: "Bicicleta", target: "Bicycle", icon: "🚲", hex: "#f5f5f5" },
+                { es: "Moto", target: "Motorcycle", icon: "🏍️", hex: "#f5f5f5" },
+                { es: "Patinete", target: "Scooter", icon: "🛴", hex: "#f5f5f5" },
+                { es: "Monopatín", target: "Skateboard", icon: "🛹", hex: "#f5f5f5" },
+                { es: "Furgoneta", target: "Van", icon: "🚙", hex: "#f5f5f5" },
+                { es: "Todoterreno", target: "Jeep", icon: "🚙", hex: "#f5f5f5" },
+                { es: "Tranvía", target: "Tram", icon: "🚃", hex: "#f5f5f5" },
+
+                // VEHÍCULOS DE TRABAJO
+                { es: "Camión de Bomberos", target: "Fire Truck", icon: "🚒", hex: "#ffe0b2" },
+                { es: "Ambulancia", target: "Ambulance", icon: "🚑", hex: "#ffe0b2" },
+                { es: "Patrulla", target: "Police Car", icon: "🚓", hex: "#e3f2fd" },
+                { es: "Tractor", target: "Tractor", icon: "🚜", hex: "#fff9c4" },
+                { es: "Grúa", target: "Crane", icon: "🏗️", hex: "#fff9c4" },
+                { es: "Camión", target: "Truck", icon: "🚚", hex: "#fff9c4" },
+                { es: "Excavadora", target: "Bulldozer", icon: "🚜", hex: "#fff9c4" },
+                { es: "Camión de Basura", target: "Garbage Truck", icon: "🗑️", hex: "#fff9c4" },
+                { es: "Autobús Escolar", target: "School Bus", icon: "🚌", hex: "#fff9c4" },
+                { es: "Camión de Correo", target: "Mail Truck", icon: "✉️", hex: "#fff9c4" },
+
+                // VÍAS FÉRREAS
+                { es: "Tren", target: "Train", icon: "🚂", hex: "#e0e0e0" },
+                { es: "Metro / Subterráneo", target: "Subway", icon: "🚇", hex: "#e0e0e0" },
+                { es: "Tren Bala", target: "Bullet Train", icon: "🚄", hex: "#e0e0e0" },
+
+                // AIRE Y ESPACIO
+                { es: "Avión", target: "Airplane", icon: "✈️", hex: "#e1f5fe" },
+                { es: "Helicóptero", target: "Helicopter", icon: "🚁", hex: "#e1f5fe" },
+                { es: "Cohete", target: "Rocket", icon: "🚀", hex: "#e1f5fe" },
+                { es: "Globo Aerostático", target: "Hot Air Balloon", icon: "🎈", hex: "#e1f5fe" },
+                { es: "OVNI", target: "UFO", icon: "🛸", hex: "#e1f5fe" },
+                { es: "Avión Caza", target: "Jet", icon: "🛩️", hex: "#e1f5fe" },
+                { es: "Dron", target: "Drone", icon: "🛸", hex: "#e1f5fe" },
+                { es: "Paracaídas", target: "Parachute", icon: "🪂", hex: "#e1f5fe" },
+                { es: "Satélite", target: "Satellite", icon: "🛰️", hex: "#e1f5fe" },
+
+                // AGUA
+                { es: "Bote", target: "Boat", icon: "⛵", hex: "#e0f7fa" },
+                { es: "Barco", target: "Ship", icon: "🚢", hex: "#e0f7fa" },
+                { es: "Lancha", target: "Speedboat", icon: "🛥️", hex: "#e0f7fa" },
+                { es: "Ferry", target: "Ferry", icon: "⛴️", hex: "#e0f7fa" },
+                { es: "Canoa", target: "Canoe", icon: "🚤", hex: "#e0f7fa" },
+                { es: "Crucero", target: "Cruise Ship", icon: "🛳️", hex: "#e0f7fa" },
+                { es: "Velero", target: "Sailboat", icon: "⛵", hex: "#e0f7fa" },
+                { es: "Yate", target: "Yacht", icon: "🛥️", hex: "#e0f7fa" },
+                { es: "Submarino", target: "Submarine", icon: "🌊", hex: "#b2ebf2" },
+                { es: "Barco Pirata", target: "Pirate Ship", icon: "🏴‍☠️", hex: "#e0f7fa" }
+            ],
+
+            // 🇧🇷 PORTUGUÉS
+            'pt': [
+                // CIUDAD Y CARRETERA
+                { es: "Auto / Coche", target: "Carro", icon: "🚗", hex: "#f5f5f5" },
+                { es: "Taxi", target: "Táxi", icon: "🚕", hex: "#fff9c4" },
+                { es: "Autobús", target: "Ônibus", icon: "🚌", hex: "#f5f5f5" },
+                { es: "Bicicleta", target: "Bicicleta", icon: "🚲", hex: "#f5f5f5" },
+                { es: "Moto", target: "Moto", icon: "🏍️", hex: "#f5f5f5" },
+                { es: "Patinete", target: "Patinete", icon: "🛴", hex: "#f5f5f5" },
+                { es: "Monopatín", target: "Skate", icon: "🛹", hex: "#f5f5f5" },
+                { es: "Furgoneta", target: "Van / Furgão", icon: "🚙", hex: "#f5f5f5" },
+                { es: "Todoterreno", target: "Jipe", icon: "🚙", hex: "#f5f5f5" },
+                { es: "Tranvía", target: "Bonde", icon: "🚃", hex: "#f5f5f5" },
+
+                // VEHÍCULOS DE TRABAJO
+                { es: "Camión de Bomberos", target: "Caminhão de bombeiros", icon: "🚒", hex: "#ffe0b2" },
+                { es: "Ambulancia", target: "Ambulância", icon: "🚑", hex: "#ffe0b2" },
+                { es: "Patrulla", target: "Carro de polícia", icon: "🚓", hex: "#e3f2fd" },
+                { es: "Tractor", target: "Trator", icon: "🚜", hex: "#fff9c4" },
+                { es: "Grúa", target: "Guindaste", icon: "🏗️", hex: "#fff9c4" },
+                { es: "Camión", target: "Caminhão", icon: "🚚", hex: "#fff9c4" },
+                { es: "Excavadora", target: "Escavadeira", icon: "🚜", hex: "#fff9c4" },
+                { es: "Camión de Basura", target: "Caminhão de lixo", icon: "🗑️", hex: "#fff9c4" },
+                { es: "Autobús Escolar", target: "Ônibus escolar", icon: "🚌", hex: "#fff9c4" },
+                { es: "Camión de Correo", target: "Caminhão do correio", icon: "✉️", hex: "#fff9c4" },
+
+                // VÍAS FÉRREAS
+                { es: "Tren", target: "Trem", icon: "🚂", hex: "#e0e0e0" },
+                { es: "Metro / Subterráneo", target: "Metrô", icon: "🚇", hex: "#e0e0e0" },
+                { es: "Tren Bala", target: "Trem-bala", icon: "🚄", hex: "#e0e0e0" },
+
+                // AIRE Y ESPACIO
+                { es: "Avión", target: "Avião", icon: "✈️", hex: "#e1f5fe" },
+                { es: "Helicóptero", target: "Helicóptero", icon: "🚁", hex: "#e1f5fe" },
+                { es: "Cohete", target: "Foguete", icon: "🚀", hex: "#e1f5fe" },
+                { es: "Globo Aerostático", target: "Balão", icon: "🎈", hex: "#e1f5fe" },
+                { es: "OVNI", target: "OVNI", icon: "🛸", hex: "#e1f5fe" },
+                { es: "Avión Caza", target: "Jato", icon: "🛩️", hex: "#e1f5fe" },
+                { es: "Dron", target: "Drone", icon: "🛸", hex: "#e1f5fe" },
+                { es: "Paracaídas", target: "Paraquedas", icon: "🪂", hex: "#e1f5fe" },
+                { es: "Satélite", target: "Satélite", icon: "🛰️", hex: "#e1f5fe" },
+
+                // AGUA
+                { es: "Bote", target: "Barco", icon: "⛵", hex: "#e0f7fa" },
+                { es: "Barco", target: "Navio", icon: "🚢", hex: "#e0f7fa" },
+                { es: "Lancha", target: "Lancha", icon: "🛥️", hex: "#e0f7fa" },
+                { es: "Ferry", target: "Balsa", icon: "⛴️", hex: "#e0f7fa" },
+                { es: "Canoa", target: "Canoa", icon: "🚤", hex: "#e0f7fa" },
+                { es: "Crucero", target: "Cruzeiro", icon: "🛳️", hex: "#e0f7fa" },
+                { es: "Velero", target: "Veleiro", icon: "⛵", hex: "#e0f7fa" },
+                { es: "Yate", target: "Iate", icon: "🛥️", hex: "#e0f7fa" },
+                { es: "Submarino", target: "Submarino", icon: "🌊", hex: "#b2ebf2" },
+                { es: "Barco Pirata", target: "Navio pirata", icon: "🏴‍☠️", hex: "#e0f7fa" }
+            ],
+
+            // 🇨🇳 CHINO (Simplificado + Pinyin)
+            'zh': [
+                // CIUDAD Y CARRETERA
+                { es: "Auto / Coche", target: "Qìchē (汽车)", icon: "🚗", hex: "#f5f5f5" },
+                { es: "Taxi", target: "Chūzūchē (出租车)", icon: "🚕", hex: "#fff9c4" },
+                { es: "Autobús", target: "Gōnggòng qìchē (公共汽车)", icon: "🚌", hex: "#f5f5f5" },
+                { es: "Bicicleta", target: "Zìxíngchē (自行车)", icon: "🚲", hex: "#f5f5f5" },
+                { es: "Moto", target: "Mótuōchē (摩托车)", icon: "🏍️", hex: "#f5f5f5" },
+                { es: "Patinete", target: "Huábǎnchē (滑板车)", icon: "🛴", hex: "#f5f5f5" },
+                { es: "Monopatín", target: "Huábǎn (滑板)", icon: "🛹", hex: "#f5f5f5" },
+                { es: "Furgoneta", target: "Huòchē (货车)", icon: "🚙", hex: "#f5f5f5" },
+                { es: "Todoterreno", target: "Jípǔchē (吉普车)", icon: "🚙", hex: "#f5f5f5" },
+                { es: "Tranvía", target: "Diànchē (电车)", icon: "🚃", hex: "#f5f5f5" },
+
+                // VEHÍCULOS DE TRABAJO
+                { es: "Camión de Bomberos", target: "Xiāofángchē (消防车)", icon: "🚒", hex: "#ffe0b2" },
+                { es: "Ambulancia", target: "Jiùhùchē (救护车)", icon: "🚑", hex: "#ffe0b2" },
+                { es: "Patrulla", target: "Jǐngchē (警车)", icon: "🚓", hex: "#e3f2fd" },
+                { es: "Tractor", target: "Tuōlājī (拖拉机)", icon: "🚜", hex: "#fff9c4" },
+                { es: "Grúa", target: "Qǐzhòngjī (起重机)", icon: "🏗️", hex: "#fff9c4" },
+                { es: "Camión", target: "Kǎchē (卡车)", icon: "🚚", hex: "#fff9c4" },
+                { es: "Excavadora", target: "Tuītǔjī (推土机)", icon: "🚜", hex: "#fff9c4" },
+                { es: "Camión de Basura", target: "Lājīchē (垃圾车)", icon: "🗑️", hex: "#fff9c4" },
+                { es: "Autobús Escolar", target: "Xiàochē (校车)", icon: "🚌", hex: "#fff9c4" },
+                { es: "Camión de Correo", target: "Yóuzhèngchē (邮政车)", icon: "✉️", hex: "#fff9c4" },
+
+                // VÍAS FÉRREAS
+                { es: "Tren", target: "Huǒchē (火车)", icon: "🚂", hex: "#e0e0e0" },
+                { es: "Metro / Subterráneo", target: "Dìtiě (地铁)", icon: "🚇", hex: "#e0e0e0" },
+                { es: "Tren Bala", target: "Gāotiě (高铁)", icon: "🚄", hex: "#e0e0e0" },
+
+                // AIRE Y ESPACIO
+                { es: "Avión", target: "Fēijī (飞机)", icon: "✈️", hex: "#e1f5fe" },
+                { es: "Helicóptero", target: "Zhíshēngjī (直升机)", icon: "🚁", hex: "#e1f5fe" },
+                { es: "Cohete", target: "Huǒjiàn (火箭)", icon: "🚀", hex: "#e1f5fe" },
+                { es: "Globo Aerostático", target: "Rèqìqiú (热气球)", icon: "🎈", hex: "#e1f5fe" },
+                { es: "OVNI", target: "Fēidié (飞碟)", icon: "🛸", hex: "#e1f5fe" },
+                { es: "Avión Caza", target: "Zhàndòujī (战斗机)", icon: "🛩️", hex: "#e1f5fe" },
+                { es: "Dron", target: "Wúrénjī (无人机)", icon: "🛸", hex: "#e1f5fe" },
+                { es: "Paracaídas", target: "Jiàngluòsǎn (降落伞)", icon: "🪂", hex: "#e1f5fe" },
+                { es: "Satélite", target: "Wèixīng (卫星)", icon: "🛰️", hex: "#e1f5fe" },
+
+                // AGUA
+                { es: "Bote", target: "Xiǎochuán (小船)", icon: "⛵", hex: "#e0f7fa" },
+                { es: "Barco", target: "Dàchuán (大船)", icon: "🚢", hex: "#e0f7fa" },
+                { es: "Lancha", target: "Kuàitǐng (快艇)", icon: "🛥️", hex: "#e0f7fa" },
+                { es: "Ferry", target: "Dùlún (渡轮)", icon: "⛴️", hex: "#e0f7fa" },
+                { es: "Canoe", target: "Dúmùzhōu (独木舟)", icon: "🚤", hex: "#e0f7fa" },
+                { es: "Crucero", target: "Yóulún (游轮)", icon: "🛳️", hex: "#e0f7fa" },
+                { es: "Velero", target: "Fānchuán (帆船)", icon: "⛵", hex: "#e0f7fa" },
+                { es: "Yate", target: "Yóutǐng (游艇)", icon: "🛥️", hex: "#e0f7fa" },
+                { es: "Submarino", target: "Qiántǐng (潜艇)", icon: "🌊", hex: "#b2ebf2" },
+                { es: "Barco Pirata", target: "Hǎidào chuán (海盗船)", icon: "🏴‍☠️", hex: "#e0f7fa" }
+            ]
+        };
+
+        // --- CARGA INTELIGENTE ---
+        // Le pasamos la base de datos de TRANSPORTES y la clave 'transportes' para el álbum
+        iniciarCursoInteligente(baseDatosTransportes, 'transportes');
+
     </script>
 
 </body>
