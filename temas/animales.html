@@ -23,7 +23,7 @@
     <script src="../motor.js"></script>
 
     <script>
-        // --- BASE DE DATOS MULTILINGÜE ---
+        // --- BASE DE DATOS MULTILINGÜE (ACTUALIZADA) ---
         const baseDatosAnimales = {
             // 🇺🇸 INGLÉS
             'en': [
@@ -34,6 +34,7 @@
                 { es: "Hámster", target: "Hamster", icon: "🐹" },
                 { es: "Loro", target: "Parrot", icon: "🦜" },
                 { es: "Tortuga", target: "Turtle", icon: "🐢" },
+                
                 // GRANJA
                 { es: "Vaca", target: "Cow", icon: "🐮" },
                 { es: "Cerdo", target: "Pig", icon: "🐷" },
@@ -41,19 +42,36 @@
                 { es: "Caballo", target: "Horse", icon: "🐴" },
                 { es: "Gallina", target: "Chicken", icon: "🐔" },
                 { es: "Pato", target: "Duck", icon: "🦆" },
-                // SELVA
+                
+                // SELVA Y SALVAJES
                 { es: "León", target: "Lion", icon: "🦁" },
                 { es: "Tigre", target: "Tiger", icon: "🐯" },
                 { es: "Elefante", target: "Elephant", icon: "🐘" },
                 { es: "Jirafa", target: "Giraffe", icon: "🦒" },
                 { es: "Mono", target: "Monkey", icon: "🐵" },
                 { es: "Oso", target: "Bear", icon: "🐻" },
-                // MARINOS Y OTROS
+                { es: "Cebra", target: "Zebra", icon: "🦓" },     // Nuevo
+                { es: "Hipopótamo", target: "Hippo", icon: "🦛" }, // Nuevo
+                { es: "Canguro", target: "Kangaroo", icon: "🦘" }, // Nuevo
+                { es: "Lobo", target: "Wolf", icon: "🐺" },       // Nuevo
+                { es: "Zorro", target: "Fox", icon: "🦊" },       // Nuevo
+                
+                // MARINOS
                 { es: "Ballena", target: "Whale", icon: "🐳" },
                 { es: "Delfín", target: "Dolphin", icon: "🐬" },
                 { es: "Pez", target: "Fish", icon: "🐟" },
+                { es: "Tiburón", target: "Shark", icon: "🦈" },   // Nuevo
+                { es: "Pulpo", target: "Octopus", icon: "🐙" },   // Nuevo
+                { es: "Pingüino", target: "Penguin", icon: "🐧" }, // Nuevo
+                { es: "Cangrejo", target: "Crab", icon: "🦀" },   // Nuevo
+
+                // INSECTOS Y OTROS
                 { es: "Mariposa", target: "Butterfly", icon: "🦋" },
+                { es: "Abeja", target: "Bee", icon: "🐝" },       // Nuevo
+                { es: "Araña", target: "Spider", icon: "🕷️" },    // Nuevo
                 { es: "Rana", target: "Frog", icon: "🐸" },
+                { es: "Serpiente", target: "Snake", icon: "🐍" }, // Nuevo
+                { es: "Búho", target: "Owl", icon: "🦉" },        // Nuevo
                 { es: "Dinosaurio", target: "Dinosaur", icon: "🦕" }
             ],
 
@@ -66,6 +84,7 @@
                 { es: "Hámster", target: "Hamster", icon: "🐹" },
                 { es: "Loro", target: "Papagaio", icon: "🦜" },
                 { es: "Tortuga", target: "Tartaruga", icon: "🐢" },
+                
                 // GRANJA
                 { es: "Vaca", target: "Vaca", icon: "🐮" },
                 { es: "Cerdo", target: "Porco", icon: "🐷" },
@@ -73,23 +92,40 @@
                 { es: "Caballo", target: "Cavalo", icon: "🐴" },
                 { es: "Gallina", target: "Galinha", icon: "🐔" },
                 { es: "Pato", target: "Pato", icon: "🦆" },
-                // SELVA
+                
+                // SELVA Y SALVAJES
                 { es: "León", target: "Leão", icon: "🦁" },
                 { es: "Tigre", target: "Tigre", icon: "🐯" },
                 { es: "Elefante", target: "Elefante", icon: "🐘" },
                 { es: "Jirafa", target: "Girafa", icon: "🦒" },
                 { es: "Mono", target: "Macaco", icon: "🐵" },
                 { es: "Oso", target: "Urso", icon: "🐻" },
-                // MARINOS Y OTROS
+                { es: "Cebra", target: "Zebra", icon: "🦓" },
+                { es: "Hipopótamo", target: "Hipopótamo", icon: "🦛" },
+                { es: "Canguro", target: "Canguru", icon: "🦘" },
+                { es: "Lobo", target: "Lobo", icon: "🐺" },
+                { es: "Zorro", target: "Raposa", icon: "🦊" },
+                
+                // MARINOS
                 { es: "Ballena", target: "Baleia", icon: "🐳" },
                 { es: "Delfín", target: "Golfinho", icon: "🐬" },
                 { es: "Pez", target: "Peixe", icon: "🐟" },
+                { es: "Tiburón", target: "Tubarão", icon: "🦈" },
+                { es: "Pulpo", target: "Polvo", icon: "🐙" },
+                { es: "Pingüino", target: "Pinguim", icon: "🐧" },
+                { es: "Cangrejo", target: "Caranguejo", icon: "🦀" },
+
+                // INSECTOS Y OTROS
                 { es: "Mariposa", target: "Borboleta", icon: "🦋" },
+                { es: "Abeja", target: "Abelha", icon: "🐝" },
+                { es: "Araña", target: "Aranha", icon: "🕷️" },
                 { es: "Rana", target: "Sapo", icon: "🐸" },
+                { es: "Serpiente", target: "Cobra", icon: "🐍" },
+                { es: "Búho", target: "Coruja", icon: "🦉" },
                 { es: "Dinosaurio", target: "Dinossauro", icon: "🦕" }
             ],
 
-            // 🇨🇳 CHINO (Simplificado + Pinyin para pronunciación)
+            // 🇨🇳 CHINO (Simplificado + Pinyin)
             'zh': [
                 // MASCOTAS
                 { es: "Perro", target: "Gǒu (狗)", icon: "🐶" },
@@ -98,6 +134,7 @@
                 { es: "Hámster", target: "Cāngshǔ (仓鼠)", icon: "🐹" },
                 { es: "Loro", target: "Yīngwǔ (鹦鹉)", icon: "🦜" },
                 { es: "Tortuga", target: "Wūguī (乌龟)", icon: "🐢" },
+                
                 // GRANJA
                 { es: "Vaca", target: "Niú (牛)", icon: "🐮" },
                 { es: "Cerdo", target: "Zhū (猪)", icon: "🐷" },
@@ -105,19 +142,36 @@
                 { es: "Caballo", target: "Mǎ (马)", icon: "🐴" },
                 { es: "Gallina", target: "Jī (鸡)", icon: "🐔" },
                 { es: "Pato", target: "Yāzi (鸭子)", icon: "🦆" },
-                // SELVA
+                
+                // SELVA Y SALVAJES
                 { es: "León", target: "Shīzi (狮子)", icon: "🦁" },
                 { es: "Tigre", target: "Lǎohǔ (老虎)", icon: "🐯" },
                 { es: "Elefante", target: "Xiàng (象)", icon: "🐘" },
                 { es: "Jirafa", target: "Chángjǐnglù (长颈鹿)", icon: "🦒" },
                 { es: "Mono", target: "Hóuzi (猴子)", icon: "🐵" },
                 { es: "Oso", target: "Xióng (熊)", icon: "🐻" },
-                // MARINOS Y OTROS
+                { es: "Cebra", target: "Bānmǎ (斑马)", icon: "🦓" },
+                { es: "Hipopótamo", target: "Hémǎ (河马)", icon: "🦛" },
+                { es: "Canguro", target: "Dàishǔ (袋鼠)", icon: "🦘" },
+                { es: "Lobo", target: "Láng (狼)", icon: "🐺" },
+                { es: "Zorro", target: "Húli (狐狸)", icon: "🦊" },
+                
+                // MARINOS
                 { es: "Ballena", target: "Jīngyú (鲸鱼)", icon: "🐳" },
                 { es: "Delfín", target: "Hǎitún (海豚)", icon: "🐬" },
                 { es: "Pez", target: "Yú (鱼)", icon: "🐟" },
+                { es: "Tiburón", target: "Shāyú (鲨鱼)", icon: "🦈" },
+                { es: "Pulpo", target: "Zhāngyú (章鱼)", icon: "🐙" },
+                { es: "Pingüino", target: "Qì'é (企鹅)", icon: "🐧" },
+                { es: "Cangrejo", target: "Pángxiè (螃蟹)", icon: "🦀" },
+
+                // INSECTOS Y OTROS
                 { es: "Mariposa", target: "Húdié (蝴蝶)", icon: "🦋" },
+                { es: "Abeja", target: "Mìfēng (蜜蜂)", icon: "🐝" },
+                { es: "Araña", target: "Zhīzhū (蜘蛛)", icon: "🕷️" },
                 { es: "Rana", target: "Qīngwā (青蛙)", icon: "🐸" },
+                { es: "Serpiente", target: "Shé (蛇)", icon: "🐍" },
+                { es: "Búho", target: "Māotóuyīng (猫头鹰)", icon: "🦉" },
                 { es: "Dinosaurio", target: "Kǒnglóng (恐龙)", icon: "🦕" }
             ]
         };
