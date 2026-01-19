@@ -8,6 +8,12 @@
 </head>
 <body>
 
+    <div class="contenedor-idiomas">
+        <div class="btn-idioma" id="lang-en" onclick="cambiarIdioma('en')" title="English">🇺🇸</div>
+        <div class="btn-idioma" id="lang-pt" onclick="cambiarIdioma('pt')" title="Português">🇧🇷</div>
+        <div class="btn-idioma" id="lang-zh" onclick="cambiarIdioma('zh')" title="中文 (Chino)">🇨🇳</div>
+    </div>
+
     <button id="btn-musica" class="btn-musica-flotante" title="Activar/Desactivar Música">🔇</button>
 
     <div id="selector-personaje" class="modal-personaje">
@@ -26,8 +32,10 @@
 
     <div style="margin-top: 40px;">
         <span id="icono-bienvenida" style="font-size: 80px; display:block; animation: flotar 3s infinite;">🏰</span>
+        
         <h1 id="titulo-bienvenida">Escuela de Inglés</h1>
-        <p style="font-size: 1.2rem; color: #555;">¡Elige una aventura para comenzar!</p>
+        <p id="subtitulo-bienvenida" style="font-size: 1.2rem; color: #555;">¡Elige una aventura para comenzar!</p>
+        
         <button onclick="borrarMemoria()" style="background:none; border:none; color:#aaa; cursor:pointer; margin-top:10px; font-family:'Nunito'; text-decoration:underline;">(Cambiar personaje)</button>
     </div>
 
@@ -157,11 +165,42 @@
 
         // Intentar iniciar música al primer clic en cualquier lado
         document.body.addEventListener('click', function iniciarAudioForzado() {
-            if (!musicaActiva) toggleMusica();
+            if (!musicaActiva) {
+                // Solo iniciamos si el usuario no la ha apagado explícitamente
+                toggleMusica();
+            }
             document.body.removeEventListener('click', iniciarAudioForzado);
         }, { once: true });
 
-        // --- 4. LÓGICA DE PERSONAJE (Tu código original + Sonidos) ---
+        // --- 4. SISTEMA DE IDIOMAS (NUEVO) 🌍 ---
+        const textosMenu = {
+            'en': { titulo: "Escuela de Inglés", sub: "¡Elige una aventura para comenzar!" },
+            'pt': { titulo: "Escola de Português", sub: "Escolha uma aventura para começar!" },
+            'zh': { titulo: "中文学校 (Escuela China)", sub: "选择一次冒险开始！" }
+        };
+
+        function cambiarIdioma(lang) {
+            playSound('click');
+            
+            // 1. Guardar en memoria
+            localStorage.setItem('idiomaObjetivo', lang);
+            
+            // 2. Actualizar visualmente las banderas
+            document.querySelectorAll('.btn-idioma').forEach(btn => btn.classList.remove('activo'));
+            document.getElementById('lang-' + lang).classList.add('activo');
+
+            // 3. Cambiar textos del menú
+            const textos = textosMenu[lang];
+            document.getElementById('titulo-bienvenida').innerText = textos.titulo;
+            document.getElementById('subtitulo-bienvenida').innerText = textos.sub;
+        }
+
+        // Cargar idioma guardado al iniciar
+        const idiomaGuardado = localStorage.getItem('idiomaObjetivo') || 'en'; // Inglés por defecto
+        cambiarIdioma(idiomaGuardado);
+
+
+        // --- 5. LÓGICA DE PERSONAJE ---
         const usuarioGuardado = localStorage.getItem('miPersonaje');
         const modal = document.getElementById('selector-personaje');
 
@@ -187,14 +226,19 @@
             const icono = document.getElementById('icono-bienvenida');
             const root = document.documentElement.style;
 
+            // Recargamos el idioma para asegurar el título correcto
+            const lang = localStorage.getItem('idiomaObjetivo') || 'en';
+            const textoBase = textosMenu[lang].titulo;
+
             if (tipo === 'nino') {
-                titulo.innerText = "¡Bienvenido, Campeón!";
+                // Podemos personalizar el saludo si quieres
+                // titulo.innerText = "¡Bienvenido, Campeón!"; 
                 icono.innerText = "👦";
                 root.setProperty('--bg-color', '#e0f7fa');
                 root.setProperty('--dots-color', '#b2ebf2');
                 root.setProperty('--primary', '#00bcd4');
             } else {
-                titulo.innerText = "¡Bienvenida, Campeona!";
+                // titulo.innerText = "¡Bienvenida, Campeona!";
                 icono.innerText = "👧";
                 root.setProperty('--bg-color', '#fce4ec');
                 root.setProperty('--dots-color', '#f8bbd0');
@@ -211,7 +255,7 @@
             }
         }
 
-        // --- 5. APLICAR SONIDOS A TODAS LAS TARJETAS ---
+        // --- 6. APLICAR SONIDOS A TODAS LAS TARJETAS ---
         document.addEventListener('DOMContentLoaded', () => {
             const tarjetas = document.querySelectorAll('.tarjeta-menu, .opcion-avatar, button');
             
