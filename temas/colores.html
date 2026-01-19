@@ -13,73 +13,182 @@
     <h1>🎨 El Mundo de Colores</h1>
     <p>¡Explora todos los matices y tonos!</p>
 
-    <div id="marcador" class="marcador">Cargando...</div>
-    
     <div class="panel-control">
-        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+        <button class="btn-accion btn-jugar" id="btn-jugar" onclick="iniciarJuego()">¡Jugar!</button>
+        <div class="marcador" id="marcador"></div>
     </div>
 
     <div class="tablero" id="tablero"></div>
 
-    <script>
-        const datosColores = [
-            // --- LOS CLÁSICOS ---
-            { icon: "🍎", en: "Red", es: "Rojo", hex: "#ffcdd2" },
-            { icon: "🐳", en: "Blue", es: "Azul", hex: "#bbdefb" },
-            { icon: "🌻", en: "Yellow", es: "Amarillo", hex: "#fff9c4" },
-            { icon: "🐸", en: "Green", es: "Verde", hex: "#c8e6c9" },
-            { icon: "🍊", en: "Orange", es: "Naranja", hex: "#ffe0b2" },
-            
-            // --- ROSAS Y VIOLETAS ---
-            { icon: "🍇", en: "Purple", es: "Morado", hex: "#e1bee7" },
-            { icon: "🎀", en: "Pink", es: "Rosado", hex: "#f8bbd0" },
-            { icon: "🌺", en: "Magenta", es: "Magenta", hex: "#ff80ab" },
-            { icon: "🌷", en: "Fuchsia", es: "Fucsia", hex: "#ea80fc" },
-            { icon: "☂️", en: "Violet", es: "Violeta", hex: "#d1c4e9" },
-            { icon: "🧼", en: "Lavender", es: "Lavanda", hex: "#ede7f6" },
-            { icon: "🔮", en: "Lilac", es: "Lila", hex: "#e6ee9c" },
-
-            // --- AZULES Y VERDES ---
-            { icon: "🧊", en: "Light Blue", es: "Celeste", hex: "#b3e5fc" },
-            { icon: "👖", en: "Navy Blue", es: "Azul Marino", hex: "#9fa8da" }, // Tono suave para leer
-            { icon: "💎", en: "Turquoise", es: "Turquesa", hex: "#b2ebf2" },
-            { icon: "🌊", en: "Cyan", es: "Cian", hex: "#80deea" },
-            { icon: "👗", en: "Teal", es: "Verde Azulado", hex: "#80cbc4" },
-            { icon: "🍈", en: "Lime", es: "Lima", hex: "#f0f4c3" },
-            { icon: "🍃", en: "Mint", es: "Menta", hex: "#e0f2f1" },
-            { icon: "🫒", en: "Olive", es: "Oliva", hex: "#dce775" },
-            { icon: "🌲", en: "Dark Green", es: "Verde Oscuro", hex: "#a5d6a7" },
-
-            // --- CÁLIDOS Y TIERRA ---
-            { icon: "🐻", en: "Brown", es: "Café", hex: "#d7ccc8" },
-            { icon: "🥯", en: "Beige", es: "Beige", hex: "#f0f4c3" },
-            { icon: "🍑", en: "Peach", es: "Durazno", hex: "#ffccbc" },
-            { icon: "🍣", en: "Salmon", es: "Salmón", hex: "#ffab91" },
-            { icon: "🪸", en: "Coral", es: "Coral", hex: "#ff8a65" },
-            { icon: "🍷", en: "Maroon", es: "Burdeos", hex: "#ef9a9a" },
-            { icon: "🧱", en: "Brick", es: "Ladrillo", hex: "#e57373" },
-            { icon: "🍯", en: "Amber", es: "Ámbar", hex: "#ffe082" },
-
-            // --- NEUTROS Y METÁLICOS ---
-            { icon: "⚫", en: "Black", es: "Negro", hex: "#cfd8dc" },
-            { icon: "🐨", en: "Gray", es: "Gris", hex: "#f5f5f5" },
-            { icon: "🥚", en: "White", es: "Blanco", hex: "#ffffff" },
-            { icon: "🍦", en: "Cream", es: "Crema", hex: "#fffde7" },
-            { icon: "🐘", en: "Ivory", es: "Marfil", hex: "#fffff0" },
-            { icon: "🏆", en: "Gold", es: "Dorado", hex: "#fff59d" },
-            { icon: "🥈", en: "Silver", es: "Plateado", hex: "#e0e0e0" },
-            { icon: "🥉", en: "Bronze", es: "Bronce", hex: "#d7ccc8" },
-
-            // --- ESPECIAL ---
-            { icon: "🌈", en: "Rainbow", es: "Arcoíris", hex: "#ffffff" }
-        ];
-    </script>
-
     <script src="../motor.js"></script>
 
     <script>
-        // Etiqueta 'colores' para el álbum
-        cargarCurso(datosColores, 'colores');
+        // --- BASE DE DATOS MULTILINGÜE (COLORES) ---
+        const baseDatosColores = {
+            // 🇺🇸 INGLÉS
+            'en': [
+                // CLÁSICOS
+                { es: "Rojo", target: "Red", icon: "🍎", hex: "#ffcdd2" },
+                { es: "Azul", target: "Blue", icon: "🐳", hex: "#bbdefb" },
+                { es: "Amarillo", target: "Yellow", icon: "🌻", hex: "#fff9c4" },
+                { es: "Verde", target: "Green", icon: "🐸", hex: "#c8e6c9" },
+                { es: "Naranja", target: "Orange", icon: "🍊", hex: "#ffe0b2" },
+
+                // ROSAS Y VIOLETAS
+                { es: "Morado", target: "Purple", icon: "🍇", hex: "#e1bee7" },
+                { es: "Rosado", target: "Pink", icon: "🎀", hex: "#f8bbd0" },
+                { es: "Magenta", target: "Magenta", icon: "🌺", hex: "#ff80ab" },
+                { es: "Fucsia", target: "Fuchsia", icon: "🌷", hex: "#ea80fc" },
+                { es: "Violeta", target: "Violet", icon: "☂️", hex: "#d1c4e9" },
+                { es: "Lavanda", target: "Lavender", icon: "🧼", hex: "#ede7f6" },
+                { es: "Lila", target: "Lilac", icon: "🔮", hex: "#e6ee9c" },
+
+                // AZULES Y VERDES
+                { es: "Celeste", target: "Light Blue", icon: "🧊", hex: "#b3e5fc" },
+                { es: "Azul Marino", target: "Navy Blue", icon: "👖", hex: "#9fa8da" },
+                { es: "Turquesa", target: "Turquoise", icon: "💎", hex: "#b2ebf2" },
+                { es: "Cian", target: "Cyan", icon: "🌊", hex: "#80deea" },
+                { es: "Verde Azulado", target: "Teal", icon: "👗", hex: "#80cbc4" },
+                { es: "Lima", target: "Lime", icon: "🍈", hex: "#f0f4c3" },
+                { es: "Menta", target: "Mint", icon: "🍃", hex: "#e0f2f1" },
+                { es: "Oliva", target: "Olive", icon: "🫒", hex: "#dce775" },
+                { es: "Verde Oscuro", target: "Dark Green", icon: "🌲", hex: "#a5d6a7" },
+
+                // CÁLIDOS Y TIERRA
+                { es: "Café", target: "Brown", icon: "🐻", hex: "#d7ccc8" },
+                { es: "Beige", target: "Beige", icon: "🥯", hex: "#f0f4c3" },
+                { es: "Durazno", target: "Peach", icon: "🍑", hex: "#ffccbc" },
+                { es: "Salmón", target: "Salmon", icon: "🍣", hex: "#ffab91" },
+                { es: "Coral", target: "Coral", icon: "🪸", hex: "#ff8a65" },
+                { es: "Burdeos", target: "Maroon", icon: "🍷", hex: "#ef9a9a" },
+                { es: "Ladrillo", target: "Brick", icon: "🧱", hex: "#e57373" },
+                { es: "Ámbar", target: "Amber", icon: "🍯", hex: "#ffe082" },
+
+                // NEUTROS Y METÁLICOS
+                { es: "Negro", target: "Black", icon: "⚫", hex: "#cfd8dc" },
+                { es: "Gris", target: "Gray", icon: "🐨", hex: "#f5f5f5" },
+                { es: "Blanco", target: "White", icon: "🥚", hex: "#ffffff" },
+                { es: "Crema", target: "Cream", icon: "🍦", hex: "#fffde7" },
+                { es: "Marfil", target: "Ivory", icon: "🐘", hex: "#fffff0" },
+                { es: "Dorado", target: "Gold", icon: "🏆", hex: "#fff59d" },
+                { es: "Plateado", target: "Silver", icon: "🥈", hex: "#e0e0e0" },
+                { es: "Bronce", target: "Bronze", icon: "🥉", hex: "#d7ccc8" },
+
+                // ESPECIAL
+                { es: "Arcoíris", target: "Rainbow", icon: "🌈", hex: "#ffffff" }
+            ],
+
+            // 🇧🇷 PORTUGUÉS
+            'pt': [
+                // CLÁSICOS
+                { es: "Rojo", target: "Vermelho", icon: "🍎", hex: "#ffcdd2" },
+                { es: "Azul", target: "Azul", icon: "🐳", hex: "#bbdefb" },
+                { es: "Amarillo", target: "Amarelo", icon: "🌻", hex: "#fff9c4" },
+                { es: "Verde", target: "Verde", icon: "🐸", hex: "#c8e6c9" },
+                { es: "Naranja", target: "Laranja", icon: "🍊", hex: "#ffe0b2" },
+
+                // ROSAS Y VIOLETAS
+                { es: "Morado", target: "Roxo", icon: "🍇", hex: "#e1bee7" },
+                { es: "Rosado", target: "Rosa", icon: "🎀", hex: "#f8bbd0" },
+                { es: "Magenta", target: "Magenta", icon: "🌺", hex: "#ff80ab" },
+                { es: "Fucsia", target: "Fúcsia", icon: "🌷", hex: "#ea80fc" },
+                { es: "Violeta", target: "Violeta", icon: "☂️", hex: "#d1c4e9" },
+                { es: "Lavanda", target: "Lavanda", icon: "🧼", hex: "#ede7f6" },
+                { es: "Lila", target: "Lilás", icon: "🔮", hex: "#e6ee9c" },
+
+                // AZULES Y VERDES
+                { es: "Celeste", target: "Azul-celeste", icon: "🧊", hex: "#b3e5fc" },
+                { es: "Azul Marino", target: "Azul-marinho", icon: "👖", hex: "#9fa8da" },
+                { es: "Turquesa", target: "Turquesa", icon: "💎", hex: "#b2ebf2" },
+                { es: "Cian", target: "Ciano", icon: "🌊", hex: "#80deea" },
+                { es: "Verde Azulado", target: "Verde-azulado", icon: "👗", hex: "#80cbc4" },
+                { es: "Lima", target: "Verde-lima", icon: "🍈", hex: "#f0f4c3" },
+                { es: "Menta", target: "Menta", icon: "🍃", hex: "#e0f2f1" },
+                { es: "Oliva", target: "Verde-oliva", icon: "🫒", hex: "#dce775" },
+                { es: "Verde Oscuro", target: "Verde-escuro", icon: "🌲", hex: "#a5d6a7" },
+
+                // CÁLIDOS Y TIERRA
+                { es: "Café", target: "Marrom", icon: "🐻", hex: "#d7ccc8" },
+                { es: "Beige", target: "Bege", icon: "🥯", hex: "#f0f4c3" },
+                { es: "Durazno", target: "Pêssego", icon: "🍑", hex: "#ffccbc" },
+                { es: "Salmón", target: "Salmão", icon: "🍣", hex: "#ffab91" },
+                { es: "Coral", target: "Coral", icon: "🪸", hex: "#ff8a65" },
+                { es: "Burdeos", target: "Bordô", icon: "🍷", hex: "#ef9a9a" },
+                { es: "Ladrillo", target: "Tijolo", icon: "🧱", hex: "#e57373" },
+                { es: "Ámbar", target: "Âmbar", icon: "🍯", hex: "#ffe082" },
+
+                // NEUTROS Y METÁLICOS
+                { es: "Negro", target: "Preto", icon: "⚫", hex: "#cfd8dc" },
+                { es: "Gris", target: "Cinza", icon: "🐨", hex: "#f5f5f5" },
+                { es: "Blanco", target: "Branco", icon: "🥚", hex: "#ffffff" },
+                { es: "Crema", target: "Creme", icon: "🍦", hex: "#fffde7" },
+                { es: "Marfil", target: "Marfim", icon: "🐘", hex: "#fffff0" },
+                { es: "Dorado", target: "Dourado", icon: "🏆", hex: "#fff59d" },
+                { es: "Plateado", target: "Prateado", icon: "🥈", hex: "#e0e0e0" },
+                { es: "Bronce", target: "Bronze", icon: "🥉", hex: "#d7ccc8" },
+
+                // ESPECIAL
+                { es: "Arcoíris", target: "Arco-íris", icon: "🌈", hex: "#ffffff" }
+            ],
+
+            // 🇨🇳 CHINO (Simplificado + Pinyin)
+            'zh': [
+                // CLÁSICOS
+                { es: "Rojo", target: "Hóngsè (红色)", icon: "🍎", hex: "#ffcdd2" },
+                { es: "Azul", target: "Lánsè (蓝色)", icon: "🐳", hex: "#bbdefb" },
+                { es: "Amarillo", target: "Huángsè (黄色)", icon: "🌻", hex: "#fff9c4" },
+                { es: "Verde", target: "Lǜsè (绿色)", icon: "🐸", hex: "#c8e6c9" },
+                { es: "Naranja", target: "Chéngsè (橙色)", icon: "🍊", hex: "#ffe0b2" },
+
+                // ROSAS Y VIOLETAS
+                { es: "Morado", target: "Zǐsè (紫色)", icon: "🍇", hex: "#e1bee7" },
+                { es: "Rosado", target: "Fěnhóngsè (粉红色)", icon: "🎀", hex: "#f8bbd0" },
+                { es: "Magenta", target: "Yánghóng (洋红)", icon: "🌺", hex: "#ff80ab" },
+                { es: "Fucsia", target: "Pǐnhóng (品红)", icon: "🌷", hex: "#ea80fc" },
+                { es: "Violeta", target: "Zǐluólán (紫罗兰)", icon: "☂️", hex: "#d1c4e9" },
+                { es: "Lavanda", target: "Xūnyīcǎo (薰衣草)", icon: "🧼", hex: "#ede7f6" },
+                { es: "Lila", target: "Dànzǐsè (淡紫色)", icon: "🔮", hex: "#e6ee9c" },
+
+                // AZULES Y VERDES
+                { es: "Celeste", target: "Tiānlán (天蓝)", icon: "🧊", hex: "#b3e5fc" },
+                { es: "Azul Marino", target: "Zànglán (藏蓝)", icon: "👖", hex: "#9fa8da" },
+                { es: "Turquesa", target: "Lǜsōngshí (绿松石)", icon: "💎", hex: "#b2ebf2" },
+                { es: "Cian", target: "Qīngsè (青色)", icon: "🌊", hex: "#80deea" },
+                { es: "Verde Azulado", target: "Lánlǜsè (蓝绿色)", icon: "👗", hex: "#80cbc4" },
+                { es: "Lima", target: "Qīngníng (青柠)", icon: "🍈", hex: "#f0f4c3" },
+                { es: "Menta", target: "Bòhé (薄荷)", icon: "🍃", hex: "#e0f2f1" },
+                { es: "Oliva", target: "Gǎnlǎn (橄榄)", icon: "🫒", hex: "#dce775" },
+                { es: "Verde Oscuro", target: "Shēnlǜ (深绿)", icon: "🌲", hex: "#a5d6a7" },
+
+                // CÁLIDOS Y TIERRA
+                { es: "Café", target: "Kāfēisè (咖啡色)", icon: "🐻", hex: "#d7ccc8" },
+                { es: "Beige", target: "Mǐsè (米色)", icon: "🥯", hex: "#f0f4c3" },
+                { es: "Durazno", target: "Táosè (桃色)", icon: "🍑", hex: "#ffccbc" },
+                { es: "Salmón", target: "Guīyúhóng (鲑鱼红)", icon: "🍣", hex: "#ffab91" },
+                { es: "Coral", target: "Shānhú (珊瑚)", icon: "🪸", hex: "#ff8a65" },
+                { es: "Burdeos", target: "Zǎohóng (枣红)", icon: "🍷", hex: "#ef9a9a" },
+                { es: "Ladrillo", target: "Zhuānhóng (砖红)", icon: "🧱", hex: "#e57373" },
+                { es: "Ámbar", target: "Hǔpò (琥珀)", icon: "🍯", hex: "#ffe082" },
+
+                // NEUTROS Y METÁLICOS
+                { es: "Negro", target: "Hēisè (黑色)", icon: "⚫", hex: "#cfd8dc" },
+                { es: "Gris", target: "Huīsè (灰色)", icon: "🐨", hex: "#f5f5f5" },
+                { es: "Blanco", target: "Báisè (白色)", icon: "🥚", hex: "#ffffff" },
+                { es: "Crema", target: "Nǎiyóu (奶油)", icon: "🍦", hex: "#fffde7" },
+                { es: "Marfil", target: "Xiàngyá (象牙)", icon: "🐘", hex: "#fffff0" },
+                { es: "Dorado", target: "Jīnsè (金色)", icon: "🏆", hex: "#fff59d" },
+                { es: "Plateado", target: "Yínsè (银色)", icon: "🥈", hex: "#e0e0e0" },
+                { es: "Bronce", target: "Gǔtóng (古铜)", icon: "🥉", hex: "#d7ccc8" },
+
+                // ESPECIAL
+                { es: "Arcoíris", target: "Cǎihóng (彩虹)", icon: "🌈", hex: "#ffffff" }
+            ]
+        };
+
+        // --- CARGA INTELIGENTE ---
+        // Le pasamos la base de datos de COLORES y la clave 'colores' para el álbum
+        iniciarCursoInteligente(baseDatosColores, 'colores');
+
     </script>
 
 </body>
