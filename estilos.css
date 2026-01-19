@@ -404,3 +404,47 @@ h1 {
 .avatar-img { font-size: 100px; margin-bottom: 10px; display: block; }
 .avatar-texto { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: #555; display: block; }
 .ocultar-modal { opacity: 0; pointer-events: none; }
+/* --- SELECTOR DE IDIOMAS (BANDERAS) --- */
+.contenedor-idiomas {
+    position: fixed;
+    top: 20px;
+    left: 20px; /* A la izquierda (la música está a la derecha) */
+    display: flex;
+    flex-direction: column; /* Una debajo de otra */
+    gap: 10px;
+    z-index: 1000;
+}
+
+.btn-idioma {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid white;
+    cursor: pointer;
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: transform 0.2s, border 0.2s;
+    opacity: 0.6; /* Un poco transparentes si no están activos */
+    filter: grayscale(80%); /* Blanco y negro si no están activos */
+}
+
+.btn-idioma:hover {
+    transform: scale(1.1);
+    opacity: 1;
+    filter: grayscale(0%);
+}
+
+/* Cuando un idioma está seleccionado */
+.btn-idioma.activo {
+    opacity: 1;
+    filter: grayscale(0%);
+    border-color: #ffca28; /* Borde dorado */
+    transform: scale(1.15);
+    box-shadow: 0 0 15px rgba(255, 202, 40, 0.6);
+    z-index: 10;
+}
+
