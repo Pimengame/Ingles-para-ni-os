@@ -13,43 +13,95 @@
     <h1>🔢 Los Números</h1>
     <p>Aprende a contar del 1 al 100</p>
 
-    <div id="marcador" class="marcador">Puntos: 0</div>
-    
     <div class="panel-control">
-        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+        <button class="btn-accion btn-jugar" id="btn-jugar" onclick="iniciarJuego()">¡Jugar!</button>
+        <div class="marcador" id="marcador"></div>
     </div>
 
     <div class="tablero" id="tablero"></div>
 
-    <script>
-        const datosNumeros = [
-            { icon: "1️⃣", en: "One", es: "Uno" },
-            { icon: "2️⃣", en: "Two", es: "Dos" },
-            { icon: "3️⃣", en: "Three", es: "Tres" },
-            { icon: "4️⃣", en: "Four", es: "Cuatro" },
-            { icon: "5️⃣", en: "Five", es: "Cinco" },
-            { icon: "6️⃣", en: "Six", es: "Seis" },
-            { icon: "7️⃣", en: "Seven", es: "Siete" },
-            { icon: "8️⃣", en: "Eight", es: "Ocho" },
-            { icon: "9️⃣", en: "Nine", es: "Nueve" },
-            { icon: "🔟", en: "Ten", es: "Diez" },
-            { icon: "1️⃣1️⃣", en: "Eleven", es: "Once" },
-            { icon: "1️⃣2️⃣", en: "Twelve", es: "Doce" },
-            { icon: "1️⃣3️⃣", en: "Thirteen", es: "Trece" },
-            { icon: "1️⃣4️⃣", en: "Fourteen", es: "Catorce" },
-            { icon: "1️⃣5️⃣", en: "Fifteen", es: "Quince" },
-            { icon: "2️⃣0️⃣", en: "Twenty", es: "Veinte" },
-            { icon: "3️⃣0️⃣", en: "Thirty", es: "Treinta" },
-            { icon: "4️⃣0️⃣", en: "Forty", es: "Cuarenta" },
-            { icon: "5️⃣0️⃣", en: "Fifty", es: "Cincuenta" },
-            { icon: "💯", en: "One Hundred", es: "Cien" }
-        ];
-    </script>
-
     <script src="../motor.js"></script>
 
     <script>
-        cargarCurso(datosNumeros, 'numeros');
+        // --- BASE DE DATOS MULTILINGÜE (NÚMEROS) ---
+        const baseDatosNumeros = {
+            // 🇺🇸 INGLÉS
+            'en': [
+                { es: "Uno", target: "One", icon: "1️⃣" },
+                { es: "Dos", target: "Two", icon: "2️⃣" },
+                { es: "Tres", target: "Three", icon: "3️⃣" },
+                { es: "Cuatro", target: "Four", icon: "4️⃣" },
+                { es: "Cinco", target: "Five", icon: "5️⃣" },
+                { es: "Seis", target: "Six", icon: "6️⃣" },
+                { es: "Siete", target: "Seven", icon: "7️⃣" },
+                { es: "Ocho", target: "Eight", icon: "8️⃣" },
+                { es: "Nueve", target: "Nine", icon: "9️⃣" },
+                { es: "Diez", target: "Ten", icon: "🔟" },
+                { es: "Once", target: "Eleven", icon: "1️⃣1️⃣" },
+                { es: "Doce", target: "Twelve", icon: "1️⃣2️⃣" },
+                { es: "Trece", target: "Thirteen", icon: "1️⃣3️⃣" },
+                { es: "Catorce", target: "Fourteen", icon: "1️⃣4️⃣" },
+                { es: "Quince", target: "Fifteen", icon: "1️⃣5️⃣" },
+                { es: "Veinte", target: "Twenty", icon: "2️⃣0️⃣" },
+                { es: "Treinta", target: "Thirty", icon: "3️⃣0️⃣" },
+                { es: "Cuarenta", target: "Forty", icon: "4️⃣0️⃣" },
+                { es: "Cincuenta", target: "Fifty", icon: "5️⃣0️⃣" },
+                { es: "Cien", target: "One Hundred", icon: "💯" }
+            ],
+
+            // 🇧🇷 PORTUGUÉS
+            'pt': [
+                { es: "Uno", target: "Um", icon: "1️⃣" },
+                { es: "Dos", target: "Dois", icon: "2️⃣" },
+                { es: "Tres", target: "Três", icon: "3️⃣" },
+                { es: "Cuatro", target: "Quatro", icon: "4️⃣" },
+                { es: "Cinco", target: "Cinco", icon: "5️⃣" },
+                { es: "Seis", target: "Seis", icon: "6️⃣" },
+                { es: "Siete", target: "Sete", icon: "7️⃣" },
+                { es: "Ocho", target: "Oito", icon: "8️⃣" },
+                { es: "Nueve", target: "Nove", icon: "9️⃣" },
+                { es: "Diez", target: "Dez", icon: "🔟" },
+                { es: "Once", target: "Onze", icon: "1️⃣1️⃣" },
+                { es: "Doce", target: "Doze", icon: "1️⃣2️⃣" },
+                { es: "Trece", target: "Treze", icon: "1️⃣3️⃣" },
+                { es: "Catorce", target: "Quatorze", icon: "1️⃣4️⃣" },
+                { es: "Quince", target: "Quinze", icon: "1️⃣5️⃣" },
+                { es: "Veinte", target: "Vinte", icon: "2️⃣0️⃣" },
+                { es: "Treinta", target: "Trinta", icon: "3️⃣0️⃣" },
+                { es: "Cuarenta", target: "Quarenta", icon: "4️⃣0️⃣" },
+                { es: "Cincuenta", target: "Cinquenta", icon: "5️⃣0️⃣" },
+                { es: "Cien", target: "Cem", icon: "💯" }
+            ],
+
+            // 🇨🇳 CHINO (Simplificado + Pinyin)
+            'zh': [
+                { es: "Uno", target: "Yī (一)", icon: "1️⃣" },
+                { es: "Dos", target: "Èr (二)", icon: "2️⃣" },
+                { es: "Tres", target: "Sān (三)", icon: "3️⃣" },
+                { es: "Cuatro", target: "Sì (四)", icon: "4️⃣" },
+                { es: "Cinco", target: "Wǔ (五)", icon: "5️⃣" },
+                { es: "Seis", target: "Liù (六)", icon: "6️⃣" },
+                { es: "Siete", target: "Qī (七)", icon: "7️⃣" },
+                { es: "Ocho", target: "Bā (八)", icon: "8️⃣" },
+                { es: "Nueve", target: "Jiǔ (九)", icon: "9️⃣" },
+                { es: "Diez", target: "Shí (十)", icon: "🔟" },
+                { es: "Once", target: "Shíyī (十一)", icon: "1️⃣1️⃣" },
+                { es: "Doce", target: "Shí'èr (十二)", icon: "1️⃣2️⃣" },
+                { es: "Trece", target: "Shísān (十三)", icon: "1️⃣3️⃣" },
+                { es: "Catorce", target: "Shísì (十四)", icon: "1️⃣4️⃣" },
+                { es: "Quince", target: "Shíwǔ (十五)", icon: "1️⃣5️⃣" },
+                { es: "Veinte", target: "Èrshí (二十)", icon: "2️⃣0️⃣" },
+                { es: "Treinta", target: "Sānshí (三十)", icon: "3️⃣0️⃣" },
+                { es: "Cuarenta", target: "Sìshí (四十)", icon: "4️⃣0️⃣" },
+                { es: "Cincuenta", target: "Wǔshí (五十)", icon: "5️⃣0️⃣" },
+                { es: "Cien", target: "Yībǎi (一百)", icon: "💯" }
+            ]
+        };
+
+        // --- CARGA INTELIGENTE ---
+        // Le pasamos la base de datos de NÚMEROS y la clave 'numeros' para el álbum
+        iniciarCursoInteligente(baseDatosNumeros, 'numeros');
+
     </script>
 
 </body>
