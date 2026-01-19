@@ -13,92 +13,164 @@
     <h1>💬 Conversación Total</h1>
     <p>Frases para la escuela, la casa y la vida diaria.</p>
 
-    <div id="marcador" class="marcador">Cargando...</div>
-    
     <div class="panel-control">
-        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+        <button class="btn-accion btn-jugar" id="btn-jugar" onclick="iniciarJuego()">¡Jugar!</button>
+        <div class="marcador" id="marcador"></div>
     </div>
 
     <div class="tablero" id="tablero"></div>
 
-    <script>
-        const datosConversacion = [
-            // --- 1. CONOCIENDO GENTE ---
-            { icon: "👋", en: "What is your name?", es: "¿Cómo te llamas?" },
-            { icon: "📛", en: "My name is...", es: "Me llamo..." },
-            { icon: "🎂", en: "How old are you?", es: "¿Cuántos años tienes?" },
-            { icon: "🖐", en: "I am ... years old", es: "Tengo ... años" },
-            { icon: "🏡", en: "Where do you live?", es: "¿Dónde vives?" },
-            { icon: "🏫", en: "Where do you go to school?", es: "¿A qué escuela vas?" },
-            { icon: "👫", en: "Do you have brothers?", es: "¿Tienes hermanos?" },
-            { icon: "📱", en: "What is your phone number?", es: "¿Cuál es tu número de teléfono?" },
-
-            // --- 2. RUTINA DIARIA (NUEVO) ---
-            { icon: "☀️", en: "Time to wake up", es: "Hora de despertar" },
-            { icon: "🪥", en: "Brush your teeth", es: "Cepíllate los dientes" },
-            { icon: "🚿", en: "Take a shower", es: "Toma una ducha" },
-            { icon: "👕", en: "Put on your clothes", es: "Ponte la ropa" },
-            { icon: "👟", en: "Put on your shoes", es: "Ponte los zapatos" },
-            { icon: "🍳", en: "Breakfast is ready", es: "El desayuno está listo" },
-            { icon: "🎒", en: "Is your backpack ready?", es: "¿Está lista tu mochila?" },
-            { icon: "🌙", en: "Time to go to sleep", es: "Hora de ir a dormir" },
-
-            // --- 3. EN LA ESCUELA (NUEVO) ---
-            { icon: "✏️", en: "Can I have a pencil?", es: "¿Me prestas un lápiz?" },
-            { icon: "✋", en: "Teacher, I have a question", es: "Maestra, tengo una pregunta" },
-            { icon: "🚽", en: "May I go to the bathroom?", es: "¿Puedo ir al baño?" },
-            { icon: "📚", en: "I finished my homework", es: "Terminé mi tarea" },
-            { icon: "✂️", en: "Can I use the scissors?", es: "¿Puedo usar las tijeras?" },
-            { icon: "🔔", en: "It is recess time", es: "Es hora del recreo" },
-            { icon: "🥪", en: "Let's eat lunch", es: "Vamos a almorzar" },
-            { icon: "🤝", en: "Do you want to be my friend?", es: "¿Quieres ser mi amigo?" },
-
-            // --- 4. SENTIMIENTOS Y SALUD ---
-            { icon: "😃", en: "I am happy", es: "Estoy feliz" },
-            { icon: "😢", en: "I am sad", es: "Estoy triste" },
-            { icon: "😡", en: "I am angry", es: "Estoy enojado" },
-            { icon: "😱", en: "I am scared", es: "Tengo miedo" },
-            { icon: "😴", en: "I am tired", es: "Estoy cansado" },
-            { icon: "🤕", en: "My head hurts", es: "Me duele la cabeza" },
-            { icon: "🤰", en: "My tummy hurts", es: "Me duele la barriga" },
-            { icon: "🤧", en: "I have a cold", es: "Tengo resfriado" },
-            { icon: "🩹", en: "I need a band-aid", es: "Necesito un parche curita" },
-
-            // --- 5. COMIDA Y GUSTOS ---
-            { icon: "🍽️", en: "I am hungry", es: "Tengo hambre" },
-            { icon: "🥤", en: "I am thirsty", es: "Tengo sed" },
-            { icon: "🍎", en: "I want a snack", es: "Quiero una merienda" },
-            { icon: "🥦", en: "I don't like vegetables", es: "No me gustan los vegetales" },
-            { icon: "🍫", en: "Can I have chocolate?", es: "¿Puedo comer chocolate?" },
-            { icon: "😋", en: "It is delicious", es: "Está delicioso" },
-            { icon: "🤢", en: "It is yucky", es: "Está asqueroso" },
-
-            // --- 6. MODALES Y EXPRESIONES ---
-            { icon: "🙏", en: "Please", es: "Por favor" },
-            { icon: "🎁", en: "Thank you very much", es: "Muchas gracias" },
-            { icon: "🤝", en: "You are welcome", es: "De nada" },
-            { icon: "👋", en: "See you tomorrow", es: "Nos vemos mañana" },
-            { icon: "🌞", en: "Have a nice day", es: "Que tengas un buen día" },
-            { icon: "😔", en: "I am sorry", es: "Lo siento / Perdón" },
-            { icon: "🤧", en: "Bless you", es: "Salud (estornudo)" },
-            { icon: "🍀", en: "Good luck", es: "Buena suerte" },
-            { icon: "👍", en: "Good job!", es: "¡Buen trabajo!" },
-            { icon: "🤷", en: "I don't know", es: "No lo sé" },
-            
-            // --- 7. PREGUNTAS CLAVE ---
-            { icon: "⌚", en: "What time is it?", es: "¿Qué hora es?" },
-            { icon: "📍", en: "Where is my mom?", es: "¿Dónde está mi mamá?" },
-            { icon: "🧸", en: "Where is my toy?", es: "¿Dónde está mi juguete?" },
-            { icon: "🤔", en: "What happened?", es: "¿Qué pasó?" },
-            { icon: "👂", en: "Can you repeat?", es: "¿Puedes repetir?" },
-            { icon: "❓", en: "Why?", es: "¿Por qué?" }
-        ];
-    </script>
-
     <script src="../motor.js"></script>
 
     <script>
-        cargarCurso(datosConversacion, 'conversacion');
+        // --- BASE DE DATOS MULTILINGÜE (CONVERSACIÓN) ---
+        const baseDatosConversacion = {
+            // 🇺🇸 INGLÉS
+            'en': [
+                // CONOCIENDO GENTE
+                { es: "¿Cómo te llamas?", target: "What is your name?", icon: "👋" },
+                { es: "Me llamo...", target: "My name is...", icon: "📛" },
+                { es: "¿Cuántos años tienes?", target: "How old are you?", icon: "🎂" },
+                { es: "Tengo ... años", target: "I am ... years old", icon: "🖐" },
+                { es: "¿Dónde vives?", target: "Where do you live?", icon: "🏡" },
+                { es: "¿Tienes hermanos?", target: "Do you have brothers?", icon: "👫" },
+
+                // RUTINA
+                { es: "Hora de despertar", target: "Time to wake up", icon: "☀️" },
+                { es: "Cepíllate los dientes", target: "Brush your teeth", icon: "🪥" },
+                { es: "Toma una ducha", target: "Take a shower", icon: "🚿" },
+                { es: "Hora de ir a dormir", target: "Time to go to sleep", icon: "🌙" },
+
+                // ESCUELA
+                { es: "¿Me prestas un lápiz?", target: "Can I have a pencil?", icon: "✏️" },
+                { es: "Maestra, tengo una pregunta", target: "Teacher, I have a question", icon: "✋" },
+                { es: "¿Puedo ir al baño?", target: "May I go to the bathroom?", icon: "🚽" },
+                { es: "Terminé mi tarea", target: "I finished my homework", icon: "📚" },
+                { es: "¿Quieres ser mi amigo?", target: "Do you want to be my friend?", icon: "🤝" },
+
+                // SENTIMIENTOS
+                { es: "Estoy feliz", target: "I am happy", icon: "😃" },
+                { es: "Estoy triste", target: "I am sad", icon: "😢" },
+                { es: "Tengo miedo", target: "I am scared", icon: "😱" },
+                { es: "Estoy cansado", target: "I am tired", icon: "😴" },
+                { es: "Me duele la cabeza", target: "My head hurts", icon: "🤕" },
+
+                // COMIDA
+                { es: "Tengo hambre", target: "I am hungry", icon: "🍽️" },
+                { es: "Tengo sed", target: "I am thirsty", icon: "🥤" },
+                { es: "Está delicioso", target: "It is delicious", icon: "😋" },
+
+                // MODALES
+                { es: "Por favor", target: "Please", icon: "🙏" },
+                { es: "Muchas gracias", target: "Thank you very much", icon: "🎁" },
+                { es: "De nada", target: "You are welcome", icon: "🤝" },
+                { es: "Lo siento", target: "I am sorry", icon: "😔" },
+
+                // PREGUNTAS
+                { es: "¿Qué hora es?", target: "What time is it?", icon: "⌚" },
+                { es: "¿Dónde está mi mamá?", target: "Where is my mom?", icon: "📍" },
+                { es: "¿Por qué?", target: "Why?", icon: "❓" }
+            ],
+
+            // 🇧🇷 PORTUGUÉS
+            'pt': [
+                // CONOCIENDO GENTE
+                { es: "¿Cómo te llamas?", target: "Qual é o seu nome?", icon: "👋" },
+                { es: "Me llamo...", target: "Meu nome é...", icon: "📛" },
+                { es: "¿Cuántos años tienes?", target: "Quantos anos você tem?", icon: "🎂" },
+                { es: "Tengo ... años", target: "Eu tenho ... anos", icon: "🖐" },
+                { es: "¿Dónde vives?", target: "Onde você mora?", icon: "🏡" },
+                { es: "¿Tienes hermanos?", target: "Você tem irmãos?", icon: "👫" },
+
+                // RUTINA
+                { es: "Hora de despertar", target: "Hora de acordar", icon: "☀️" },
+                { es: "Cepíllate los dientes", target: "Escove os dentes", icon: "🪥" },
+                { es: "Toma una ducha", target: "Tome um banho", icon: "🚿" },
+                { es: "Hora de ir a dormir", target: "Hora de dormir", icon: "🌙" },
+
+                // ESCUELA
+                { es: "¿Me prestas un lápiz?", target: "Me empresta um lápis?", icon: "✏️" },
+                { es: "Maestra, tengo una pregunta", target: "Professora, tenho uma pergunta", icon: "✋" },
+                { es: "¿Puedo ir al baño?", target: "Posso ir ao banheiro?", icon: "🚽" },
+                { es: "Terminé mi tarea", target: "Terminei minha lição", icon: "📚" },
+                { es: "¿Quieres ser mi amigo?", target: "Quer ser meu amigo?", icon: "🤝" },
+
+                // SENTIMIENTOS
+                { es: "Estoy feliz", target: "Estou feliz", icon: "😃" },
+                { es: "Estoy triste", target: "Estou triste", icon: "😢" },
+                { es: "Tengo miedo", target: "Estou com medo", icon: "😱" },
+                { es: "Estoy cansado", target: "Estou cansado", icon: "😴" },
+                { es: "Me duele la cabeza", target: "Minha cabeça dói", icon: "🤕" },
+
+                // COMIDA
+                { es: "Tengo hambre", target: "Estou com fome", icon: "🍽️" },
+                { es: "Tengo sed", target: "Estou com sede", icon: "🥤" },
+                { es: "Está delicioso", target: "Está delicioso", icon: "😋" },
+
+                // MODALES
+                { es: "Por favor", target: "Por favor", icon: "🙏" },
+                { es: "Muchas gracias", target: "Muito obrigado(a)", icon: "🎁" },
+                { es: "De nada", target: "De nada", icon: "🤝" },
+                { es: "Lo siento", target: "Desculpe", icon: "😔" },
+
+                // PREGUNTAS
+                { es: "¿Qué hora es?", target: "Que horas são?", icon: "⌚" },
+                { es: "¿Dónde está mi mamá?", target: "Onde está minha mãe?", icon: "📍" },
+                { es: "¿Por qué?", target: "Por que?", icon: "❓" }
+            ],
+
+            // 🇨🇳 CHINO (Simplificado + Pinyin)
+            'zh': [
+                // CONOCIENDO GENTE
+                { es: "¿Cómo te llamas?", target: "Nǐ jiào shénme? (你叫什么?)", icon: "👋" },
+                { es: "Me llamo...", target: "Wǒ jiào... (我叫...)", icon: "📛" },
+                { es: "¿Cuántos años tienes?", target: "Nǐ jǐ suì le? (你几岁了?)", icon: "🎂" },
+                { es: "Tengo ... años", target: "Wǒ ... suì le (我...岁了)", icon: "🖐" },
+                { es: "¿Dónde vives?", target: "Nǐ zhù zài nǎli? (你住在哪里?)", icon: "🏡" },
+                { es: "¿Tienes hermanos?", target: "Nǐ yǒu xiōngdì ma? (你有兄弟吗?)", icon: "👫" },
+
+                // RUTINA
+                { es: "Hora de despertar", target: "Qǐchuáng shíjiān (起床时间)", icon: "☀️" },
+                { es: "Cepíllate los dientes", target: "Shuāyá (刷牙)", icon: "🪥" },
+                { es: "Toma una ducha", target: "Xǐzǎo (洗澡)", icon: "🚿" },
+                { es: "Hora de ir a dormir", target: "Shuìjiào shíjiān (睡觉时间)", icon: "🌙" },
+
+                // ESCUELA
+                { es: "¿Me prestas un lápiz?", target: "Kěyǐ jiè bǐ ma? (可以借笔吗?)", icon: "✏️" },
+                { es: "Maestra, tengo una pregunta", target: "Lǎoshī, wǒ yǒu wèntí (老师, 我有问题)", icon: "✋" },
+                { es: "¿Puedo ir al baño?", target: "Wǒ kěyǐ qù cèsuǒ ma? (我可以去厕所吗?)", icon: "🚽" },
+                { es: "Terminé mi tarea", target: "Zuò wán zuòyè le (做完作业了)", icon: "📚" },
+                { es: "¿Quieres ser mi amigo?", target: "Zuò péngyǒu hǎo ma? (做朋友好吗?)", icon: "🤝" },
+
+                // SENTIMIENTOS
+                { es: "Estoy feliz", target: "Wǒ hěn kāixīn (我很开心)", icon: "😃" },
+                { es: "Estoy triste", target: "Wǒ hěn nánguò (我很难过)", icon: "😢" },
+                { es: "Tengo miedo", target: "Wǒ hàipà (我害怕)", icon: "😱" },
+                { es: "Estoy cansado", target: "Wǒ lèi le (我累了)", icon: "😴" },
+                { es: "Me duele la cabeza", target: "Wǒ tóu téng (我头疼)", icon: "🤕" },
+
+                // COMIDA
+                { es: "Tengo hambre", target: "Wǒ è le (我饿了)", icon: "🍽️" },
+                { es: "Tengo sed", target: "Wǒ kě le (我渴了)", icon: "🥤" },
+                { es: "Está delicioso", target: "Hěn hǎochī (很好吃)", icon: "😋" },
+
+                // MODALES
+                { es: "Por favor", target: "Qǐng (请)", icon: "🙏" },
+                { es: "Muchas gracias", target: "Xièxiè (谢谢)", icon: "🎁" },
+                { es: "De nada", target: "Bù kèqì (不客气)", icon: "🤝" },
+                { es: "Lo siento", target: "Duìbuqǐ (对不起)", icon: "😔" },
+
+                // PREGUNTAS
+                { es: "¿Qué hora es?", target: "Jǐ diǎn le? (几点了?)", icon: "⌚" },
+                { es: "¿Dónde está mi mamá?", target: "Māma zài nǎli? (妈妈在哪里?)", icon: "📍" },
+                { es: "¿Por qué?", target: "Wèishéme? (为什么?)", icon: "❓" }
+            ]
+        };
+
+        // --- CARGA INTELIGENTE ---
+        // Clave 'conversacion' para el álbum de premios
+        iniciarCursoInteligente(baseDatosConversacion, 'conversacion');
+
     </script>
 
 </body>
