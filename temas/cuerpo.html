@@ -13,75 +13,185 @@
     <h1>👃 El Cuerpo Humano</h1>
     <p>¡De la cabeza a los pies, y lo que hay dentro!</p>
 
-    <div id="marcador" class="marcador">Cargando...</div>
-    
     <div class="panel-control">
-        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+        <button class="btn-accion btn-jugar" id="btn-jugar" onclick="iniciarJuego()">¡Jugar!</button>
+        <div class="marcador" id="marcador"></div>
     </div>
 
     <div class="tablero" id="tablero"></div>
 
-    <script>
-        const datosCuerpo = [
-            // --- LA CARA (FACE) ---
-            { icon: "👱‍♀️", en: "Head", es: "Cabeza" },
-            { icon: "😀", en: "Face", es: "Cara" },
-            { icon: "💇‍♀️", en: "Hair", es: "Pelo" },
-            { icon: "🧠", en: "Forehead", es: "Frente" },
-            { icon: "🤨", en: "Eyebrow", es: "Ceja" },
-            { icon: "👁️", en: "Eye", es: "Ojo" },
-            { icon: "👁️", en: "Eyelashes", es: "Pestañas" },
-            { icon: "👂", en: "Ear", es: "Oreja" },
-            { icon: "👃", en: "Nose", es: "Nariz" },
-            { icon: "😊", en: "Cheek", es: "Mejilla" },
-            { icon: "👄", en: "Mouth", es: "Boca" },
-            { icon: "💋", en: "Lips", es: "Labios" },
-            { icon: "🦷", en: "Teeth", es: "Dientes" },
-            { icon: "👅", en: "Tongue", es: "Lengua" },
-            { icon: "🤔", en: "Chin", es: "Barbilla" },
-            { icon: "🧣", en: "Neck", es: "Cuello" },
-
-            // --- EL TRONCO Y BRAZOS ---
-            { icon: "🤷", en: "Shoulder", es: "Hombro" },
-            { icon: "👕", en: "Chest", es: "Pecho" },
-            { icon: "🎒", en: "Back", es: "Espalda" },
-            { icon: "🤰", en: "Stomach", es: "Estómago / Barriga" },
-            { icon: "🍩", en: "Belly Button", es: "Ombligo" },
-            { icon: "💪", en: "Arm", es: "Brazo" },
-            { icon: "💪", en: "Elbow", es: "Codo" },
-            { icon: "⌚", en: "Wrist", es: "Muñeca" },
-            { icon: "✋", en: "Hand", es: "Mano" },
-            { icon: "👆", en: "Finger", es: "Dedo de la mano" },
-            { icon: "👍", en: "Thumb", es: "Pulgar" },
-            { icon: "💅", en: "Nail", es: "Uña" },
-
-            // --- LAS PIERNAS ---
-            { icon: "🦵", en: "Leg", es: "Pierna" },
-            { icon: "🦵", en: "Knee", es: "Rodilla" },
-            { icon: "🦶", en: "Ankle", es: "Tobillo" },
-            { icon: "🦶", en: "Foot", es: "Pie" },
-            { icon: "👣", en: "Feet", es: "Pies" },
-            { icon: "🦶", en: "Heel", es: "Talón" },
-            { icon: "🦶", en: "Toes", es: "Dedos de los pies" },
-
-            // --- ÓRGANOS Y ESQUELETO (Nivel Experto) ---
-            { icon: "🧠", en: "Brain", es: "Cerebro" },
-            { icon: "❤️", en: "Heart", es: "Corazón" },
-            { icon: "🫁", en: "Lungs", es: "Pulmones" },
-            { icon: "🦴", en: "Bone", es: "Hueso" },
-            { icon: "💀", en: "Skull", es: "Cráneo" },
-            { icon: "🏋️", en: "Muscle", es: "Músculo" },
-            { icon: "🩸", en: "Blood", es: "Sangre" },
-            { icon: "☠️", en: "Skeleton", es: "Esqueleto" },
-            { icon: "🦵", en: "Skin", es: "Piel" }
-        ];
-    </script>
-
     <script src="../motor.js"></script>
 
     <script>
-        // Etiqueta 'cuerpo' para que funcione el álbum de premios
-        cargarCurso(datosCuerpo, 'cuerpo');
+        // --- BASE DE DATOS MULTILINGÜE (CUERPO) ---
+        const baseDatosCuerpo = {
+            // 🇺🇸 INGLÉS
+            'en': [
+                // LA CARA
+                { es: "Cabeza", target: "Head", icon: "👱‍♀️" },
+                { es: "Cara", target: "Face", icon: "😀" },
+                { es: "Pelo", target: "Hair", icon: "💇‍♀️" },
+                { es: "Frente", target: "Forehead", icon: "🧠" },
+                { es: "Ceja", target: "Eyebrow", icon: "🤨" },
+                { es: "Ojo", target: "Eye", icon: "👁️" },
+                { es: "Pestañas", target: "Eyelashes", icon: "👁️" },
+                { es: "Oreja", target: "Ear", icon: "👂" },
+                { es: "Nariz", target: "Nose", icon: "👃" },
+                { es: "Mejilla", target: "Cheek", icon: "😊" },
+                { es: "Boca", target: "Mouth", icon: "👄" },
+                { es: "Labios", target: "Lips", icon: "💋" },
+                { es: "Dientes", target: "Teeth", icon: "🦷" },
+                { es: "Lengua", target: "Tongue", icon: "👅" },
+                { es: "Barbilla", target: "Chin", icon: "🤔" },
+                { es: "Cuello", target: "Neck", icon: "🧣" },
+
+                // TRONCO Y BRAZOS
+                { es: "Hombro", target: "Shoulder", icon: "🤷" },
+                { es: "Pecho", target: "Chest", icon: "👕" },
+                { es: "Espalda", target: "Back", icon: "🎒" },
+                { es: "Estómago", target: "Stomach", icon: "🤰" },
+                { es: "Ombligo", target: "Belly Button", icon: "🍩" },
+                { es: "Brazo", target: "Arm", icon: "💪" },
+                { es: "Codo", target: "Elbow", icon: "💪" },
+                { es: "Muñeca", target: "Wrist", icon: "⌚" },
+                { es: "Mano", target: "Hand", icon: "✋" },
+                { es: "Dedo", target: "Finger", icon: "👆" },
+                { es: "Pulgar", target: "Thumb", icon: "👍" },
+                { es: "Uña", target: "Nail", icon: "💅" },
+
+                // PIERNAS
+                { es: "Pierna", target: "Leg", icon: "🦵" },
+                { es: "Rodilla", target: "Knee", icon: "🦵" },
+                { es: "Tobillo", target: "Ankle", icon: "🦶" },
+                { es: "Pie", target: "Foot", icon: "🦶" },
+                { es: "Talón", target: "Heel", icon: "🦶" },
+                { es: "Dedos de los pies", target: "Toes", icon: "🦶" },
+
+                // INTERIOR
+                { es: "Cerebro", target: "Brain", icon: "🧠" },
+                { es: "Corazón", target: "Heart", icon: "❤️" },
+                { es: "Pulmones", target: "Lungs", icon: "🫁" },
+                { es: "Hueso", target: "Bone", icon: "🦴" },
+                { es: "Cráneo", target: "Skull", icon: "💀" },
+                { es: "Músculo", target: "Muscle", icon: "🏋️" },
+                { es: "Sangre", target: "Blood", icon: "🩸" },
+                { es: "Esqueleto", target: "Skeleton", icon: "☠️" },
+                { es: "Piel", target: "Skin", icon: "🦵" }
+            ],
+
+            // 🇧🇷 PORTUGUÉS
+            'pt': [
+                // LA CARA
+                { es: "Cabeza", target: "Cabeça", icon: "👱‍♀️" },
+                { es: "Cara", target: "Rosto", icon: "😀" },
+                { es: "Pelo", target: "Cabelo", icon: "💇‍♀️" },
+                { es: "Frente", target: "Testa", icon: "🧠" },
+                { es: "Ceja", target: "Sobrancelha", icon: "🤨" },
+                { es: "Ojo", target: "Olho", icon: "👁️" },
+                { es: "Pestañas", target: "Cílios", icon: "👁️" },
+                { es: "Oreja", target: "Orelha", icon: "👂" },
+                { es: "Nariz", target: "Nariz", icon: "👃" },
+                { es: "Mejilla", target: "Bochecha", icon: "😊" },
+                { es: "Boca", target: "Boca", icon: "👄" },
+                { es: "Labios", target: "Lábios", icon: "💋" },
+                { es: "Dientes", target: "Dentes", icon: "🦷" },
+                { es: "Lengua", target: "Língua", icon: "👅" },
+                { es: "Barbilla", target: "Queixo", icon: "🤔" },
+                { es: "Cuello", target: "Pescoço", icon: "🧣" },
+
+                // TRONCO Y BRAZOS
+                { es: "Hombro", target: "Ombro", icon: "🤷" },
+                { es: "Pecho", target: "Peito", icon: "👕" },
+                { es: "Espalda", target: "Costas", icon: "🎒" },
+                { es: "Estómago", target: "Estômago", icon: "🤰" },
+                { es: "Ombligo", target: "Umbigo", icon: "🍩" },
+                { es: "Brazo", target: "Braço", icon: "💪" },
+                { es: "Codo", target: "Cotovelo", icon: "💪" },
+                { es: "Muñeca", target: "Pulso", icon: "⌚" },
+                { es: "Mano", target: "Mão", icon: "✋" },
+                { es: "Dedo", target: "Dedo", icon: "👆" },
+                { es: "Pulgar", target: "Polegar", icon: "👍" },
+                { es: "Uña", target: "Unha", icon: "💅" },
+
+                // PIERNAS
+                { es: "Pierna", target: "Perna", icon: "🦵" },
+                { es: "Rodilla", target: "Joelho", icon: "🦵" },
+                { es: "Tobillo", target: "Tornozelo", icon: "🦶" },
+                { es: "Pie", target: "Pé", icon: "🦶" },
+                { es: "Talón", target: "Calcanhar", icon: "🦶" },
+                { es: "Dedos de los pies", target: "Dedos dos pés", icon: "🦶" },
+
+                // INTERIOR
+                { es: "Cerebro", target: "Cérebro", icon: "🧠" },
+                { es: "Corazón", target: "Coração", icon: "❤️" },
+                { es: "Pulmones", target: "Pulmões", icon: "🫁" },
+                { es: "Hueso", target: "Osso", icon: "🦴" },
+                { es: "Cráneo", target: "Crânio", icon: "💀" },
+                { es: "Músculo", target: "Músculo", icon: "🏋️" },
+                { es: "Sangre", target: "Sangue", icon: "🩸" },
+                { es: "Esqueleto", target: "Esqueleto", icon: "☠️" },
+                { es: "Piel", target: "Pele", icon: "🦵" }
+            ],
+
+            // 🇨🇳 CHINO (Simplificado + Pinyin)
+            'zh': [
+                // LA CARA
+                { es: "Cabeza", target: "Tóu (头)", icon: "👱‍♀️" },
+                { es: "Cara", target: "Liǎn (脸)", icon: "😀" },
+                { es: "Pelo", target: "Tóufa (头发)", icon: "💇‍♀️" },
+                { es: "Frente", target: "É'tóu (额头)", icon: "🧠" },
+                { es: "Ceja", target: "Méimao (眉毛)", icon: "🤨" },
+                { es: "Ojo", target: "Yǎnjīng (眼睛)", icon: "👁️" },
+                { es: "Pestañas", target: "Jiémáo (睫毛)", icon: "👁️" },
+                { es: "Oreja", target: "Ěrduo (耳朵)", icon: "👂" },
+                { es: "Nariz", target: "Bízi (鼻子)", icon: "👃" },
+                { es: "Mejilla", target: "Liǎnjiá (脸颊)", icon: "😊" },
+                { es: "Boca", target: "Zuǐba (嘴巴)", icon: "👄" },
+                { es: "Labios", target: "Zuǐchún (嘴唇)", icon: "💋" },
+                { es: "Dientes", target: "Yáchǐ (牙齿)", icon: "🦷" },
+                { es: "Lengua", target: "Shétou (舌头)", icon: "👅" },
+                { es: "Barbilla", target: "Xiàba (下巴)", icon: "🤔" },
+                { es: "Cuello", target: "Bózi (脖子)", icon: "🧣" },
+
+                // TRONCO Y BRAZOS
+                { es: "Hombro", target: "Jiānbǎng (肩膀)", icon: "🤷" },
+                { es: "Pecho", target: "Xiōngbù (胸部)", icon: "👕" },
+                { es: "Espalda", target: "Bèibù (背部)", icon: "🎒" },
+                { es: "Estómago", target: "Dùzi (肚子)", icon: "🤰" },
+                { es: "Ombligo", target: "Dùqí (肚脐)", icon: "🍩" },
+                { es: "Brazo", target: "Gēbo (胳膊)", icon: "💪" },
+                { es: "Codo", target: "Zhǒubù (肘部)", icon: "💪" },
+                { es: "Muñeca", target: "Shǒuwàn (手腕)", icon: "⌚" },
+                { es: "Mano", target: "Shǒu (手)", icon: "✋" },
+                { es: "Dedo", target: "Shǒuzhǐ (手指)", icon: "👆" },
+                { es: "Pulgar", target: "Dàmǔzhǐ (大拇指)", icon: "👍" },
+                { es: "Uña", target: "Zhījia (指甲)", icon: "💅" },
+
+                // PIERNAS
+                { es: "Pierna", target: "Tuǐ (腿)", icon: "🦵" },
+                { es: "Rodilla", target: "Xīgài (膝盖)", icon: "🦵" },
+                { es: "Tobillo", target: "Jiǎohuái (脚踝)", icon: "🦶" },
+                { es: "Pie", target: "Jiǎo (脚)", icon: "🦶" },
+                { es: "Talón", target: "Jiǎohòugēn (脚后跟)", icon: "🦶" },
+                { es: "Dedos de los pies", target: "Jiǎozhǐ (脚趾)", icon: "🦶" },
+
+                // INTERIOR
+                { es: "Cerebro", target: "Dànǎo (大脑)", icon: "🧠" },
+                { es: "Corazón", target: "Xīnzàng (心脏)", icon: "❤️" },
+                { es: "Pulmones", target: "Fèibù (肺部)", icon: "🫁" },
+                { es: "Hueso", target: "Gútou (骨头)", icon: "🦴" },
+                { es: "Cráneo", target: "Tóugǔ (头骨)", icon: "💀" },
+                { es: "Músculo", target: "Jīròu (肌肉)", icon: "🏋️" },
+                { es: "Sangre", target: "Xuèyè (血液)", icon: "🩸" },
+                { es: "Esqueleto", target: "Gǔgé (骨骼)", icon: "☠️" },
+                { es: "Piel", target: "Pífū (皮肤)", icon: "🦵" }
+            ]
+        };
+
+        // --- CARGA INTELIGENTE ---
+        // Le pasamos la base de datos del CUERPO y la clave 'cuerpo' para el álbum
+        iniciarCursoInteligente(baseDatosCuerpo, 'cuerpo');
+
     </script>
 
 </body>
