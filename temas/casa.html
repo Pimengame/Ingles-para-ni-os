@@ -13,87 +13,131 @@
     <h1>🏠 Mi Dulce Hogar</h1>
     <p>¡Recorre todas las habitaciones de la casa!</p>
 
-    <div id="marcador" class="marcador">Cargando...</div>
-    
     <div class="panel-control">
-        <button id="btn-jugar" class="btn-accion btn-jugar" onclick="iniciarJuego()">🎮 ¡Jugar Examen!</button>
+        <button class="btn-accion btn-jugar" id="btn-jugar" onclick="iniciarJuego()">¡Jugar!</button>
+        <div class="marcador" id="marcador"></div>
     </div>
 
     <div class="tablero" id="tablero"></div>
 
-    <script>
-        const datosCasa = [
-            // --- ESTRUCTURA GENERAL (Gris Claro) ---
-            { icon: "🏠", en: "House", es: "Casa", pt: "Casa", zh: "房子", hex: "#f5f5f5" },
-            { icon: "🚪", en: "Door", es: "Puerta", pt: "Porta", zh: "门", hex: "#f5f5f5" },
-            { icon: "🪟", en: "Window", es: "Ventana", pt: "Janela", zh: "窗户", hex: "#f5f5f5" },
-            { icon: "🧱", en: "Wall", es: "Pared", pt: "Parede", zh: "墙", hex: "#f5f5f5" },
-            { icon: "👣", en: "Floor", es: "Piso/Suelo", pt: "Chão", zh: "地板", hex: "#f5f5f5" },
-            { icon: "⛺", en: "Roof", es: "Techo", pt: "Telhado", zh: "屋顶", hex: "#f5f5f5" },
-            { icon: "🪜", en: "Stairs", es: "Escaleras", pt: "Escadas", zh: "楼梯", hex: "#f5f5f5" },
-            { icon: "🔑", en: "Key", es: "Llave", pt: "Chave", zh: "钥匙", hex: "#f5f5f5" },
-            { icon: "🪴", en: "Garden", es: "Jardín", pt: "Jardim", zh: "花园", hex: "#e8f5e9" },
-
-            // --- SALA DE ESTAR (Verde Menta) ---
-            { icon: "🛋️", en: "Sofa", es: "Sofá", pt: "Sofá", zh: "沙发", hex: "#e0f2f1" },
-            { icon: "🪑", en: "Armchair", es: "Sillón", pt: "Poltrona", zh: "单人沙发", hex: "#e0f2f1" },
-            { icon: "📺", en: "Television", es: "Televisión", pt: "Televisão", zh: "电视", hex: "#e0f2f1" },
-            { icon: "🧶", en: "Rug", es: "Alfombra", pt: "Tapete", zh: "地毯", hex: "#e0f2f1" },
-            { icon: "🕰️", en: "Clock", es: "Reloj", pt: "Relógio", zh: "时钟", hex: "#e0f2f1" },
-            { icon: "🖼️", en: "Picture", es: "Cuadro", pt: "Quadro", zh: "画", hex: "#e0f2f1" },
-            { icon: "🏺", en: "Vase", es: "Florero", pt: "Vaso", zh: "花瓶", hex: "#e0f2f1" },
-            { icon: "🔥", en: "Fireplace", es: "Chimenea", pt: "Lareira", zh: "壁炉", hex: "#e0f2f1" },
-            { icon: "☎️", en: "Telephone", es: "Teléfono", pt: "Telefone", zh: "电话", hex: "#e0f2f1" },
-
-            // --- COCINA (Amarillo Suave) ---
-            { icon: "🍳", en: "Kitchen", es: "Cocina (Lugar)", pt: "Cozinha", zh: "厨房", hex: "#fffde7" },
-            { icon: "🧊", en: "Fridge", es: "Refrigerador", pt: "Geladeira", zh: "冰箱", hex: "#fffde7" },
-            { icon: "🔥", en: "Stove", es: "Estufa / Cocina", pt: "Fogão", zh: "炉灶", hex: "#fffde7" },
-            { icon: "🥘", en: "Oven", es: "Horno", pt: "Forno", zh: "烤箱", hex: "#fffde7" },
-            { icon: "🥪", en: "Microwave", es: "Microondas", pt: "Micro-ondas", zh: "微波炉", hex: "#fffde7" },
-            { icon: "🪑", en: "Table", es: "Mesa", pt: "Mesa", zh: "桌子", hex: "#fffde7" },
-            { icon: "🥣", en: "Bowl", es: "Tazón / Bol", pt: "Tigela", zh: "碗", hex: "#fffde7" },
-            { icon: "🍽️", en: "Plate", es: "Plato", pt: "Prato", zh: "盘子", hex: "#fffde7" },
-            { icon: "🍴", en: "Fork", es: "Tenedor", pt: "Garfo", zh: "叉子", hex: "#fffde7" },
-            { icon: "🥄", en: "Spoon", es: "Cuchara", pt: "Colher", zh: "勺子", hex: "#fffde7" },
-            { icon: "🔪", en: "Knife", es: "Cuchillo", pt: "Faca", zh: "刀", hex: "#fffde7" },
-            { icon: "🥛", en: "Glass", es: "Vaso", pt: "Copo", zh: "玻璃杯", hex: "#fffde7" },
-            { icon: "☕", en: "Cup", es: "Taza", pt: "Xícara", zh: "杯子", hex: "#fffde7" },
-            { icon: "🗑️", en: "Trash Can", es: "Basurero", pt: "Lixeira", zh: "垃圾桶", hex: "#fffde7" },
-            { icon: "🥘", en: "Pot", es: "Olla", pt: "Panela", zh: "锅", hex: "#fffde7" },
-            { icon: "🍳", en: "Pan", es: "Sartén", pt: "Frigideira", zh: "平底锅", hex: "#fffde7" },
-
-            // --- DORMITORIO (Lila Suave) ---
-            { icon: "🛏️", en: "Bed", es: "Cama", pt: "Cama", zh: "床", hex: "#f3e5f5" },
-            { icon: "🛌", en: "Pillow", es: "Almohada", pt: "Travesseiro", zh: "枕头", hex: "#f3e5f5" },
-            { icon: "🥶", en: "Blanket", es: "Manta / Cobija", pt: "Cobertor", zh: "毯子", hex: "#f3e5f5" },
-            { icon: "🚪", en: "Wardrobe", es: "Armario", pt: "Guarda-roupa", zh: "衣柜", hex: "#f3e5f5" },
-            { icon: "💡", en: "Lamp", es: "Lámpara", pt: "Luminária", zh: "台灯", hex: "#f3e5f5" },
-            { icon: "⏰", en: "Alarm Clock", es: "Despertador", pt: "Despertador", zh: "闹钟", hex: "#f3e5f5" },
-            { icon: "🧸", en: "Toy Box", es: "Caja de Juguetes", pt: "Caixa de brinquedos", zh: "玩具箱", hex: "#f3e5f5" },
-            { icon: "🪞", en: "Mirror", es: "Espejo", pt: "Espelho", zh: "镜子", hex: "#f3e5f5" },
-            { icon: "💻", en: "Computer", es: "Computadora", pt: "Computador", zh: "电脑", hex: "#f3e5f5" },
-
-            // --- BAÑO Y LIMPIEZA (Azul Cielo) ---
-            { icon: "🚽", en: "Toilet", es: "Inodoro / Váter", pt: "Vaso sanitário", zh: "马桶", hex: "#e1f5fe" },
-            { icon: "🚿", en: "Shower", es: "Ducha", pt: "Chuveiro", zh: "淋浴", hex: "#e1f5fe" },
-            { icon: "🛁", en: "Bathtub", es: "Bañera", pt: "Banheira", zh: "浴缸", hex: "#e1f5fe" },
-            { icon: "🧼", en: "Soap", es: "Jabón", pt: "Sabonete", zh: "香皂", hex: "#e1f5fe" },
-            { icon: "🧴", en: "Shampoo", es: "Champú", pt: "Shampoo", zh: "洗发水", hex: "#e1f5fe" },
-            { icon: "🧖", en: "Towel", es: "Toalla", pt: "Toalha", zh: "毛巾", hex: "#e1f5fe" },
-            { icon: "🪥", en: "Toothbrush", es: "Cepillo de dientes", pt: "Escova de dentes", zh: "牙刷", hex: "#e1f5fe" },
-            { icon: "🧻", en: "Toilet Paper", es: "Papel Higiénico", pt: "Papel higiênico", zh: "卫生纸", hex: "#e1f5fe" },
-            { icon: "🧹", en: "Broom", es: "Escoba", pt: "Vassoura", zh: "扫帚", hex: "#e1f5fe" },
-            { icon: "🧺", en: "Washing Machine", es: "Lavadora", pt: "Máquina de lavar", zh: "洗衣机", hex: "#e1f5fe" },
-            { icon: "🧽", en: "Sponge", es: "Esponja", pt: "Esponja", zh: "海绵", hex: "#e1f5fe" }
-        ];
-    </script>
-
     <script src="../motor.js"></script>
 
     <script>
-        // Recuerda: 'casa' es la clave para desbloquear la estampita en el álbum
-        cargarCurso(datosCasa, 'casa');
+        // --- BASE DE DATOS MULTILINGÜE (FORMATO NUEVO) ---
+        const baseDatosCasa = {
+            // 🇺🇸 INGLÉS
+            'en': [
+                // ESTRUCTURA
+                { es: "Casa", target: "House", icon: "🏠" },
+                { es: "Puerta", target: "Door", icon: "🚪" },
+                { es: "Ventana", target: "Window", icon: "🪟" },
+                { es: "Pared", target: "Wall", icon: "🧱" },
+                { es: "Techo", target: "Roof", icon: "⛺" },
+                { es: "Jardín", target: "Garden", icon: "🪴" },
+
+                // SALA
+                { es: "Sofá", target: "Sofa", icon: "🛋️" },
+                { es: "Televisión", target: "Television", icon: "📺" },
+                { es: "Reloj", target: "Clock", icon: "🕰️" },
+                { es: "Teléfono", target: "Telephone", icon: "☎️" },
+
+                // COCINA
+                { es: "Cocina (Lugar)", target: "Kitchen", icon: "🍳" },
+                { es: "Refrigerador", target: "Fridge", icon: "🧊" },
+                { es: "Mesa", target: "Table", icon: "🪑" },
+                { es: "Plato", target: "Plate", icon: "🍽️" },
+                { es: "Vaso", target: "Glass", icon: "🥛" },
+
+                // DORMITORIO
+                { es: "Cama", target: "Bed", icon: "🛏️" },
+                { es: "Almohada", target: "Pillow", icon: "🛌" },
+                { es: "Lámpara", target: "Lamp", icon: "💡" },
+                { es: "Computadora", target: "Computer", icon: "💻" },
+
+                // BAÑO
+                { es: "Inodoro", target: "Toilet", icon: "🚽" },
+                { es: "Ducha", target: "Shower", icon: "🚿" },
+                { es: "Jabón", target: "Soap", icon: "🧼" },
+                { es: "Escoba", target: "Broom", icon: "🧹" }
+            ],
+
+            // 🇧🇷 PORTUGUÉS
+            'pt': [
+                // ESTRUCTURA
+                { es: "Casa", target: "Casa", icon: "🏠" },
+                { es: "Puerta", target: "Porta", icon: "🚪" },
+                { es: "Ventana", target: "Janela", icon: "🪟" },
+                { es: "Pared", target: "Parede", icon: "🧱" },
+                { es: "Techo", target: "Telhado", icon: "⛺" },
+                { es: "Jardín", target: "Jardim", icon: "🪴" },
+
+                // SALA
+                { es: "Sofá", target: "Sofá", icon: "🛋️" },
+                { es: "Televisión", target: "Televisão", icon: "📺" },
+                { es: "Reloj", target: "Relógio", icon: "🕰️" },
+                { es: "Teléfono", target: "Telefone", icon: "☎️" },
+
+                // COCINA
+                { es: "Cocina (Lugar)", target: "Cozinha", icon: "🍳" },
+                { es: "Refrigerador", target: "Geladeira", icon: "🧊" },
+                { es: "Mesa", target: "Mesa", icon: "🪑" },
+                { es: "Plato", target: "Prato", icon: "🍽️" },
+                { es: "Vaso", target: "Copo", icon: "🥛" },
+
+                // DORMITORIO
+                { es: "Cama", target: "Cama", icon: "🛏️" },
+                { es: "Almohada", target: "Travesseiro", icon: "🛌" },
+                { es: "Lámpara", target: "Luminária", icon: "💡" },
+                { es: "Computadora", target: "Computador", icon: "💻" },
+
+                // BAÑO
+                { es: "Inodoro", target: "Vaso sanitário", icon: "🚽" },
+                { es: "Ducha", target: "Chuveiro", icon: "🚿" },
+                { es: "Jabón", target: "Sabonete", icon: "🧼" },
+                { es: "Escoba", target: "Vassoura", icon: "🧹" }
+            ],
+
+            // 🇨🇳 CHINO (Simplificado + Pinyin)
+            'zh': [
+                // ESTRUCTURA
+                { es: "Casa", target: "Fángzi (房子)", icon: "🏠" },
+                { es: "Puerta", target: "Mén (门)", icon: "🚪" },
+                { es: "Ventana", target: "Chuānghu (窗户)", icon: "🪟" },
+                { es: "Pared", target: "Qiáng (墙)", icon: "🧱" },
+                { es: "Techo", target: "Wūdǐng (屋顶)", icon: "⛺" },
+                { es: "Jardín", target: "Huāyuán (花园)", icon: "🪴" },
+
+                // SALA
+                { es: "Sofá", target: "Shāfā (沙发)", icon: "🛋️" },
+                { es: "Televisión", target: "Diànshì (电视)", icon: "📺" },
+                { es: "Reloj", target: "Shízhōng (时钟)", icon: "🕰️" },
+                { es: "Teléfono", target: "Diànhuà (电话)", icon: "☎️" },
+
+                // COCINA
+                { es: "Cocina (Lugar)", target: "Chúfáng (厨房)", icon: "🍳" },
+                { es: "Refrigerador", target: "Bīngxiāng (冰箱)", icon: "🧊" },
+                { es: "Mesa", target: "Zhuōzi (桌子)", icon: "🪑" },
+                { es: "Plato", target: "Pánzi (盘子)", icon: "🍽️" },
+                { es: "Vaso", target: "Bēizi (杯子)", icon: "🥛" },
+
+                // DORMITORIO
+                { es: "Cama", target: "Chuáng (床)", icon: "🛏️" },
+                { es: "Almohada", target: "Zhěntou (枕头)", icon: "🛌" },
+                { es: "Lámpara", target: "Táidēng (台灯)", icon: "💡" },
+                { es: "Computadora", target: "Diànnǎo (电脑)", icon: "💻" },
+
+                // BAÑO
+                { es: "Inodoro", target: "Mǎtǒng (马桶)", icon: "🚽" },
+                { es: "Ducha", target: "Línyù (淋浴)", icon: "🚿" },
+                { es: "Jabón", target: "Xiāngzào (香皂)", icon: "🧼" },
+                { es: "Escoba", target: "Sàozhou (扫帚)", icon: "🧹" }
+            ]
+        };
+
+        // --- CARGA INTELIGENTE ---
+        // Le pasamos la base de datos de LA CASA y la clave 'casa' para el álbum
+        iniciarCursoInteligente(baseDatosCasa, 'casa');
+
     </script>
 
 </body>
