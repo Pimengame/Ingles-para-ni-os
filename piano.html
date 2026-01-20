@@ -3,242 +3,409 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Piano Estudio</title>
+    <title>Piano Maestro Pro</title>
     <link rel="stylesheet" href="estilos.css">
+    <style>
+        /* --- ESTILOS CORREGIDOS --- */
+        
+        /* Contenedor de los botones de modo */
+        .selector-modos {
+            display: flex; justify-content: center; gap: 20px; margin-bottom: 25px;
+        }
+        .btn-modo {
+            background: #fff; border: none; padding: 12px 25px; border-radius: 50px;
+            font-family: 'Fredoka One', cursive; font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 4px 0 #ddd; transition: all 0.2s;
+            opacity: 0.7; filter: grayscale(100%);
+        }
+        .btn-modo:active { transform: translateY(4px); box-shadow: none; }
+        .btn-modo.activo {
+            opacity: 1; filter: grayscale(0%); transform: scale(1.1);
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2); z-index: 10;
+        }
+        #btn-modo-grabadora.activo { border: 2px solid #f44336; color: #d32f2f; }
+        #btn-modo-clases.activo { border: 2px solid #2196f3; color: #1565c0; }
+
+        /* Panel de canciones */
+        .panel-canciones {
+            display: none; justify-content: center; gap: 10px; flex-wrap: wrap;
+            margin-bottom: 15px; animation: bajar 0.5s ease; width: 100%;
+        }
+        @keyframes bajar { from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
+
+        .btn-cancion {
+            background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5);
+            padding: 8px 15px; border-radius: 15px; cursor: pointer;
+            font-family: 'Fredoka One', cursive; font-size: 1rem; transition: 0.2s;
+        }
+        .btn-cancion:hover { background: white; color: #3f51b5; }
+        .btn-cancion.activa { background: #ff4081; border-color: white; color: white; transform: scale(1.05); }
+
+        /* Tecla Guía (Amarilla) */
+        .tecla-blanca.tecla-guia {
+            background: #ffeb3b !important;
+            box-shadow: 0 0 30px #ffeb3b, inset 0 -5px 10px rgba(0,0,0,0.1) !important;
+            z-index: 50; animation: latido 1s infinite; border-color: #fdd835;
+        }
+        .tecla-negra.tecla-guia {
+            background: #ffeb3b !important;
+            box-shadow: 0 0 30px #ffeb3b !important;
+            z-index: 100; animation: latido 1s infinite; border-bottom-color: #f9a825;
+        }
+        @keyframes latido { 0%{transform:scale(1);} 50%{transform:scale(1.02) translateY(2px);} 100%{transform:scale(1);} }
+
+        /* --- CORRECCIÓN VISUAL DEL MUEBLE --- */
+        .mueble-piano {
+            /* Asegura que el mueble contenga todo y no se salga */
+            overflow: hidden; 
+            padding: 0 0 20px 0; /* Quitamos padding lateral para que las teclas lleguen al borde */
+            position: relative;
+        }
+
+        .contenedor-teclas {
+            /* Alineación y Scroll */
+            display: flex; /* Flex para alinear teclas */
+            justify-content: center; /* Intenta centrar si cabe */
+            overflow-x: auto; /* Scroll horizontal si no cabe */
+            overflow-y: hidden;
+            padding-bottom: 10px;
+            margin: 0 auto; /* Centrado automático */
+            background: rgba(0,0,0,0.2); /* Sombra de fondo para las teclas */
+            border-top: 5px solid rgba(0,0,0,0.3); /* Sombra superior para dar profundidad */
+            
+            /* Corrección de scrollbar */
+            scrollbar-width: thin;
+            scrollbar-color: #90caf9 transparent;
+        }
+        
+        /* Si la pantalla es pequeña, alineamos al inicio para poder hacer scroll */
+        @media (max-width: 800px) {
+            .contenedor-teclas {
+                justify-content: flex-start;
+            }
+        }
+
+        .tira-roja {
+            height: 15px; background: #b71c1c; margin-bottom: 0;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            z-index: 20; position: relative;
+        }
+    </style>
 </head>
 <body>
 
-    <a href="index.html" class="btn-volver">⬅ Volver al Menú</a>
+    <a href="index.html" class="btn-volver">⬅ Volver</a>
 
-    <h1>🎹 Piano Estudio</h1>
-    <p>¡Graba tus canciones cantando!</p>
+    <h1 style="margin-top: 50px;">🎹 Piano Mágico</h1>
+
+    <div class="selector-modos">
+        <button id="btn-modo-grabadora" class="btn-modo activo" onclick="cambiarModo('grabadora')">
+            🎙️ Estudio
+        </button>
+        <button id="btn-modo-clases" class="btn-modo" onclick="cambiarModo('clases')">
+            🎓 Escuela
+        </button>
+    </div>
 
     <div class="mueble-piano">
-        <div class="panel-control-piano">
+        <div class="tira-roja"></div>
+
+        <div id="panel-grabadora" class="panel-control-piano">
             <button id="btn-grabar" class="btn-rec btn-grabar" title="Grabar">🔴</button>
             <button id="btn-detener" class="btn-rec btn-stop" title="Detener" style="display:none;">⬛</button>
             <button id="btn-reproducir" class="btn-rec btn-play" title="Escuchar" style="display:none;">▶️</button>
-            <div id="estado-grabacion" style="color:white; align-self: center; font-weight:bold;">Toca una tecla para activar</div>
+            <div id="estado-grabacion" style="color:white; font-family:'Varela Round'; font-weight:bold; font-size:1.2rem;">
+                ¡Toca y Canta! 🎵
+            </div>
         </div>
 
-        <div class="contenedor-teclas" id="miPiano"></div>
+        <div id="panel-clases" class="panel-canciones">
+            <div style="width: 100%; text-align: center; color: white; margin-bottom: 8px; font-family:'Varela Round'; opacity:0.8;">
+                👇 Elige una canción:
+            </div>
+            <button class="btn-cancion" onclick="iniciarClase('estrellita', this)">🌟 Estrellita</button>
+            <button class="btn-cancion" onclick="iniciarClase('cumple', this)">🎂 Cumpleaños</button>
+            <button class="btn-cancion" onclick="iniciarClase('himno', this)">🎼 Alegría</button>
+            <button class="btn-cancion" onclick="iniciarClase('tiburon', this)">🦈 Tiburón</button>
+            <div id="mensaje-clase" style="width: 100%; text-align: center; color: #ffeb3b; font-size: 1.4rem; margin-top: 10px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+        </div>
+
+        <div class="contenedor-teclas" id="miPiano">
+            </div>
     </div>
 
+    <script src="motor.js"></script>
+
     <script>
-        // --- 1. CONFIGURACIÓN DE AUDIO ROBUSTA ---
-        // Creamos el contexto, pero sabemos que puede nacer "dormido"
+        // ==========================================
+        // 1. CONFIGURACIÓN DE AUDIO
+        // ==========================================
         const AudioContext = window.AudioContext || window.webkitAudioContext;
-        const audioCtx = new AudioContext();
-        
-        // Nodo maestro para controlar el volumen general
-        const masterGain = audioCtx.createGain();
-        masterGain.gain.value = 0.8; // Volumen al 80%
-        masterGain.connect(audioCtx.destination); // Conectado a los parlantes
+        const contextoPiano = new AudioContext();
+        const masterGain = contextoPiano.createGain();
+        masterGain.gain.value = 0.8;
+        masterGain.connect(contextoPiano.destination);
+        const destinoGrabacion = contextoPiano.createMediaStreamDestination();
 
-        // Nodo especial para la grabadora
-        const destinoGrabacion = audioCtx.createMediaStreamDestination();
-
-        // Variables de Grabación
         let mediaRecorder;
         let chunks = [];
-        let audioUrl;
         let grabacionAudio = new Audio();
         let grabando = false;
+        let modoActual = 'grabadora';
+        let cancionActual = [];
+        let indiceNota = 0;
+        let notaEsperada = null;
 
-        const pianoContainer = document.getElementById('miPiano');
-
-        // --- 2. EL DESPERTADOR DE AUDIO (FIX) ---
-        // Esta función revisa si el audio está "Suspendido" y lo despierta
-        function despertarAudio() {
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume().then(() => {
-                    console.log("Audio despertado exitosamente");
-                    document.getElementById('estado-grabacion').innerText = "Listo para tocar";
-                });
-            }
-        }
-
-        // --- 3. NOTAS Y FRECUENCIAS ---
+        // ==========================================
+        // 2. DEFINICIÓN DE NOTAS (2 OCTAVAS)
+        // ==========================================
         const notas = [
-            { nota: "Do", tipo: "b", freq: 130.81 }, { nota: "Do#", tipo: "n", freq: 138.59 },
-            { nota: "Re", tipo: "b", freq: 146.83 }, { nota: "Re#", tipo: "n", freq: 155.56 },
-            { nota: "Mi", tipo: "b", freq: 164.81 }, { nota: "Fa", tipo: "b", freq: 174.61 },
-            { nota: "Fa#", tipo: "n", freq: 185.00 }, { nota: "Sol", tipo: "b", freq: 196.00 },
-            { nota: "Sol#", tipo: "n", freq: 207.65 }, { nota: "La", tipo: "b", freq: 220.00 },
-            { nota: "La#", tipo: "n", freq: 233.08 }, { nota: "Si", tipo: "b", freq: 246.94 },
-            
-            { nota: "Do", tipo: "b", freq: 261.63 }, { nota: "Do#", tipo: "n", freq: 277.18 },
-            { nota: "Re", tipo: "b", freq: 293.66 }, { nota: "Re#", tipo: "n", freq: 311.13 },
-            { nota: "Mi", tipo: "b", freq: 329.63 }, { nota: "Fa", tipo: "b", freq: 349.23 },
-            { nota: "Fa#", tipo: "n", freq: 369.99 }, { nota: "Sol", tipo: "b", freq: 392.00 },
-            { nota: "Sol#", tipo: "n", freq: 415.30 }, { nota: "La", tipo: "b", freq: 440.00 },
-            { nota: "La#", tipo: "n", freq: 466.16 }, { nota: "Si", tipo: "b", freq: 493.88 },
+            // OCTAVA 3 (Grave)
+            { id: "c3", nota: "Do", tipo: "b", freq: 130.81 }, { id: "cs3", nota: "", tipo: "n", freq: 138.59 },
+            { id: "d3", nota: "Re", tipo: "b", freq: 146.83 }, { id: "ds3", nota: "", tipo: "n", freq: 155.56 },
+            { id: "e3", nota: "Mi", tipo: "b", freq: 164.81 },
+            { id: "f3", nota: "Fa", tipo: "b", freq: 174.61 }, { id: "fs3", nota: "", tipo: "n", freq: 185.00 },
+            { id: "g3", nota: "Sol", tipo: "b", freq: 196.00 }, { id: "gs3", nota: "", tipo: "n", freq: 207.65 },
+            { id: "a3", nota: "La", tipo: "b", freq: 220.00 }, { id: "as3", nota: "", tipo: "n", freq: 233.08 },
+            { id: "b3", nota: "Si", tipo: "b", freq: 246.94 },
 
-            { nota: "Do", tipo: "b", freq: 523.25 }, { nota: "Do#", tipo: "n", freq: 554.37 },
-            { nota: "Re", tipo: "b", freq: 587.33 }, { nota: "Re#", tipo: "n", freq: 622.25 },
-            { nota: "Mi", tipo: "b", freq: 659.25 }, { nota: "Fa", tipo: "b", freq: 698.46 }
+            // OCTAVA 4 (Central)
+            { id: "c4", nota: "Do", tipo: "b", freq: 261.63 }, { id: "cs4", nota: "", tipo: "n", freq: 277.18 },
+            { id: "d4", nota: "Re", tipo: "b", freq: 293.66 }, { id: "ds4", nota: "", tipo: "n", freq: 311.13 },
+            { id: "e4", nota: "Mi", tipo: "b", freq: 329.63 },
+            { id: "f4", nota: "Fa", tipo: "b", freq: 349.23 }, { id: "fs4", nota: "", tipo: "n", freq: 369.99 },
+            { id: "g4", nota: "Sol", tipo: "b", freq: 392.00 }, { id: "gs4", nota: "", tipo: "n", freq: 415.30 },
+            { id: "a4", nota: "La", tipo: "b", freq: 440.00 }, { id: "as4", nota: "", tipo: "n", freq: 466.16 },
+            { id: "b4", nota: "Si", tipo: "b", freq: 493.88 },
+
+            // OCTAVA 5 (Aguda)
+            { id: "c5", nota: "Do", tipo: "b", freq: 523.25 }, { id: "cs5", nota: "", tipo: "n", freq: 554.37 },
+            { id: "d5", nota: "Re", tipo: "b", freq: 587.33 }, { id: "ds5", nota: "", tipo: "n", freq: 622.25 },
+            { id: "e5", nota: "Mi", tipo: "b", freq: 659.25 }
         ];
 
-        // --- 4. DIBUJAR TECLAS ---
+        const canciones = {
+            'estrellita': [
+                'c4','c4','g4','g4','a4','a4','g4',
+                'f4','f4','e4','e4','d4','d4','c4',
+                'g4','g4','f4','f4','e4','e4','d4',
+                'g4','g4','f4','f4','e4','e4','d4',
+                'c4','c4','g4','g4','a4','a4','g4',
+                'f4','f4','e4','e4','d4','d4','c4'
+            ],
+            'cumple': [
+                'c4','c4','d4','c4','f4','e4',
+                'c4','c4','d4','c4','g4','f4',
+                'c4','c4','c5','a4','f4','e4','d4',
+                'as4','as4','a4','f4','g4','f4'
+            ],
+            'himno': [
+                'e4','e4','f4','g4','g4','f4','e4','d4',
+                'c4','c4','d4','e4','e4','d4','d4',
+                'e4','e4','f4','g4','g4','f4','e4','d4',
+                'c4','c4','d4','e4','d4','c4','c4',
+                'd4','d4','e4','c4','d4','e4','f4','e4','c4',
+                'd4','e4','f4','e4','d4','c4','d4','g3'
+            ],
+            'tiburon': [
+                'd4','e4','g4','g4','g4','g4','g4','g4',
+                'd4','e4','g4','g4','g4','g4','g4','g4',
+                'd4','e4','g4','g4','g4','g4','g4','g4',
+                'g4','g4','f4'
+            ]
+        };
+
+        // ==========================================
+        // 4. GENERACIÓN DEL PIANO
+        // ==========================================
+        const pianoContainer = document.getElementById('miPiano');
         let blancasCount = 0;
-        const anchoBlanca = 62;
-        const anchoNegra = 38;
+        const anchoBlanca = 60; 
+        const anchoNegra = 40; 
 
-        notas.forEach(item => {
-            const tecla = document.createElement('div');
+        if (pianoContainer) {
+            notas.forEach(item => {
+                const tecla = document.createElement('div');
+                tecla.id = 'tecla-' + item.id; 
+                
+                if (item.tipo === 'b') {
+                    tecla.className = 'tecla-blanca';
+                    tecla.innerText = item.nota;
+                    pianoContainer.appendChild(tecla);
+                    asignarEventos(tecla, item);
+                    blancasCount++;
+                } else {
+                    tecla.className = 'tecla-negra';
+                    const leftPos = (blancasCount * anchoBlanca) - (anchoNegra / 2); 
+                    tecla.style.left = leftPos + 'px';
+                    pianoContainer.appendChild(tecla);
+                    asignarEventos(tecla, item);
+                }
+            });
+            // Ancho exacto para que el contenedor encaje perfecto
+            pianoContainer.style.width = (blancasCount * anchoBlanca) + 'px';
+        }
+
+        // ==========================================
+        // 5. LÓGICA DE SONIDO Y JUEGO
+        // ==========================================
+        function tocarNota(item, elemento) {
+            if (contextoPiano.state === 'suspended') contextoPiano.resume();
             
-            if (item.tipo === 'b') {
-                tecla.className = 'tecla-blanca';
-                tecla.innerText = item.nota;
-                pianoContainer.appendChild(tecla);
-                asignarEventos(tecla, item.freq);
-                blancasCount++;
-            } else {
-                tecla.className = 'tecla-negra';
-                const leftPos = (blancasCount * anchoBlanca) - (anchoNegra / 2) - 2; 
-                tecla.style.left = leftPos + 'px';
-                pianoContainer.appendChild(tecla);
-                asignarEventos(tecla, item.freq);
-            }
-        });
-
-        // --- 5. MOTOR DE SONIDO (MEJORADO) ---
-        function tocarNota(frecuencia, elemento) {
-            despertarAudio(); // ¡IMPORTANTE! Intenta despertar en cada toque
-
             if(elemento.classList.contains('activa')) return;
             elemento.classList.add('activa');
 
-            const osc = audioCtx.createOscillator();
-            const noteGain = audioCtx.createGain();
-
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(frecuencia, audioCtx.currentTime);
-
-            // Envolvente de sonido (ADSR simple)
-            noteGain.gain.setValueAtTime(0, audioCtx.currentTime);
-            noteGain.gain.linearRampToValueAtTime(0.6, audioCtx.currentTime + 0.02);
-            noteGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
-
-            // --- RUTEO DE CABLES ---
-            // 1. Cable hacia el Master (Parlantes)
-            noteGain.connect(masterGain);
+            // --- CORRECCIÓN: ELIMINADO EL SCROLL AQUÍ ---
+            // Ya no hacemos scroll cada vez que se toca una nota.
             
-            // 2. Cable hacia la Grabadora (Si estamos grabando)
-            // Esto evita problemas de rendimiento si no se usa
-            noteGain.connect(destinoGrabacion);
+            const osc = contextoPiano.createOscillator();
+            const noteGain = contextoPiano.createGain();
+
+            osc.type = 'triangle'; 
+            osc.frequency.setValueAtTime(item.freq, contextoPiano.currentTime);
+
+            noteGain.gain.setValueAtTime(0, contextoPiano.currentTime);
+            noteGain.gain.linearRampToValueAtTime(0.5, contextoPiano.currentTime + 0.02);
+            noteGain.gain.exponentialRampToValueAtTime(0.001, contextoPiano.currentTime + 1.5);
+
+            noteGain.connect(masterGain);
+            noteGain.connect(destinoGrabacion); 
 
             osc.connect(noteGain);
             osc.start();
-            osc.stop(audioCtx.currentTime + 1.5);
+            osc.stop(contextoPiano.currentTime + 1.5);
             elemento.oscilador = osc;
-        }
 
-        function soltarTecla(elemento) {
-            setTimeout(() => elemento.classList.remove('activa'), 100);
-            if (elemento.oscilador) {
-                try { 
-                    // Detener suavemente
-                    elemento.oscilador.stop(audioCtx.currentTime + 0.1); 
-                } catch(e) {}
+            if (modoActual === 'clases' && notaEsperada) {
+                if (item.id === notaEsperada) {
+                    indiceNota++;
+                    iluminarSiguienteNota();
+                }
             }
         }
 
-        function asignarEventos(tecla, freq) {
-            // Mouse
-            tecla.addEventListener('mousedown', (e) => { 
-                if(e.buttons === 1) tocarNota(freq, tecla); 
-            });
-            // Táctil (Android)
-            tecla.addEventListener('touchstart', (e) => { 
-                e.preventDefault(); // Evita scroll y menús raros
-                tocarNota(freq, tecla); 
-            });
-            
-            tecla.addEventListener('mouseup', () => soltarTecla(tecla));
-            tecla.addEventListener('mouseleave', () => soltarTecla(tecla));
-            tecla.addEventListener('touchend', () => soltarTecla(tecla));
+        function soltarTecla(elemento) {
+            setTimeout(() => elemento.classList.remove('activa'), 150);
+            if (elemento.oscilador) {
+                try { elemento.oscilador.stop(contextoPiano.currentTime + 0.1); } catch(e) {}
+            }
         }
 
-        // --- 6. GRABADORA (MICRÓFONO + PIANO) ---
+        function asignarEventos(tecla, item) {
+            const iniciar = (e) => { 
+                if(e.type === 'mousedown' && e.buttons !== 1) return;
+                tocarNota(item, tecla); 
+            };
+            const terminar = (e) => { soltarTecla(tecla); };
+
+            tecla.addEventListener('mousedown', iniciar);
+            tecla.addEventListener('touchstart', (e) => { e.preventDefault(); tocarNota(item, tecla); });
+            tecla.addEventListener('mouseup', terminar);
+            tecla.addEventListener('mouseleave', terminar);
+            tecla.addEventListener('touchend', terminar);
+        }
+
+        function iniciarClase(nombreCancion, btn) {
+            document.querySelectorAll('.btn-cancion').forEach(b => b.classList.remove('activa'));
+            if(btn) btn.classList.add('activa');
+
+            document.querySelectorAll('.tecla-guia').forEach(t => t.classList.remove('tecla-guia'));
+            cancionActual = canciones[nombreCancion];
+            indiceNota = 0;
+            document.getElementById('mensaje-clase').innerText = "¡Sigue la tecla amarilla!";
+            
+            // CENTRAR UNA VEZ AL INICIAR LA CANCIÓN
+            centrarPianoEnDoCentral();
+            
+            iluminarSiguienteNota();
+        }
+
+        function iluminarSiguienteNota() {
+            document.querySelectorAll('.tecla-guia').forEach(t => t.classList.remove('tecla-guia'));
+
+            if (indiceNota < cancionActual.length) {
+                notaEsperada = cancionActual[indiceNota];
+                const tecla = document.getElementById('tecla-' + notaEsperada);
+                
+                if (tecla) {
+                    tecla.classList.add('tecla-guia');
+                    // --- CORRECCIÓN: ELIMINADO EL SCROLL AQUÍ TAMBIÉN ---
+                    // El piano se quedará quieto.
+                }
+            } else {
+                notaEsperada = null;
+                document.getElementById('mensaje-clase').innerHTML = "¡FELICIDADES! 🎉";
+                if(typeof lanzarConfeti === 'function') lanzarConfeti();
+                if(typeof playSound === 'function') playSound('fanfarria');
+                setTimeout(() => {
+                    if(typeof mostrarModal === 'function') mostrarModal('victoria');
+                }, 1000);
+            }
+        }
+
+        function cambiarModo(modo) {
+            modoActual = modo;
+            document.getElementById('btn-modo-grabadora').classList.toggle('activo', modo === 'grabadora');
+            document.getElementById('btn-modo-clases').classList.toggle('activo', modo === 'clases');
+            const pGrab = document.getElementById('panel-grabadora');
+            const pClas = document.getElementById('panel-clases');
+
+            if (modo === 'grabadora') {
+                pGrab.style.display = 'flex'; pClas.style.display = 'none';
+                document.querySelectorAll('.tecla-guia').forEach(t => t.classList.remove('tecla-guia'));
+                notaEsperada = null;
+            } else {
+                pGrab.style.display = 'none'; pClas.style.display = 'flex';
+                document.getElementById('mensaje-clase').innerText = "Selecciona una canción";
+                centrarPianoEnDoCentral();
+            }
+            if(typeof playSound === 'function') playSound('click');
+        }
+
+        // Nueva Función: Solo centra al Do Central (c4) una vez, suavemente.
+        function centrarPianoEnDoCentral() {
+            const doCentral = document.getElementById('tecla-c4');
+            if(doCentral) {
+                doCentral.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+            }
+        }
+
+        // Centrar al cargar la página también
+        window.addEventListener('load', () => {
+             setTimeout(centrarPianoEnDoCentral, 500);
+        });
+
+        // Lógica de Grabadora
         const btnGrabar = document.getElementById('btn-grabar');
         const btnDetener = document.getElementById('btn-detener');
         const btnPlay = document.getElementById('btn-reproducir');
         const txtEstado = document.getElementById('estado-grabacion');
 
-// --- BUSCA ESTA PARTE EN TU CÓDIGO Y REEMPLÁZALA ---
-
         btnGrabar.onclick = async () => {
-            despertarAudio(); 
-
+            if (contextoPiano.state === 'suspended') contextoPiano.resume();
             try {
-                // AQUÍ ESTÁ EL TRUCO: Configuración "Pro" para música
-                // Desactivamos la cancelación de eco y supresión de ruido
-                // para que no corte la voz cuando suena el piano.
-                const constraints = {
-                    audio: {
-                        echoCancellation: false,
-                        noiseSuppression: false,
-                        autoGainControl: false,
-                        latency: 0
-                    }
-                };
-
-                const streamMic = await navigator.mediaDevices.getUserMedia(constraints);
-                const sourceMic = audioCtx.createMediaStreamSource(streamMic);
-                
-                // Conectar Micro a Grabadora
+                const streamMic = await navigator.mediaDevices.getUserMedia({audio: true});
+                const sourceMic = contextoPiano.createMediaStreamSource(streamMic);
                 sourceMic.connect(destinoGrabacion);
-
-                // --- RESTO DEL CÓDIGO IGUAL QUE ANTES ---
                 mediaRecorder = new MediaRecorder(destinoGrabacion.stream);
                 chunks = [];
-
-                mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
-                
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
                 mediaRecorder.onstop = () => {
                     const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
-                    audioUrl = window.URL.createObjectURL(blob);
-                    grabacionAudio.src = audioUrl;
-                    
+                    grabacionAudio.src = window.URL.createObjectURL(blob);
                     streamMic.getTracks().forEach(track => track.stop());
-                    
-                    btnPlay.style.display = 'inline-block';
-                    txtEstado.innerText = "¡Grabación terminada!";
-                    txtEstado.classList.remove('parpadeo');
+                    btnPlay.style.display = 'inline-block'; txtEstado.innerText = "¡Grabado! 🎤";
                     grabando = false;
                 };
-
-                mediaRecorder.start();
-                grabando = true;
-                
-                btnGrabar.style.display = 'none';
-                btnDetener.style.display = 'inline-block';
-                btnPlay.style.display = 'none';
-                txtEstado.innerText = "🔴 GRABANDO... (Toca y Canta)";
-                txtEstado.classList.add('parpadeo');
-
-            } catch (err) {
-                alert("Error al acceder al micrófono: " + err.message);
-                console.error(err);
-            }
+                mediaRecorder.start(); grabando = true;
+                btnGrabar.style.display = 'none'; btnDetener.style.display = 'inline-block'; btnPlay.style.display = 'none';
+                txtEstado.innerText = "🔴 Grabando...";
+            } catch (err) { alert("Necesito micrófono para grabar."); }
         };
-
-        btnDetener.onclick = () => {
-            if(mediaRecorder && grabando) {
-                mediaRecorder.stop();
-                btnDetener.style.display = 'none';
-                btnGrabar.style.display = 'inline-block';
-            }
-        };
-
-        btnPlay.onclick = () => {
-            txtEstado.innerText = "▶️ Reproduciendo...";
-            grabacionAudio.play();
-            grabacionAudio.onended = () => txtEstado.innerText = "Listo para grabar de nuevo";
-        };
+        btnDetener.onclick = () => { if(mediaRecorder && grabando) { mediaRecorder.stop(); btnDetener.style.display = 'none'; btnGrabar.style.display = 'inline-block'; } };
+        btnPlay.onclick = () => { txtEstado.innerText = "▶️ Reproduciendo..."; grabacionAudio.play(); grabacionAudio.onended = () => txtEstado.innerText = "¡Grabado! 🎤"; };
 
     </script>
 </body>
 </html>
-
