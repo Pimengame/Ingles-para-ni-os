@@ -7,8 +7,6 @@
     <link rel="stylesheet" href="estilos.css">
     <style>
         /* --- ESTILOS CORREGIDOS --- */
-        
-        /* Contenedor de los botones de modo */
         .selector-modos {
             display: flex; justify-content: center; gap: 20px; margin-bottom: 25px;
         }
@@ -26,7 +24,6 @@
         #btn-modo-grabadora.activo { border: 2px solid #f44336; color: #d32f2f; }
         #btn-modo-clases.activo { border: 2px solid #2196f3; color: #1565c0; }
 
-        /* Panel de canciones */
         .panel-canciones {
             display: none; justify-content: center; gap: 10px; flex-wrap: wrap;
             margin-bottom: 15px; animation: bajar 0.5s ease; width: 100%;
@@ -41,7 +38,6 @@
         .btn-cancion:hover { background: white; color: #3f51b5; }
         .btn-cancion.activa { background: #ff4081; border-color: white; color: white; transform: scale(1.05); }
 
-        /* Tecla Guía (Amarilla) */
         .tecla-blanca.tecla-guia {
             background: #ffeb3b !important;
             box-shadow: 0 0 30px #ffeb3b, inset 0 -5px 10px rgba(0,0,0,0.1) !important;
@@ -54,42 +50,22 @@
         }
         @keyframes latido { 0%{transform:scale(1);} 50%{transform:scale(1.02) translateY(2px);} 100%{transform:scale(1);} }
 
-        /* --- CORRECCIÓN VISUAL DEL MUEBLE --- */
         .mueble-piano {
-            /* Asegura que el mueble contenga todo y no se salga */
-            overflow: hidden; 
-            padding: 0 0 20px 0; /* Quitamos padding lateral para que las teclas lleguen al borde */
-            position: relative;
+            overflow: hidden; padding: 0 0 20px 0; position: relative;
         }
 
         .contenedor-teclas {
-            /* Alineación y Scroll */
-            display: flex; /* Flex para alinear teclas */
-            justify-content: center; /* Intenta centrar si cabe */
-            overflow-x: auto; /* Scroll horizontal si no cabe */
-            overflow-y: hidden;
-            padding-bottom: 10px;
-            margin: 0 auto; /* Centrado automático */
-            background: rgba(0,0,0,0.2); /* Sombra de fondo para las teclas */
-            border-top: 5px solid rgba(0,0,0,0.3); /* Sombra superior para dar profundidad */
-            
-            /* Corrección de scrollbar */
-            scrollbar-width: thin;
-            scrollbar-color: #90caf9 transparent;
+            display: flex; justify-content: center; overflow-x: auto; overflow-y: hidden;
+            padding-bottom: 10px; margin: 0 auto; background: rgba(0,0,0,0.2);
+            border-top: 5px solid rgba(0,0,0,0.3);
+            scrollbar-width: thin; scrollbar-color: #90caf9 transparent;
         }
         
-        /* Si la pantalla es pequeña, alineamos al inicio para poder hacer scroll */
-        @media (max-width: 800px) {
-            .contenedor-teclas {
-                justify-content: flex-start;
-            }
-        }
+        @media (max-width: 800px) { .contenedor-teclas { justify-content: flex-start; } }
 
         .tira-roja {
-            height: 15px; background: #b71c1c; margin-bottom: 0;
-            width: 100%;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            z-index: 20; position: relative;
+            height: 15px; background: #b71c1c; margin-bottom: 0; width: 100%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 20; position: relative;
         }
     </style>
 </head>
@@ -128,19 +104,18 @@
             <button class="btn-cancion" onclick="iniciarClase('cumple', this)">🎂 Cumpleaños</button>
             <button class="btn-cancion" onclick="iniciarClase('himno', this)">🎼 Alegría</button>
             <button class="btn-cancion" onclick="iniciarClase('tiburon', this)">🦈 Tiburón</button>
+            <button class="btn-cancion" onclick="iniciarClase('recuerdame', this)">🎸 Recuérdame</button>
+            <button class="btn-cancion" onclick="iniciarClase('dragonball', this)">🐉 Dragon Ball</button>
+            
             <div id="mensaje-clase" style="width: 100%; text-align: center; color: #ffeb3b; font-size: 1.4rem; margin-top: 10px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
         </div>
 
-        <div class="contenedor-teclas" id="miPiano">
-            </div>
+        <div class="contenedor-teclas" id="miPiano"></div>
     </div>
 
     <script src="motor.js"></script>
 
     <script>
-        // ==========================================
-        // 1. CONFIGURACIÓN DE AUDIO
-        // ==========================================
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const contextoPiano = new AudioContext();
         const masterGain = contextoPiano.createGain();
@@ -157,11 +132,7 @@
         let indiceNota = 0;
         let notaEsperada = null;
 
-        // ==========================================
-        // 2. DEFINICIÓN DE NOTAS (2 OCTAVAS)
-        // ==========================================
         const notas = [
-            // OCTAVA 3 (Grave)
             { id: "c3", nota: "Do", tipo: "b", freq: 130.81 }, { id: "cs3", nota: "", tipo: "n", freq: 138.59 },
             { id: "d3", nota: "Re", tipo: "b", freq: 146.83 }, { id: "ds3", nota: "", tipo: "n", freq: 155.56 },
             { id: "e3", nota: "Mi", tipo: "b", freq: 164.81 },
@@ -170,7 +141,6 @@
             { id: "a3", nota: "La", tipo: "b", freq: 220.00 }, { id: "as3", nota: "", tipo: "n", freq: 233.08 },
             { id: "b3", nota: "Si", tipo: "b", freq: 246.94 },
 
-            // OCTAVA 4 (Central)
             { id: "c4", nota: "Do", tipo: "b", freq: 261.63 }, { id: "cs4", nota: "", tipo: "n", freq: 277.18 },
             { id: "d4", nota: "Re", tipo: "b", freq: 293.66 }, { id: "ds4", nota: "", tipo: "n", freq: 311.13 },
             { id: "e4", nota: "Mi", tipo: "b", freq: 329.63 },
@@ -179,46 +149,36 @@
             { id: "a4", nota: "La", tipo: "b", freq: 440.00 }, { id: "as4", nota: "", tipo: "n", freq: 466.16 },
             { id: "b4", nota: "Si", tipo: "b", freq: 493.88 },
 
-            // OCTAVA 5 (Aguda)
             { id: "c5", nota: "Do", tipo: "b", freq: 523.25 }, { id: "cs5", nota: "", tipo: "n", freq: 554.37 },
             { id: "d5", nota: "Re", tipo: "b", freq: 587.33 }, { id: "ds5", nota: "", tipo: "n", freq: 622.25 },
             { id: "e5", nota: "Mi", tipo: "b", freq: 659.25 }
         ];
 
         const canciones = {
-            'estrellita': [
-                'c4','c4','g4','g4','a4','a4','g4',
-                'f4','f4','e4','e4','d4','d4','c4',
-                'g4','g4','f4','f4','e4','e4','d4',
-                'g4','g4','f4','f4','e4','e4','d4',
-                'c4','c4','g4','g4','a4','a4','g4',
-                'f4','f4','e4','e4','d4','d4','c4'
-            ],
-            'cumple': [
-                'c4','c4','d4','c4','f4','e4',
-                'c4','c4','d4','c4','g4','f4',
-                'c4','c4','c5','a4','f4','e4','d4',
-                'as4','as4','a4','f4','g4','f4'
-            ],
-            'himno': [
-                'e4','e4','f4','g4','g4','f4','e4','d4',
-                'c4','c4','d4','e4','e4','d4','d4',
-                'e4','e4','f4','g4','g4','f4','e4','d4',
-                'c4','c4','d4','e4','d4','c4','c4',
-                'd4','d4','e4','c4','d4','e4','f4','e4','c4',
-                'd4','e4','f4','e4','d4','c4','d4','g3'
-            ],
-            'tiburon': [
-                'd4','e4','g4','g4','g4','g4','g4','g4',
-                'd4','e4','g4','g4','g4','g4','g4','g4',
-                'd4','e4','g4','g4','g4','g4','g4','g4',
-                'g4','g4','f4'
+            'estrellita': ['c4','c4','g4','g4','a4','a4','g4','f4','f4','e4','e4','d4','d4','c4','g4','g4','f4','f4','e4','e4','d4','g4','g4','f4','f4','e4','e4','d4','c4','c4','g4','g4','a4','a4','g4','f4','f4','e4','e4','d4','d4','c4'],
+            'cumple': ['c4','c4','d4','c4','f4','e4','c4','c4','d4','c4','g4','f4','c4','c4','c5','a4','f4','e4','d4','as4','as4','a4','f4','g4','f4'],
+            'himno': ['e4','e4','f4','g4','g4','f4','e4','d4','c4','c4','d4','e4','e4','d4','d4','e4','e4','f4','g4','g4','f4','e4','d4','c4','c4','d4','e4','d4','c4','c4','d4','d4','e4','c4','d4','e4','f4','e4','c4','d4','e4','f4','e4','d4','c4','d4','g3'],
+            'tiburon': ['d4','e4','g4','g4','g4','g4','g4','g4','d4','e4','g4','g4','g4','g4','g4','g4','d4','e4','g4','g4','g4','g4','g4','g4','g4','g4','f4'],
+            'recuerdame': ['c4','e4','c4','c4','e4','c4','g3','e4','c4','e4','c4','e4','g4','f4','e4','d4','d4','e4','f4','e4','d4','c4','g3','a3','b3','c4','c4','c5','b4','a4','g4','f4','e4','f4','g4','f4','e4','d4','c4','e4','c4','c4','e4','c4','g3','e4','c4','e4','c4','e4','g4','f4','e4','d4','c4','c5','b4','c5','a4','a4','b4','a4','g4','f4','e4','f4','e4','f4','e4','d4','c4','c4','e4','c4'],
+            'dragonball': [
+                // Tu sonrisa tan resplandeciente (SOL SOL MI FA SOL LA SOL FA MI RE)
+                'g4','g4','e4','f4','g4','a4','g4','f4','e4','d4',
+                // A mi corazón deja encantado (MI MI DO RE MI FA MI RE DO SI LA)
+                'e4','e4','c4','d4','e4','f4','e4','d4','c4','b3','a3',
+                // Ven toma mi mano (LA LA DO LA SOL DO)
+                'a3','a3','c4','a3','g3','c4',
+                // Para huir de esta terrible oscuridad (RE MI FA MI RE DO RE)
+                'd4','e4','f4','e4','d4','c4','d4',
+                // Estribillo: El universo te puedo dar (DO DO DO DO DO SIb LAb SIb...) 
+                // Nota: Usamos as4 para SIb y gs4 para LAb
+                'c5','c5','c5','c5','c5','as4','gs4','as4','c5','as4','as4',
+                // Sin importar el tiempo (LA# SOL# SOL)
+                'as4','gs4','g4',
+                // Todo me voy a entregar
+                'g4','f4','f4','g4','ds4','f4','g4'
             ]
         };
 
-        // ==========================================
-        // 4. GENERACIÓN DEL PIANO
-        // ==========================================
         const pianoContainer = document.getElementById('miPiano');
         let blancasCount = 0;
         const anchoBlanca = 60; 
@@ -243,22 +203,15 @@
                     asignarEventos(tecla, item);
                 }
             });
-            // Ancho exacto para que el contenedor encaje perfecto
             pianoContainer.style.width = (blancasCount * anchoBlanca) + 'px';
         }
 
-        // ==========================================
-        // 5. LÓGICA DE SONIDO Y JUEGO
-        // ==========================================
         function tocarNota(item, elemento) {
             if (contextoPiano.state === 'suspended') contextoPiano.resume();
             
             if(elemento.classList.contains('activa')) return;
             elemento.classList.add('activa');
 
-            // --- CORRECCIÓN: ELIMINADO EL SCROLL AQUÍ ---
-            // Ya no hacemos scroll cada vez que se toca una nota.
-            
             const osc = contextoPiano.createOscillator();
             const noteGain = contextoPiano.createGain();
 
@@ -315,9 +268,7 @@
             indiceNota = 0;
             document.getElementById('mensaje-clase').innerText = "¡Sigue la tecla amarilla!";
             
-            // CENTRAR UNA VEZ AL INICIAR LA CANCIÓN
             centrarPianoEnDoCentral();
-            
             iluminarSiguienteNota();
         }
 
@@ -330,8 +281,6 @@
                 
                 if (tecla) {
                     tecla.classList.add('tecla-guia');
-                    // --- CORRECCIÓN: ELIMINADO EL SCROLL AQUÍ TAMBIÉN ---
-                    // El piano se quedará quieto.
                 }
             } else {
                 notaEsperada = null;
@@ -363,7 +312,6 @@
             if(typeof playSound === 'function') playSound('click');
         }
 
-        // Nueva Función: Solo centra al Do Central (c4) una vez, suavemente.
         function centrarPianoEnDoCentral() {
             const doCentral = document.getElementById('tecla-c4');
             if(doCentral) {
@@ -371,12 +319,10 @@
             }
         }
 
-        // Centrar al cargar la página también
         window.addEventListener('load', () => {
              setTimeout(centrarPianoEnDoCentral, 500);
         });
 
-        // Lógica de Grabadora
         const btnGrabar = document.getElementById('btn-grabar');
         const btnDetener = document.getElementById('btn-detener');
         const btnPlay = document.getElementById('btn-reproducir');
