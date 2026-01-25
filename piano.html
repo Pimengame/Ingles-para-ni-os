@@ -8,7 +8,8 @@
     <style>
         /* --- ESTILOS GENERALES --- */
         body {
-            overflow-x: hidden; /* Evita scroll lateral en toda la página */
+            overflow-x: hidden;
+            user-select: none; /* Evita seleccionar texto al tocar rápido */
         }
 
         /* --- BOTONES SUPERIORES --- */
@@ -27,7 +28,6 @@
 
         .btn-volver {
             position: relative; 
-            top: auto; left: auto;
             margin: 0;
         }
 
@@ -52,7 +52,7 @@
         /* --- SELECTOR DE MODOS --- */
         .selector-modos {
             display: flex; justify-content: center; gap: 20px; 
-            margin-top: 80px; /* Espacio para el header */
+            margin-top: 80px;
             margin-bottom: 25px;
         }
         .btn-modo {
@@ -73,6 +73,7 @@
         .panel-canciones {
             display: none; justify-content: center; gap: 10px; flex-wrap: wrap;
             margin-bottom: 15px; animation: bajar 0.5s ease; width: 100%;
+            max-width: 900px; margin-left: auto; margin-right: auto;
         }
         @keyframes bajar { from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
 
@@ -80,9 +81,30 @@
             background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5);
             padding: 8px 15px; border-radius: 15px; cursor: pointer;
             font-family: 'Fredoka One', cursive; font-size: 1rem; transition: 0.2s;
+            margin-bottom: 5px;
         }
         .btn-cancion:hover { background: white; color: #3f51b5; }
         .btn-cancion.activa { background: #ff4081; border-color: white; color: white; transform: scale(1.05); }
+
+        /* BOTÓN DE DEMO (NUEVO) */
+        .btn-demo {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 0 #2e7d32;
+            transition: all 0.2s;
+            font-family: 'Varela Round', sans-serif;
+            animation: aparecer 0.5s ease;
+        }
+        .btn-demo:active { transform: translateY(3px); box-shadow: none; }
+        .btn-demo:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+        @keyframes aparecer { from{opacity:0; transform:scale(0.8);} to{opacity:1; transform:scale(1);} }
 
         /* --- TECLAS GUÍA --- */
         .tecla-blanca.tecla-guia {
@@ -97,12 +119,12 @@
         }
         @keyframes latido { 0%{transform:scale(1);} 50%{transform:scale(1.02) translateY(2px);} 100%{transform:scale(1);} }
 
-        /* --- MUEBLE PIANO MEJORADO --- */
+        /* --- MUEBLE PIANO --- */
         .mueble-piano {
             overflow: hidden; 
             padding: 0 0 20px 0; 
             position: relative;
-            max-width: 100%; /* Asegura que no rompa el ancho en móviles */
+            max-width: 100%;
         }
 
         .tira-roja {
@@ -110,31 +132,24 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 20; position: relative;
         }
 
-        /* --- CONTENEDOR TECLAS CON SCROLL VISIBLE --- */
         .contenedor-teclas {
             display: flex;
-            justify-content: center; /* Intenta centrar */
-            overflow-x: auto; /* Scroll si no cabe */
+            justify-content: center;
+            overflow-x: auto;
             overflow-y: hidden;
-            padding-bottom: 20px; /* Espacio para scrollbar */
+            padding-bottom: 20px;
             margin: 0 auto;
             background: rgba(0,0,0,0.2);
             border-top: 5px solid rgba(0,0,0,0.3);
-            
-            /* Scrollbar estilo moderno */
             scrollbar-width: thin;
             scrollbar-color: #29b6f6 transparent;
-            -webkit-overflow-scrolling: touch; /* Suavidad en iPhone */
+            -webkit-overflow-scrolling: touch;
         }
         
-        /* En pantallas pequeñas, alinear al inicio para facilitar scroll */
         @media (max-width: 900px) {
-            .contenedor-teclas {
-                justify-content: flex-start;
-            }
+            .contenedor-teclas { justify-content: flex-start; }
         }
 
-        /* Aviso de deslizamiento */
         .aviso-scroll {
             display: none;
             color: #666;
@@ -191,11 +206,12 @@
             <button class="btn-cancion" onclick="iniciarClase('tiburon', this)">🦈 Tiburón</button>
             <button class="btn-cancion" onclick="iniciarClase('recuerdame', this)">🎸 Recuérdame</button>
             <button class="btn-cancion" onclick="iniciarClase('aladdin', this)">🧞‍♂️ Un Mundo Ideal</button>
-            
             <button class="btn-cancion" onclick="iniciarClase('dragonball', this)">🐉 Dragon Ball</button>
             <button class="btn-cancion" onclick="iniciarClase('slamdunk', this)">🏀 Slam Dunk</button>
             
-            <div id="mensaje-clase" style="width: 100%; text-align: center; color: #ffeb3b; font-size: 1.4rem; margin-top: 10px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+            <div id="area-mensajes" style="width: 100%; text-align: center; margin-top: 15px;">
+                <div id="mensaje-clase" style="color: #ffeb3b; font-size: 1.4rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+                <div id="contenedor-demo"></div> </div>
         </div>
 
         <div class="contenedor-teclas" id="miPiano">
@@ -206,22 +222,7 @@
 
     <script>
         // ==========================================
-        // 1. PANTALLA COMPLETA
-        // ==========================================
-        function togglePantallaCompleta() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert(`Error: ${err.message}`);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
-        }
-
-        // ==========================================
-        // 2. CONFIGURACIÓN DE AUDIO
+        // 1. CONFIGURACIÓN DE AUDIO
         // ==========================================
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         const contextoPiano = new AudioContext();
@@ -234,13 +235,16 @@
         let chunks = [];
         let grabacionAudio = new Audio();
         let grabando = false;
+        
+        // Variables para la clase y demo
         let modoActual = 'grabadora';
         let cancionActual = [];
         let indiceNota = 0;
         let notaEsperada = null;
+        let timeoutsDemo = []; // Para controlar la reproducción automática
 
         // ==========================================
-        // 3. DEFINICIÓN DE NOTAS (2 OCTAVAS)
+        // 2. DEFINICIÓN DE NOTAS
         // ==========================================
         const notas = [
             { id: "c3", nota: "Do", tipo: "b", freq: 130.81 }, { id: "cs3", nota: "", tipo: "n", freq: 138.59 },
@@ -272,13 +276,7 @@
             'recuerdame': ['c4','e4','c4','c4','e4','c4','g3','e4','c4','e4','c4','e4','g4','f4','e4','d4','d4','e4','f4','e4','d4','c4','g3','a3','b3','c4','c4','c5','b4','a4','g4','f4','e4','f4','g4','f4','e4','d4','c4','e4','c4','c4','e4','c4','g3','e4','c4','e4','c4','e4','g4','f4','e4','d4','c4','c5','b4','c5','a4','a4','b4','a4','g4','f4','e4','f4','e4','f4','e4','d4','c4','c4','e4','c4'],
             'dragonball': ['g4','g4','e4','f4','g4','a4','g4','f4','e4','d4','e4','e4','c4','d4','e4','f4','e4','d4','c4','b3','a3','a3','a3','c4','a3','g3','c4','d4','e4','f4','e4','d4','c4','d4','c5','c5','c5','c5','c5','as4','gs4','as4','c5','as4','as4','as4','gs4','g4','g4','f4','f4','g4','ds4','f4','g4'],
             'slamdunk': ['f4','f4','g4','a4','a4','g4','f4','g4','a4','g4','f4','g4','a4','c5','c5','c5','c5','a4','as4','a4','f4','a4','as4','c5','d5','c5','as4','a4','g4','f4','g4','a4','a4','c5','d5','e5','f4','g4','a4','as4','a4','g4','f4'],
-            /* --- NUEVA CANCIÓN AGREGADA: UN MUNDO IDEAL --- */
-            'aladdin': [
-                'a3','a3','b3','b3','cs4','cs4', // Yo te quiero enseñar...
-                'a3','gs3','fs3','gs3','a3','a3','fs3', // Este mundo espléndido...
-                'a3','b3','cs4','a3','gs3', // Un mundo ideal (Coro)
-                'fs3','a3','cs4','e4','d4','cs4','b3' // Será fantástico encontrar
-            ]
+            'aladdin': ['a3','a3','b3','b3','cs4','cs4','a3','gs3','fs3','gs3','a3','a3','fs3','a3','b3','cs4','a3','gs3','fs3','a3','cs4','e4','d4','cs4','b3']
         };
 
         const pianoContainer = document.getElementById('miPiano');
@@ -290,7 +288,6 @@
             notas.forEach(item => {
                 const tecla = document.createElement('div');
                 tecla.id = 'tecla-' + item.id; 
-                
                 if (item.tipo === 'b') {
                     tecla.className = 'tecla-blanca';
                     tecla.innerText = item.nota;
@@ -308,6 +305,9 @@
             pianoContainer.style.width = (blancasCount * anchoBlanca) + 'px';
         }
 
+        // ==========================================
+        // 3. MOTOR DE SONIDO Y LÓGICA DE DEMO
+        // ==========================================
         function tocarNota(item, elemento) {
             if (contextoPiano.state === 'suspended') contextoPiano.resume();
             
@@ -332,7 +332,8 @@
             osc.stop(contextoPiano.currentTime + 1.5);
             elemento.oscilador = osc;
 
-            if (modoActual === 'clases' && notaEsperada) {
+            // Lógica para modo clases
+            if (modoActual === 'clases' && notaEsperada && timeoutsDemo.length === 0) {
                 if (item.id === notaEsperada) {
                     indiceNota++;
                     iluminarSiguienteNota();
@@ -347,21 +348,74 @@
             }
         }
 
+        // --- FUNCIÓN PARA REPRODUCIR DEMO ---
+        function reproducirDemo() {
+            detenerDemo(); // Limpiar si ya hay una sonando
+            const btn = document.getElementById('btn-demo-play');
+            if(btn) btn.innerText = "⏹ Detener";
+
+            const velocidad = 500; // Milisegundos entre notas
+
+            cancionActual.forEach((idNota, index) => {
+                const tiempo = setTimeout(() => {
+                    const notaObj = notas.find(n => n.id === idNota);
+                    const elemento = document.getElementById('tecla-' + idNota);
+                    
+                    if (notaObj && elemento) {
+                        tocarNota(notaObj, elemento);
+                        // Soltar la tecla visualmente un poco después
+                        setTimeout(() => soltarTecla(elemento), velocidad - 100);
+                    }
+
+                    // Si es la última nota, restaurar botón
+                    if (index === cancionActual.length - 1) {
+                        setTimeout(() => {
+                            if(btn) btn.innerText = "🔊 Escuchar melodía";
+                        }, velocidad);
+                    }
+
+                }, index * velocidad);
+                
+                timeoutsDemo.push(tiempo);
+            });
+        }
+
+        function detenerDemo() {
+            timeoutsDemo.forEach(t => clearTimeout(t));
+            timeoutsDemo = [];
+            
+            // Limpiar teclas que se hayan quedado pegadas visualmente
+            document.querySelectorAll('.activa').forEach(el => {
+                el.classList.remove('activa');
+                // Intentar detener osciladores si están en el DOM (truco rápido)
+                if(el.oscilador) { try{el.oscilador.stop();}catch(e){} }
+            });
+
+            const btn = document.getElementById('btn-demo-play');
+            if(btn) btn.innerText = "🔊 Escuchar melodía";
+            
+            // Reiniciar guía visual
+            if(modoActual === 'clases') iluminarSiguienteNota();
+        }
+
         function asignarEventos(tecla, item) {
             const iniciar = (e) => { 
                 if(e.type === 'mousedown' && e.buttons !== 1) return;
+                // SI EL USUARIO TOCA, DETENER DEMO
+                if(timeoutsDemo.length > 0) detenerDemo();
                 tocarNota(item, tecla); 
             };
             const terminar = (e) => { soltarTecla(tecla); };
 
             tecla.addEventListener('mousedown', iniciar);
-            tecla.addEventListener('touchstart', (e) => { e.preventDefault(); tocarNota(item, tecla); });
+            tecla.addEventListener('touchstart', (e) => { e.preventDefault(); iniciar(e); }); // Pequeño fix para touch
             tecla.addEventListener('mouseup', terminar);
             tecla.addEventListener('mouseleave', terminar);
             tecla.addEventListener('touchend', terminar);
         }
 
         function iniciarClase(nombreCancion, btn) {
+            detenerDemo(); // Detener cualquier sonido anterior
             document.querySelectorAll('.btn-cancion').forEach(b => b.classList.remove('activa'));
             if(btn) btn.classList.add('activa');
 
@@ -370,32 +424,51 @@
             indiceNota = 0;
             document.getElementById('mensaje-clase').innerText = "¡Sigue la tecla amarilla!";
             
+            // CREAR BOTÓN DE DEMO DINÁMICAMENTE
+            const contenedorDemo = document.getElementById('contenedor-demo');
+            contenedorDemo.innerHTML = `<button id="btn-demo-play" class="btn-demo" onclick="toggleDemo()">🔊 Escuchar melodía</button>`;
+            
             centrarPianoEnDoCentral();
             iluminarSiguienteNota();
+        }
+
+        function toggleDemo() {
+            if(timeoutsDemo.length > 0) {
+                detenerDemo();
+            } else {
+                reproducirDemo();
+            }
         }
 
         function iluminarSiguienteNota() {
             document.querySelectorAll('.tecla-guia').forEach(t => t.classList.remove('tecla-guia'));
 
+            // No iluminar si está sonando la demo para no confundir
+            if(timeoutsDemo.length > 0) return;
+
             if (indiceNota < cancionActual.length) {
                 notaEsperada = cancionActual[indiceNota];
                 const tecla = document.getElementById('tecla-' + notaEsperada);
-                
-                if (tecla) {
-                    tecla.classList.add('tecla-guia');
-                }
+                if (tecla) tecla.classList.add('tecla-guia');
             } else {
                 notaEsperada = null;
                 document.getElementById('mensaje-clase').innerHTML = "¡FELICIDADES! 🎉";
+                document.getElementById('contenedor-demo').innerHTML = ""; // Quitar botón al terminar
+                
+                // Efecto victoria simple
                 if(typeof lanzarConfeti === 'function') lanzarConfeti();
-                if(typeof playSound === 'function') playSound('fanfarria');
-                setTimeout(() => {
-                    if(typeof mostrarModal === 'function') mostrarModal('victoria');
-                }, 1000);
+                // Sonido victoria simple
+                const osc = contextoPiano.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, contextoPiano.currentTime); // Do5
+                osc.frequency.setValueAtTime(659.25, contextoPiano.currentTime + 0.1); // Mi5
+                osc.connect(masterGain);
+                osc.start(); osc.stop(contextoPiano.currentTime + 0.3);
             }
         }
 
         function cambiarModo(modo) {
+            detenerDemo();
             modoActual = modo;
             document.getElementById('btn-modo-grabadora').classList.toggle('activo', modo === 'grabadora');
             document.getElementById('btn-modo-clases').classList.toggle('activo', modo === 'clases');
@@ -409,9 +482,9 @@
             } else {
                 pGrab.style.display = 'none'; pClas.style.display = 'flex';
                 document.getElementById('mensaje-clase').innerText = "Selecciona una canción";
+                document.getElementById('contenedor-demo').innerHTML = "";
                 centrarPianoEnDoCentral();
             }
-            if(typeof playSound === 'function') playSound('click');
         }
 
         function centrarPianoEnDoCentral() {
@@ -420,18 +493,26 @@
                 doCentral.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
             }
         }
+        
+        // PANTALLA COMPLETA
+        function togglePantallaCompleta() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => { alert(`Error: ${err.message}`); });
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
 
-        window.addEventListener('load', () => {
-             setTimeout(centrarPianoEnDoCentral, 500);
-        });
+        window.addEventListener('load', () => { setTimeout(centrarPianoEnDoCentral, 500); });
 
+        // GRABACIÓN
         const btnGrabar = document.getElementById('btn-grabar');
         const btnDetener = document.getElementById('btn-detener');
         const btnPlay = document.getElementById('btn-reproducir');
         const txtEstado = document.getElementById('estado-grabacion');
 
         btnGrabar.onclick = async () => {
-            if (contextoPiano.state === 'suspended') contextoPiano.resume();
+            if (contextoPiano.state === 'suspended') await contextoPiano.resume();
             try {
                 const streamMic = await navigator.mediaDevices.getUserMedia({audio: true});
                 const sourceMic = contextoPiano.createMediaStreamSource(streamMic);
