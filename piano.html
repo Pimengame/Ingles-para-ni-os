@@ -350,48 +350,63 @@
             ],
             'aladdin': [
                 // --- VERSO 1: "Yo te quiero enseñar..." ---
-                // F# - E - G - F# - D - A(baja)
-                'fs4','e4','g4','fs4','d4','a3', 
-                // "Este mundo espléndido" (Shining, shimmering, splendid)
-                'fs4','e4','g4','fs4','d4','fs4','e4', 
-                // "Ven princesa y deja a tu corazón soñar" (Tell me, princess...)
-                // Aquí está el truco: usa Re# (ds4) para que suene a la película
-                'e4','ds4','fs4','e4','cs4','e4','d4',
-                // "Yo te puedo mostrar..."
-                'cs4','d4','b3','cs4','e4','d4','a3',
+                {nota:'fs4', duracion:400}, {nota:'e4', duracion:200}, // Yo-te
+                {nota:'g4', duracion:400}, {nota:'fs4', duracion:200}, // quie-ro
+                {nota:'d4', duracion:400}, {nota:'a3', duracion:1000}, // en-se-ñar... (pausa)
 
-                // --- VERSO 2: "Cosas maravillosas..." ---
-                // F# - E - G - F# - D - A(baja)
-                'fs4','e4','g4','fs4','d4','a3',
-                // "Con la magia de mi alfombra..."
-                'fs4','e4','g4','fs4','d4','fs4','e4',
-                // "...vamos a volar"
-                'e4','ds4','fs4','e4','cs4','e4','d4',
-                // "Un mundo ideal..." (Pre-coro subida)
-                'cs4','d4','b3','cs4','e4','d4',
+                // "Este mundo espléndido"
+                {nota:'fs4', duracion:400}, {nota:'e4', duracion:200}, // Es-te
+                {nota:'g4', duracion:400}, {nota:'fs4', duracion:200}, // mun-do
+                {nota:'d4', duracion:400}, {nota:'fs4', duracion:400}, {nota:'e4', duracion:1200}, // es-plén-di-do
 
-                // --- CORO: "Un mundo ideal..." (A Whole New World) ---
-                // F# - G - B - A
-                'fs4','g4','b4','a4', 
-                // "Un mundo en el que tú y yo" (A new fantastic point of view)
-                'fs4','g4','b4','a4','e4','g4','fs4','fs4',
-                // "Podamos decidir, sin nadie que..." (No one to tell us no)
-                'fs4','g4','a4','cs5','b4','a4',
-                // "...nos diga no, o a dónde ir" (Or where to go)
-                'd5','cs5','d5','a4',
-                // "O a decirnos qué soñar" (Or say we're only dreaming)
-                'd4','fs4','e4','d4','b3','d4','e4',
+                // "Ven princesa..." (Aquí usamos el Re# mágico)
+                {nota:'e4', duracion:300}, {nota:'ds4', duracion:300}, // Ven-prin
+                {nota:'fs4', duracion:300}, {nota:'e4', duracion:300}, // ce-sa
+                {nota:'cs4', duracion:300}, {nota:'e4', duracion:300}, // y-de
+                {nota:'d4', duracion:1200}, // ja...
 
-                // --- CORO 2: "Un mundo ideal..." ---
-                'fs4','g4','b4','a4',
-                // "Para compartir..."
-                'fs4','g4','b4','a4','e4','g4','fs4','fs4',
-                // "Donde ya vi al subir..." (But when I'm way up here)
-                'fs4','g4','a4','cs5','b4','a4',
-                // "...con claridad" (It's crystal clear)
-                'd5','cs5','d5','a4',
-                // "Que ahora en un mundo ideal estoy" (That now I'm in a whole new world with you)
-                'd4','fs4','e4','d4','e4','fs4','e4','d4','cs4','d4'
+                // "A tu corazón soñar"
+                {nota:'cs4', duracion:300}, {nota:'d4', duracion:300}, // a-tu
+                {nota:'b3', duracion:300}, {nota:'cs4', duracion:300}, // co-ra
+                {nota:'e4', duracion:400}, {nota:'d4', duracion:400}, {nota:'a3', duracion:1000}, // zón-so-ñar
+
+                // --- CORO: "Un mundo ideal..." ---
+                {nota:'fs4', duracion:300}, {nota:'g4', duracion:300}, // Un-mun
+                {nota:'b4', duracion:600}, {nota:'a4', duracion:1200}, // do-i-deal...
+
+                // "Un mundo en el que tú y yo"
+                {nota:'fs4', duracion:300}, {nota:'g4', duracion:300}, // Un-mun
+                {nota:'b4', duracion:400}, {nota:'a4', duracion:400}, // do-en-el
+                {nota:'e4', duracion:300}, {nota:'g4', duracion:300}, {nota:'fs4', duracion:1000}, // que-tú-y-yo
+
+                // "Podamos decidir"
+                {nota:'fs4', duracion:300}, {nota:'g4', duracion:300}, // Po-da
+                {nota:'a4', duracion:400}, {nota:'cs5', duracion:400}, // mos-de
+                {nota:'b4', duracion:600}, {nota:'a4', duracion:800}, // ci-dir
+
+                // "Sin nadie que nos diga no"
+                {nota:'d5', duracion:400}, {nota:'cs5', duracion:400}, // Sin-na
+                {nota:'d5', duracion:600}, {nota:'a4', duracion:1000}, // die-que...
+
+                // "O a dónde ir"
+                {nota:'d4', duracion:300}, {nota:'fs4', duracion:300}, // O-a
+                {nota:'e4', duracion:300}, {nota:'d4', duracion:300}, // don-de
+                {nota:'b3', duracion:400}, {nota:'d4', duracion:400}, {nota:'e4', duracion:1000}, // ir...
+
+                // --- FINAL: "Un mundo ideal..." (Repetición) ---
+                {nota:'fs4', duracion:300}, {nota:'g4', duracion:300}, // Un-mun
+                {nota:'b4', duracion:600}, {nota:'a4', duracion:1200}, // do-i-deal
+
+                // "Que compartir"
+                {nota:'fs4', duracion:300}, {nota:'g4', duracion:300}, // Que-com
+                {nota:'b4', duracion:600}, {nota:'a4', duracion:1200}, // par-tir
+
+                // "Que ahora en un mundo ideal estoy"
+                {nota:'d4', duracion:300}, {nota:'fs4', duracion:300}, // Que-a
+                {nota:'e4', duracion:300}, {nota:'d4', duracion:300}, // ho-ra
+                {nota:'e4', duracion:300}, {nota:'fs4', duracion:300}, // en-un
+                {nota:'e4', duracion:300}, {nota:'d4', duracion:300}, // mun-do
+                {nota:'cs4', duracion:400}, {nota:'d4', duracion:1500} // i-deal-es-toy
             ],
         };
 
@@ -662,6 +677,7 @@
     </script>
 </body>
 </html>
+
 
 
 
