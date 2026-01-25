@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guardianes del Código: Platinum Final</title>
+    <style>
+        /* --- ESTILOS VISUALES --- */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Exo+2:wght@400;700&display=swap');
+
+        :root {
+            --bg-space: #050011;
+            --panel-bg: rgba(15, 20, 40, 0.95);
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff0055;
+            --neon-gold: #ffd700;
+            --neon-green: #39ff14;
+            --font-tech: 'Orbitron', sans-serif;
+            --font-read: 'Exo 2', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-space); color: white; margin: 0; height: 100vh; overflow: hidden;
+            font-family: var(--font-read); user-select: none; touch-action: manipulation;
+        }
+
+        /* FONDO ANIMADO */
+        .stars-container { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-2; overflow:hidden; }
+        .stars-1 { width:100%; height:200%; background: radial-gradient(white 1px, transparent 1px) 0 0 / 50px 50px; animation: moveStars 100s linear infinite; opacity:0.5; }
+        .stars-2 { width:100%; height:200%; background: radial-gradient(white 2px, transparent 2px) 0 0 / 100px 100px; animation: moveStars 60s linear infinite; opacity:0.3; }
+        @keyframes moveStars { from {transform:translateY(0);} to {transform:translateY(-50%);} }
+
+        /* UI PRINCIPAL */
+        .app { display: flex; justify-content: center; align-items: center; height: 100%; }
+        .game-frame {
+            background: var(--panel-bg); border: 3px solid var(--neon-cyan); box-shadow: 0 0 30px rgba(0,243,255,0.3);
+            border-radius: 25px; width: 95%; max-width: 600px; height: 95vh; max-height: 850px;
+            position: relative; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(10px);
+        }
+
+        .screen { flex: 1; display: none; flex-direction: column; align-items: center; padding: 20px; animation: fadeIn 0.5s ease-out; }
+        .screen.active { display: flex; }
+        
+        /* CORRECCIÓN: Menú con Scroll */
+        #screen-menu { 
+            justify-content: flex-start; /* Empezar arriba */
+            overflow-y: auto; /* Permitir bajar */
+        }
+        #screen-menu::-webkit-scrollbar { width: 6px; }
+        #screen-menu::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 3px; }
+
+        #screen-battle { justify-content: space-between; overflow: hidden; }
+
+        @keyframes fadeIn { from{opacity:0; transform:scale(0.98);} to{opacity:1; transform:scale(1);} }
+
+        /* TYPOGRAPHY & BOTONES */
+        h1 { color: var(--neon-cyan); text-shadow: 0 0 15px var(--neon-cyan); font-family: var(--font-tech); text-align: center; font-size: 1.5rem; margin-bottom: 5px; margin-top: 10px; }
+        
+        .btn {
+            background: linear-gradient(180deg, var(--neon-cyan), #0072ff); border: none; padding: 12px 25px;
+            color: #000; font-family: var(--font-tech); font-weight: 800; font-size: 1rem;
+            border-radius: 50px; cursor: pointer; margin: 5px; box-shadow: 0 0 15px var(--neon-cyan);
+            transition: all 0.2s; width: 80%; max-width: 300px; flex-shrink: 0;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-shop { background: linear-gradient(180deg, var(--neon-gold), #ff8800); box-shadow: 0 0 15px var(--neon-gold); }
+        .btn-secondary { background: #333; color: white; box-shadow: none; border: 1px solid #555; width: auto; padding: 5px 15px; font-size: 0.9rem; }
+
+        select { padding: 10px; width: 80%; background: rgba(0,0,0,0.6); border: 2px solid var(--neon-cyan); color: white; border-radius: 10px; margin-bottom: 10px; font-family: var(--font-read); flex-shrink: 0;}
+
+        /* BATALLA UI */
+        .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: rgba(0,0,0,0.3); font-family: var(--font-tech); font-size: 0.9rem; }
+        .coin-display { color: var(--neon-gold); font-size: 1.2rem; display: flex; align-items: center; gap: 5px; }
+        
+        .battle-arena { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-grow: 1; padding: 0 20px; position: relative; }
+        .combatant { text-align: center; width: 40%; position: relative; z-index: 2; }
+        .sprite { font-size: 4rem; filter: drop-shadow(0 0 20px rgba(255,255,255,0.2)); transition: transform 0.3s; }
+        
+        .hp-container { width: 100%; height: 8px; background: #222; border-radius: 5px; margin-top: 10px; overflow: hidden; }
+        .hp-bar { height: 100%; width: 100%; transition: width 0.4s; }
+        #player-hp { background: var(--neon-green); }
+        #enemy-hp { background: var(--neon-pink); }
+
+        .control-panel { background: rgba(0,0,0,0.4); width: 100%; padding: 15px; text-align: center; border-top: 2px solid var(--neon-cyan); z-index: 2; }
+        .math-input { background: transparent; border: none; border-bottom: 3px solid var(--neon-cyan); color: var(--neon-cyan); font-size: 2.5rem; font-family: var(--font-tech); text-align: center; width: 150px; outline: none; }
+
+        /* MODALES */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 0, 15, 0.95); z-index: 50;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            padding: 20px; box-sizing: border-box; backdrop-filter: blur(15px);
+        }
+        
+        /* TIENDA GRID */
+        .shop-grid { 
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; 
+            width: 100%; max-height: 60vh; overflow-y: auto; padding: 10px;
+        }
+        .shop-item {
+            background: rgba(255,255,255,0.1); border: 2px solid #555; border-radius: 10px; padding: 10px;
+            display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s;
+        }
+        .shop-item.owned { border-color: var(--neon-green); background: rgba(0, 50, 0, 0.5); }
+        .shop-item.selected { border-color: var(--neon-gold); box-shadow: 0 0 15px var(--neon-gold); transform: scale(1.05); }
+        .shop-price { font-weight: bold; color: var(--neon-gold); margin-top: 5px; }
+
+        /* HISTORIA MEJORADA */
+        .story-box { 
+            border: 2px solid var(--neon-gold); 
+            background: rgba(40, 30, 10, 0.9); 
+            padding: 20px; 
+            border-radius: 15px; 
+            text-align: left; 
+            margin-bottom: 20px;
+            height: 180px; overflow-y: auto; display: flex; align-items: flex-start;
+        }
+
+        /* FX */
+        .laser-beam { position: absolute; height: 6px; background: white; box-shadow: 0 0 10px var(--neon-cyan); border-radius: 3px; z-index: 1; pointer-events: none; transform-origin: left center; }
+        .shake-screen { animation: shakeHard 0.5s; }
+        .hit-enemy { animation: flashDamage 0.4s; }
+        @keyframes shakeHard { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+        @keyframes flashDamage { 50%{filter:sepia(1) hue-rotate(-50deg) saturate(5) brightness(2);} }
+
+        /* --- NUEVOS ESTILOS (Combos, Poderes, Reportes, Mascotas) --- */
+        .combo-box {
+            position: absolute; top: 60px; right: 20px;
+            font-family: var(--font-tech); font-size: 1.5rem;
+            color: var(--neon-gold); text-shadow: 0 0 10px var(--neon-pink);
+            transform: rotate(-5deg); opacity: 0; transition: all 0.3s; pointer-events: none;
+        }
+        .combo-active { opacity: 1; transform: scale(1.2) rotate(-5deg); }
+
+        .visual-hint-container {
+            display: flex; justify-content: center; gap: 10px;
+            margin-top: 5px; margin-bottom: 5px; font-size: 1rem; color: #ddd;
+        }
+        .hint-group { display: flex; gap: 2px; }
+
+        .powerups-container { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+        .btn-power {
+            background: linear-gradient(180deg, #444, #222); border: 1px solid #666; color: #fff;
+            padding: 8px 12px; border-radius: 8px; cursor: pointer;
+            font-family: var(--font-tech); font-size: 0.8rem;
+            display: flex; flex-direction: column; align-items: center; transition: all 0.2s;
+        }
+        .btn-power:active { transform: scale(0.95); }
+
+        .report-list { list-style: none; padding: 0; margin: 10px 0; max-height: 100px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 5px; }
+        .report-item { padding: 5px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; display: flex; justify-content: space-between; }
+        .val-wrong { color: var(--neon-pink); text-decoration: line-through; margin-right: 5px;}
+        .val-correct { color: var(--neon-green); font-weight: bold; }
+
+        /* ESTILOS MASCOTA */
+        .pet-container {
+            background: rgba(255, 255, 255, 0.1); border: 2px solid var(--neon-green);
+            border-radius: 15px; padding: 10px; margin: 10px 0; text-align: center;
+            width: 80%; animation: breathe 3s infinite ease-in-out; cursor: pointer; flex-shrink: 0;
+        }
+        .pet-icon { font-size: 3rem; display: block; margin-bottom: 5px; transition: transform 0.2s; }
+        .pet-container:hover .pet-icon { transform: scale(1.1) rotate(5deg); }
+        .pet-info { font-size: 0.8rem; color: #ddd; }
+        .pet-bar-bg { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 5px; overflow: hidden; }
+        .pet-bar-fill { height: 100%; background: var(--neon-green); width: 0%; transition: width 0.5s; }
+        @keyframes breathe { 0%, 100% { box-shadow: 0 0 10px rgba(57, 255, 20, 0.2); } 50% { box-shadow: 0 0 25px rgba(57, 255, 20, 0.5); } }
+        
+        .mini-pet { 
+            position: absolute; bottom: -10px; left: -20px; 
+            font-size: 2rem; z-index: 3; filter: drop-shadow(0 0 5px var(--neon-green));
+        }
+        /* --- ESTILOS DE EVOLUCIÓN (NUEVO) --- */
+.evo-container {
+    display: flex; flex-direction: column; align-items: center;
+    position: relative; padding: 40px;
+}
+
+/* El resplandor giratorio de fondo */
+.sunburst {
+    position: absolute; top: 50%; left: 50%;
+    width: 300px; height: 300px;
+    background: conic-gradient(from 0deg, transparent 0%, var(--neon-green) 10%, transparent 20%, var(--neon-green) 30%, transparent 40%, var(--neon-green) 50%, transparent 60%, var(--neon-green) 70%, transparent 80%, var(--neon-green) 90%, transparent 100%);
+    transform: translate(-50%, -50%);
+    opacity: 0.3; border-radius: 50%; z-index: -1;
+    animation: spinBurst 10s linear infinite;
+}
+
+/* Animación de la mascota apareciendo */
+.evo-pet-big {
+    font-size: 8rem; 
+    filter: drop-shadow(0 0 30px var(--neon-green));
+    animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes spinBurst { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes popIn { 0% { transform: scale(0) rotate(-180deg); opacity: 0; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+
+/* Partículas de Confeti */
+.confetti {
+    position: absolute; width: 10px; height: 10px;
+    background: var(--neon-gold);
+    animation: fall 2s linear forwards;
+}
+@keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+/* --- ESTILOS DE DESTRUCCIÓN ÉPICA --- */
+
+/* 1. Partículas de explosión del enemigo */
+.debris {
+    position: absolute; width: 8px; height: 8px;
+    border-radius: 2px; pointer-events: none; z-index: 10;
+}
+
+/* 2. Animación de Muerte del Enemigo */
+.enemy-die {
+    animation: dieShake 0.5s forwards;
+}
+@keyframes dieShake {
+    0% { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); }
+    20% { transform: scale(1.2) rotate(-10deg) skew(20deg); filter: hue-rotate(90deg) brightness(2); }
+    40% { transform: scale(0.8) rotate(10deg) skew(-20deg); filter: hue-rotate(180deg) brightness(3); }
+    100% { transform: scale(0) rotate(180deg); opacity: 0; }
+}
+
+/* 3. MODAL FINAL DEL JUEGO (Estilo Matrix/Hacker) */
+.finale-content {
+    text-align: center; color: var(--neon-cyan);
+    font-family: 'Courier New', monospace; /* Estilo terminal */
+}
+.glitch-text {
+    font-size: 3rem; font-weight: bold; position: relative;
+    color: white; animation: glitch 1s infinite;
+}
+@keyframes glitch {
+    0% { text-shadow: 2px 0 red, -2px 0 blue; }
+    25% { text-shadow: -2px 0 red, 2px 0 blue; }
+    50% { text-shadow: 2px 0 red, -2px 0 blue; }
+    75% { text-shadow: -2px 0 red, 2px 0 blue; }
+    100% { text-shadow: 2px 0 red, -2px 0 blue; }
+}
+.boss-defeat-icon {
+    font-size: 6rem; margin: 20px;
+    animation: dissolve 3s forwards;
+}
+@keyframes dissolve {
+    0% { opacity: 1; filter: blur(0px); transform: scale(1); }
+    50% { opacity: 0.8; filter: blur(5px) hue-rotate(180deg); transform: scale(1.1) skew(10deg); }
+    100% { opacity: 0; filter: blur(20px); transform: scale(2); }
+}
+/* Animación de destrucción para el modal */
+.glitch-die {
+    animation: glitchBoom 1s forwards;
+}
+
+@keyframes glitchBoom {
+    0% { transform: scale(1) translate(0,0); filter: hue-rotate(0deg); opacity: 1; }
+    20% { transform: scale(1.2) translate(-10px, 10px); filter: hue-rotate(90deg); }
+    40% { transform: scale(0.9) translate(10px, -10px) skew(20deg); filter: invert(1); }
+    60% { transform: scale(1.1) translate(-5px, 5px) skew(-20deg); opacity: 0.8; }
+    80% { transform: scale(1.5); filter: blur(10px); opacity: 0.5; }
+    100% { transform: scale(2); filter: blur(20px); opacity: 0; }
+}
+
+    </style>
+</head>
+<body>
+
+<div class="stars-container"><div class="stars-1"></div><div class="stars-2"></div></div>
+
+<div class="app">
+    <div class="game-frame" id="main-frame">
+        
+        <div id="screen-menu" class="screen active">
+            <div style="font-size:4rem; margin-bottom:5px;">🌌🚀</div>
+            <h1>GUARDIANES DEL CÓDIGO<br><span style="font-size:0.9rem; color:var(--neon-gold);">PLATINUM EDITION</span></h1>
+            
+            <div class="coin-display" style="margin-bottom: 10px;">
+                Tus Monedas: <span id="menu-coins" style="font-weight:bold; margin-left:5px;">0</span> 💰
+            </div>
+
+            <div class="pet-container" onclick="petInteraction()">
+                <div class="pet-icon" id="menu-pet-icon">🥚</div>
+                <div style="font-weight:bold; color:var(--neon-green); font-size:0.9rem;" id="menu-pet-name">Huevo</div>
+                <div class="pet-info">Nivel <span id="pet-lvl">1</span></div>
+                <div class="pet-bar-bg"><div class="pet-bar-fill" id="pet-xp-bar"></div></div>
+                <div style="font-size:0.7rem; margin-top:2px; color:#aaa;">Click me!</div>
+            </div>
+
+            <select id="lang-select">
+                <option value="es">Español</option>
+                <option value="en">English (Aprender)</option>
+                <option value="pt">Português (Aprender)</option>
+                <option value="zh">中文 (Aprender)</option>
+            </select>
+            
+            <select id="age-select">
+                <option value="cadet">Cadete (5-7)</option>
+                <option value="captain">Capitán (8-10)</option>
+                <option value="commander">Comandante (11-12+)</option>
+            </select>
+
+            <button class="btn" onclick="initStoryMode()">INICIAR MISIÓN</button>
+            <button class="btn btn-shop" onclick="openShop()">HANGAR (TIENDA)</button>
+            <div style="height: 20px;"></div> </div>
+
+        <div id="screen-battle" class="screen" style="padding:0;">
+            <div class="top-bar">
+                <button class="btn btn-secondary" onclick="goToMenu()">🏠 MENU</button>
+                <div class="coin-display"><span id="battle-coins">0</span> 💰</div>
+                <div style="color:var(--neon-cyan)">CAP <span id="chap-num">1</span>/10</div>
+            </div>
+
+            <div id="combo-display" class="combo-box">COMBO x0</div>
+
+            <div class="battle-arena">
+                <div class="combatant">
+                    <div class="sprite" id="player-sprite">🚀</div>
+                    <div class="mini-pet" id="battle-pet">🥚</div>
+                    <div class="hp-container"><div class="hp-bar" id="player-hp"></div></div>
+                </div>
+                <div style="font-size:2rem; opacity:0.5;">VS</div>
+                <div class="combatant">
+                    <div class="sprite" id="enemy-sprite">👾</div>
+                    <div class="hp-container"><div class="hp-bar" id="enemy-hp"></div></div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <div id="math-display" style="font-family:var(--font-tech); font-size:2.5rem; margin-bottom:5px;">...</div>
+                
+                <div id="visual-hint" class="visual-hint-container"></div>
+
+                <input type="tel" pattern="[0-9]*" inputmode="numeric" id="answer-input" class="math-input" placeholder="?" autocomplete="off">
+                
+                <button class="btn" onclick="fireWeapon()" style="width:100%; margin-top:10px; padding:10px;">DISPARAR 🔥</button>
+
+                <div class="powerups-container">
+                    <button class="btn-power" onclick="usePowerUp('hack')">
+                        <span>💾</span> <small>50💰</small>
+                    </button>
+                    <button class="btn-power" onclick="usePowerUp('shield')">
+                        <span>🛡️</span> <small>30💰</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-story" class="modal-overlay">
+            <h2 id="story-header" style="color:var(--neon-gold);">TRANSMISIÓN</h2>
+            <div class="story-box" style="flex-direction: column;">
+                <div style="display:flex; align-items:flex-start; width:100%; margin-bottom:10px;">
+                    <div style="font-size:3rem; margin-right:15px;">🤖</div>
+                    <div id="story-base" class="story-text" style="color:#fff;">...</div>
+                </div>
+                <div id="story-learn" class="story-text" style="color:var(--neon-cyan); border-top:1px dashed #555; padding-top:10px; width:100%; display:none;">
+                    ...
+                </div>
+            </div>
+            <button class="btn" id="story-btn-action" onclick="proceedFromStory()">CONTINUAR >></button>
+            <button class="btn btn-secondary" onclick="stopNarrator()" style="margin-top:10px;">Silenciar</button>
+        </div>
+
+        <div id="modal-shop" class="modal-overlay">
+            <h2 style="color:var(--neon-gold);">HANGAR DE NAVES</h2>
+            <p>Monedas disponibles: <span id="shop-coins-val" style="color:var(--neon-gold); font-weight:bold;">0</span> 💰</p>
+            <div class="shop-grid" id="shop-grid"></div>
+            <button class="btn btn-secondary" onclick="closeShop()" style="margin-top:20px; width:80%;">VOLVER AL MENÚ</button>
+        </div>
+
+    </div>
+</div>
+<div id="modal-evolution" class="modal-overlay" style="background: rgba(0,0,0,0.95);">
+    <div class="evo-container">
+        <div class="sunburst"></div> <h1 style="color:var(--neon-green); font-size:2.5rem; margin:0; text-shadow:0 0 20px var(--neon-green);">¡EVOLUCIÓN!</h1>
+        
+        <div class="evo-pet-big" id="evo-icon-display">🐲</div>
+        
+        <h2 id="evo-name-display" style="color:white; font-size:2rem; margin:10px 0;">Dragón</h2>
+        <p id="evo-msg-display" style="color:#aaa; font-size:1.2rem;">¡Ahora es más fuerte!</p>
+        
+        <button class="btn" onclick="closeEvoModal()" style="margin-top:20px; font-size:1.2rem;">¡INCREÍBLE!</button>
+    </div>
+</div>
+<div id="modal-finale" class="modal-overlay" style="background: black;">
+    <div class="finale-content">
+        <h1 class="glitch-text">SISTEMA PURGADO</h1>
+        
+        <div id="final-boss-vis" class="boss-defeat-icon">👹</div>
+        
+        <p style="font-size:1.2rem; margin-top:20px;">AMENAZA ELIMINADA.</p>
+        <p style="color:#aaa;">Has salvado el universo matemático.</p>
+        
+        <div style="margin-top:30px; border:1px solid var(--neon-cyan); padding:10px;">
+            REPORTE FINAL:<br>
+            <span style="color:var(--neon-gold); font-size:1.5rem;">MISIÓN CUMPLIDA</span>
+        </div>
+
+        <button class="btn" onclick="location.reload()" style="margin-top:40px;">REINICIAR SISTEMA</button>
+    </div>
+</div>
+<div id="modal-destruction" class="modal-overlay" style="background: rgba(20, 0, 0, 0.9);">
+    <div class="evo-container">
+        <h1 style="color:var(--neon-pink); font-size:2.5rem; text-shadow:0 0 20px red;">¡ENEMIGO CAÍDO!</h1>
+        
+        <div id="destruct-icon" style="font-size:8rem; margin: 20px; transition: all 0.5s;">👾</div>
+        
+        <div id="destruct-msg" style="color:#fff; font-size:1.2rem; margin-bottom:20px;">
+            Amenaza eliminada del sistema.
+        </div>
+        
+        <button class="btn" onclick="finishLevel()" style="border-color:var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink);">
+            RECOGER RECOMPENSA >>
+        </button>
+    </div>
+</div>
+<div id="modal-video-ending" class="modal-overlay" style="background: black; z-index: 200;">
+    <div style="position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+        <video id="final-video-player" style="max-width: 100%; max-height: 100%; width: 100%;" controls>
+            <source src="final.MP4" type="video/mp4">
+            Tu navegador no soporta videos.
+        </video>
+        
+        <button onclick="endVideoSequence()" style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.5); color: white; border: 1px solid white; padding: 10px; cursor: pointer;">
+            SALTAR VIDEO ⏭️
+        </button>
+    </div>
+</div>
+
+<script>
+    // --- COLORES DE FONDO POR NIVEL ---
+const BG_THEMES = [
+    "linear-gradient(to bottom, #050011, #101030)", // Nivel 1: Espacio Profundo
+    "linear-gradient(to bottom, #1a0b2e, #4b1d3f)", // Nivel 2: Asteroides (Morado oscuro)
+    "linear-gradient(to bottom, #001220, #004e92)", // Nivel 3: Planeta Hielo (Azul frío)
+    "linear-gradient(to bottom, #1f2833, #45a29e)", // Nivel 4: La Nube (Verde azulado oscuro)
+    "linear-gradient(to bottom, #300000, #800000)", // Nivel 5: Firewall (Rojo intenso)
+    "linear-gradient(to bottom, #001100, #003300)", // Nivel 6: Password (Verde Hacker)
+    "radial-gradient(circle, #2c003e, #000000)",    // Nivel 7: Espagueti (Vórtice)
+    "linear-gradient(to right, #0f2027, #203a43)",  // Nivel 8: Base de Datos (Tecnológico)
+    "repeating-linear-gradient(45deg, #101010, #101010 10px, #202020 10px, #202020 20px)", // Nivel 9: Error 404 (Rayado Glitch)
+    "radial-gradient(circle, #500000, #000000)"     // Nivel 10: EL NÚCLEO (Infierno final)
+];
+    // --- DATOS NAVES ---
+    const SHIPS_DB = [
+        { id: 0, icon: "🚀", name: "Alpha", price: 0 },
+        { id: 1, icon: "🛸", name: "UFO", price: 50 },
+        { id: 2, icon: "🚁", name: "Falcon", price: 100 },
+        { id: 3, icon: "🛩️", name: "Jet", price: 200 },
+        { id: 4, icon: "🏎️", name: "Racer", price: 300 },
+        { id: 5, icon: "🚤", name: "Speeder", price: 400 },
+        { id: 6, icon: "🐲", name: "Dragon", price: 800 },
+        { id: 7, icon: "🦄", name: "Magic", price: 1000 }
+    ];
+
+    // --- DATOS MASCOTAS ---
+    const PET_STAGES = [
+        { lvl: 1, xp: 0, icon: "🥚", name: "Huevo Misterioso", msg: "¡Un huevo espacial! ¿Qué saldrá?" },
+        { lvl: 2, xp: 50, icon: "🐣", name: "Pollito Code", msg: "¡Ha nacido! Le gustan los números." },
+        { lvl: 3, xp: 150, icon: "🦉", name: "Búho Sabio", msg: "¡Se ha vuelto muy inteligente!" },
+        { lvl: 4, xp: 300, icon: "🐕", name: "Ciber-Perro", msg: "¡Protege tu nave de los virus!" },
+        { lvl: 5, xp: 600, icon: "🐲", name: "Dragón Binario", msg: "¡La forma definitiva! Poder puro." }
+    ];
+
+    // --- DATOS HISTORIA ---
+    const STORY_DB = {
+        es: [
+            { title: "Cap 1: El Despertar", text: "¡Cadete! El 'General Glitch' ha infectado la galaxia. Está borrando las tablas de multiplicar. ¡Tu misión es depurar el sistema a cañonazos!", reward: 20 },
+            { title: "Cap 2: Lluvia de Bugs", text: "Entramos en un campo de asteroides de código roto. Si te tocan, te convertirán en una tostadora. ¡Calcula rápido para desintegrarlos!", reward: 30 },
+            { title: "Cap 3: Planeta Cero", text: "Glitch ha congelado la RAM. Los números se vuelven negativos por el frío. ¡Tus respuestas correctas generan calor! ¡Suma rápido!", reward: 40 },
+            { title: "Cap 4: La Nube", text: "Estamos en 'La Nube'. Hay niebla y el Wi-Fi va lento. Los enemigos usan lag para esconderse. ¡Usa tu radar matemático!", reward: 50 },
+            { title: "Cap 5: El Firewall", text: "¡Cuidado! Este planeta es un Firewall de fuego real. Glitch intenta sobrecalentar tu nave. ¡Resta enemigos para enfriar el CPU!", reward: 60 },
+            { title: "Cap 6: Password", text: "El portal de salida tiene contraseña. La pista dice: 'Solo el que sepa sumar pasará'. ¡Hackearemos la puerta con respuestas!", reward: 70 },
+            { title: "Cap 7: Espagueti", text: "Caímos en la dimensión 'Código Espagueti'. La lógica está enredada. Arriba es abajo. ¡Concéntrate para no volverte loco!", reward: 80 },
+            { title: "Cap 8: Base de Datos", text: "La fortaleza de Glitch. Muros encriptados con seguridad militar. Tus misiles matemáticos son la llave maestra.", reward: 90 },
+            { title: "Cap 9: Error 404", text: "Guardia de élite 'Error 404'. Dicen que no existen, pero disparan muy fuerte. ¡Encuéntralos y bórralos del servidor!", reward: 100 },
+            { title: "Cap 10: EL NÚCLEO", text: "¡Es el General Glitch! Amenaza con dividir por cero. ¡Resuelve la ecuación final, dale a ENTER y salva la realidad!", reward: 500 }
+        ],
+        en: [
+            { title: "Ch 1: The Awakening", text: "Cadet! 'General Glitch' has infected the galaxy. He is deleting multiplication tables. Your mission is to debug the system with cannons!" },
+            { title: "Ch 2: Bug Rain", text: "We are entering a field of broken code asteroids. If they touch you, you become a toaster. Calculate fast to disintegrate them!" },
+            { title: "Ch 3: Zero Planet", text: "Glitch has frozen the RAM. Numbers are turning negative due to the cold. Your correct answers generate heat! Add fast!" },
+            { title: "Ch 4: The Cloud", text: "We are in 'The Cloud'. There is fog and Wi-Fi is slow. Enemies use lag to hide. Use your math radar!" },
+            { title: "Ch 5: The Firewall", text: "Watch out! This planet is a literal Firewall. Glitch is trying to overheat your ship. Subtract enemies to cool down the CPU!" },
+            { title: "Ch 6: Password", text: "The exit portal has a password. The hint says: 'Only those who add shall pass'. We will hack the door with answers!" },
+            { title: "Ch 7: Spaghetti", text: "We fell into the 'Spaghetti Code' dimension. Logic is tangled. Up is down. Focus so you don't go crazy!" },
+            { title: "Ch 8: Database", text: "Glitch's fortress. Walls encrypted with military security. Your math missiles are the master key." },
+            { title: "Ch 9: Error 404", text: "Elite guard 'Error 404'. They say they don't exist, but they shoot hard. Find them and delete them from the server!" },
+            { title: "Ch 10: THE CORE", text: "It's General Glitch! He threatens to divide by zero. Solve the final equation, hit ENTER and save reality!" }
+        ],
+        pt: [
+            { title: "Cap 1: O Despertar", text: "Cadete! O 'General Glitch' infectou a galáxia. Ele está apagando a tabuada. Sua missão é depurar o sistema com canhões!" },
+            { title: "Cap 2: Chuva de Bugs", text: "Estamos entrando em um campo de asteroides de código quebrado. Se te tocarem, você vira uma torradeira. Calcule rápido!" },
+            { title: "Cap 3: Planeta Zero", text: "Glitch congelou a RAM. Os números estão ficando negativos. Suas respostas geram calor! Some rápido!" },
+            { title: "Cap 4: A Nuvem", text: "Estamos na 'Nuvem'. Há neblina e o Wi-Fi está lento. Inimigos usam lag para se esconder. Use seu radar matemático!" },
+            { title: "Cap 5: O Firewall", text: "Cuidado! Este planeta é um Firewall de fogo. Glitch quer superaquecer sua nave. Subtraia inimigos para resfriar a CPU!" },
+            { title: "Cap 6: Senha", text: "O portal tem senha. A dica diz: 'Só quem sabe somar passará'. Vamos hackear a porta com respostas!" },
+            { title: "Cap 7: Espaguete", text: "Caímos na dimensão 'Código Espaguete'. A lógica está emaranhada. Cima é baixo. Concentre-se!" },
+            { title: "Cap 8: Banco de Dados", text: "A fortaleza de Glitch. Paredes criptografadas. Seus mísseis matemáticos são a chave mestra." },
+            { title: "Cap 9: Erro 404", text: "Guarda de elite 'Erro 404'. Dizem que não existem, mas atiram forte. Encontre-os e delete-os do servidor!" },
+            { title: "Cap 10: O NÚCLEO", text: "É o General Glitch! Ele ameaça dividir por zero. Resolva a equação final, aperte ENTER e salve a realidade!" }
+        ],
+        zh: [
+            { title: "第1章：觉醒", text: "学员！'Glitch将军'感染了银河系。他正在删除乘法表。你的任务是用大炮调试系统！" },
+            { title: "第2章：Bug雨", text: "我们需要穿过破碎的代码小行星带。如果碰到它们，你会变成烤面包机。快速计算以消灭它们！" },
+            { title: "第3章：零度星球", text: "Glitch冻结了内存(RAM)。数字因寒冷变负。你的正确答案能产生热量！快点加法！" },
+            { title: "第4章：云端", text: "我们在'云端'。雾很大，Wi-Fi很慢。敌人利用延迟躲藏。使用你的数学雷达！" },
+            { title: "第5章：防火墙", text: "小心！这个星球是真正的防火墙。Glitch试图让你的飞船过热。减去敌人来冷却CPU！" },
+            { title: "第6章：密码", text: "出口有密码。提示说：'只有会加法的人才能通过'。我们要用答案破解大门！" },
+            { title: "第7章：面条代码", text: "我们掉进了'面条代码'维度。逻辑混乱。上就是下。集中注意力！" },
+            { title: "第8章：数据库", text: "Glitch的堡垒。墙壁经过加密。你的数学导弹是万能钥匙。" },
+            { title: "第9章：错误404", text: "精英卫队'Error 404'。据说他们不存在，但火力很猛。找到并删除他们！" },
+            { title: "第10章：核心", text: "是Glitch将军！他威胁要除以零。解出最后的方程，按回车键，拯救现实！" }
+        ]
+    };
+
+    const ENEMIES = ["👾", "🦟", "⛄", "👻", "🌋", "🌀", "🤡", "🏯", "🤖", "👹"];
+
+    // --- ESTADO DEL JUEGO ---
+    const Game = {
+        coins: 0,
+        unlockedShips: [0], 
+        currentShip: 0,
+        chapter: 0,
+        
+        // Estado batalla
+        hpPlayer: 100, hpEnemy: 100, maxEnemy: 100,
+        answer: 0, lang: 'es', age: 'cadet',
+        inStory: false,
+        
+        combo: 0,           
+        battleLog: [],      
+        shieldActive: false,
+        pet: { xp: 0, level: 1 } // Mascota
+    };
+
+    // --- AUDIO ---
+    const AudioSys = {
+        ctx: new (window.AudioContext || window.webkitAudioContext)(),
+        play(f, t, v) {
+            if(this.ctx.state==='suspended')this.ctx.resume();
+            const o=this.ctx.createOscillator(), g=this.ctx.createGain();
+            o.type=t; o.frequency.value=f; g.gain.value=v;
+            g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime+0.3);
+            o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime+0.3);
+        },
+        laser(){this.play(800,'sawtooth',0.1)}, hit(){this.play(150,'square',0.2)}, win(){this.play(600,'sine',0.2)},
+        speak(txt){
+            if('speechSynthesis' in window){
+                window.speechSynthesis.cancel();
+                const m = new SpeechSynthesisUtterance(txt);
+                const langMap = { 'en': 'en-US', 'pt': 'pt-BR', 'zh': 'zh-CN', 'es': 'es-ES' };
+                m.lang = langMap[Game.lang] || 'es-ES';
+                window.speechSynthesis.speak(m);
+            }
+        },
+        stop(){ window.speechSynthesis.cancel(); }
+    };
+
+    // --- LÓGICA PRINCIPAL ---
+    function init() {
+        const s = localStorage.getItem('GuardianesGold');
+        if(s) {
+            const d = JSON.parse(s);
+            Game.coins = d.coins || 0;
+            Game.unlockedShips = d.unlockedShips || [0];
+            Game.currentShip = d.currentShip || 0;
+            Game.chapter = d.chapter || 0;
+            Game.pet = d.pet || { xp: 0, level: 1 };
+        }
+        updateUI();
+        updatePetUI();
+    }
+
+    function save() {
+        localStorage.setItem('GuardianesGold', JSON.stringify({
+            coins: Game.coins, 
+            unlockedShips: Game.unlockedShips, 
+            currentShip: Game.currentShip, 
+            chapter: Game.chapter,
+            pet: Game.pet 
+        }));
+        updateUI();
+        updatePetUI();
+    }
+
+    function updateUI() {
+        document.getElementById('menu-coins').innerText = Game.coins;
+        document.getElementById('battle-coins').innerText = Game.coins;
+        document.getElementById('shop-coins-val').innerText = Game.coins;
+    }
+
+    // --- LÓGICA MASCOTA ---
+    function updatePetUI() {
+        let currentStage = PET_STAGES[0];
+        let nextStage = PET_STAGES[1];
+
+        for(let i = 0; i < PET_STAGES.length; i++) {
+            if(Game.pet.xp >= PET_STAGES[i].xp) {
+                currentStage = PET_STAGES[i];
+                nextStage = PET_STAGES[i+1] || null;
+            }
+        }
+        Game.pet.level = currentStage.lvl;
+
+        document.getElementById('menu-pet-icon').innerText = currentStage.icon;
+        document.getElementById('menu-pet-name').innerText = currentStage.name;
+        document.getElementById('pet-lvl').innerText = currentStage.lvl;
+        document.getElementById('battle-pet').innerText = currentStage.icon;
+
+        const bar = document.getElementById('pet-xp-bar');
+        if(nextStage) {
+            const range = nextStage.xp - currentStage.xp;
+            const progress = Game.pet.xp - currentStage.xp;
+            const pct = Math.floor((progress / range) * 100);
+            bar.style.width = pct + "%";
+        } else {
+            bar.style.width = "100%"; bar.style.background = "var(--neon-gold)";
+        }
+    }
+
+    function petInteraction() {
+        AudioSys.play(600 + (Math.random()*200), 'sine', 0.1);
+        const icon = document.getElementById('menu-pet-icon');
+        icon.style.transform = "scale(1.3) rotate(20deg)";
+        setTimeout(() => icon.style.transform = "scale(1) rotate(0deg)", 200);
+    }
+
+    function gainPetXP(amount) {
+        const oldLvl = Game.pet.level;
+        Game.pet.xp += amount;
+        updatePetUI();
+        const newLvl = Game.pet.level;
+
+        if(newLvl > oldLvl) {
+            AudioSys.play(400, 'square', 0.1); 
+            setTimeout(() => AudioSys.play(600, 'square', 0.1), 100);
+            
+            const stageData = PET_STAGES.find(s => s.lvl === newLvl);
+            document.getElementById('modal-story').style.display = 'flex';
+            document.getElementById('story-header').innerText = "¡EVOLUCIÓN!";
+            document.getElementById('story-header').style.color = "var(--neon-green)";
+            
+            document.getElementById('story-base').innerHTML = `
+                <div style="text-align:center;">
+                    <div style="font-size:5rem; margin:10px;">${stageData.icon}</div>
+                    <h3 style="color:var(--neon-green)">¡Tu mascota es ahora un ${stageData.name}!</h3>
+                    <p>${stageData.msg}</p>
+                </div>
+            `;
+            document.getElementById('story-learn').style.display = 'none';
+            
+            const btn = document.getElementById('story-btn-action');
+            btn.innerText = "¡GENIAL!";
+            btn.onclick = () => { document.getElementById('modal-story').style.display = 'none'; };
+        }
+    }
+
+    // --- HISTORIA ---
+    function initStoryMode() {
+        Game.lang = document.getElementById('lang-select').value;
+        Game.age = document.getElementById('age-select').value;
+        if(Game.chapter >= 10) Game.chapter = 0; 
+
+        document.getElementById('screen-menu').classList.remove('active');
+        document.getElementById('screen-battle').classList.add('active');
+        
+        showStoryIntro();
+    }
+
+    function typeWriterEffect(element, text, speed = 30) {
+        element.innerHTML = ""; 
+        let i = 0;
+        if (element.typingInterval) clearInterval(element.typingInterval);
+        element.typingInterval = setInterval(() => {
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+            } else {
+                clearInterval(element.typingInterval);
+            }
+        }, speed);
+    }
+
+    function showStoryIntro() {
+        Game.inStory = true;
+        
+        const dataBase = STORY_DB.es[Game.chapter] || STORY_DB.es[0];
+        const targetLang = Game.lang;
+        const dataLearn = (STORY_DB[targetLang] && STORY_DB[targetLang][Game.chapter]) 
+                          ? STORY_DB[targetLang][Game.chapter] 
+                          : dataBase;
+
+        document.getElementById('modal-story').style.display = 'flex';
+        document.getElementById('story-header').innerText = dataBase.title;
+        document.getElementById('story-header').style.color = "var(--neon-gold)";
+
+        const elBase = document.getElementById('story-base');
+        typeWriterEffect(elBase, dataBase.text);
+
+        const elLearn = document.getElementById('story-learn');
+        if (targetLang !== 'es') {
+            elLearn.style.display = 'block';
+            setTimeout(() => { typeWriterEffect(elLearn, dataLearn.text); }, 500);
+            AudioSys.speak(dataLearn.text); 
+        } else {
+            elLearn.style.display = 'none';
+            AudioSys.speak(dataBase.text);
+        }
+        
+        const btn = document.getElementById('story-btn-action');
+        btn.innerText = "¡A LA BATALLA!";
+        btn.onclick = startBattle;
+    }
+
+    function proceedFromStory() { /* Hook */ }
+    function stopNarrator() { AudioSys.stop(); }
+
+    // --- BATALLA ---
+    function startBattle() {
+    AudioSys.stop();
+    document.getElementById('modal-story').style.display = 'none';
+    Game.inStory = false;
+    
+    const myShip = SHIPS_DB.find(s => s.id === Game.currentShip).icon;
+    document.getElementById('player-sprite').innerText = myShip;
+
+    // --- CORRECCIÓN AQUÍ ---
+    const enemyEl = document.getElementById('enemy-sprite');
+    enemyEl.innerText = ENEMIES[Game.chapter];
+    const theme = BG_THEMES[Game.chapter] || BG_THEMES[0];
+    document.body.style.background = theme;
+    // IMPORTANTE: Reseteamos la clase para quitar 'enemy-die' o efectos anteriores
+    enemyEl.className = "sprite"; 
+    // -----------------------
+
+    document.getElementById('chap-num').innerText = Game.chapter + 1;
+
+    Game.hpPlayer = 100;
+        Game.maxEnemy = 100 + (Game.chapter * 50);
+        Game.hpEnemy = Game.maxEnemy;
+        Game.battleLog = [];      
+        Game.shieldActive = false; 
+        document.getElementById('player-sprite').style.filter = "none";
+        
+        updateHealth();
+        nextProblem();
+        updatePetUI(); // Mostrar mascota mini correcta
+    }
+
+    function nextProblem() {
+        let n1, n2, op, sym;
+        const r = (m) => Math.floor(Math.random()*m)+1;
+        
+        // TUTOR INTELIGENTE: 30% prob de repaso
+        let isReview = false;
+        if (Game.battleLog.length > 0 && Math.random() < 0.3) {
+            const problem = Game.battleLog[0]; 
+            const parts = problem.q.split(' '); 
+            n1 = parseInt(parts[0]); sym = parts[1]; n2 = parseInt(parts[2]);
+            if(sym === '+') { op='+'; Game.answer = n1+n2; }
+            else if(sym === '-') { op='-'; Game.answer = n1-n2; }
+            else if(sym === '×' || sym === 'x') { op='x'; sym='×'; Game.answer = n1*n2; }
+            else if(sym === '÷' || sym === '/') { op='/'; sym='÷'; Game.answer = n1/n2; }
+            isReview = true;
+        } else {
+            if(Game.age==='cadet'){ n1=r(10); n2=r(10); op=Math.random()>.5?'+':'-'; if(op==='-'&&n1<n2)[n1,n2]=[n2,n1]; }
+            else if(Game.age==='captain'){ n1=r(10)+2; n2=r(10); op=Math.random()>.4?'x':'+'; }
+            else { op=['+','-','x','/'][r(4)-1]; n1=r(20)+5; n2=r(10)+2; if(op==='/') n1=n2*r(5); }
+
+            if(op==='+')Game.answer=n1+n2; if(op==='-')Game.answer=n1-n2;
+            if(op==='x')Game.answer=n1*n2; if(op==='/')Game.answer=n1/n2;
+            sym = op==='x'?'×':(op==='/'?'÷':op);
+        }
+
+        const display = document.getElementById('math-display');
+        display.innerText = `${n1} ${sym} ${n2} = ?`;
+        display.style.color = isReview ? "var(--neon-pink)" : "white";
+        
+        const visualDiv = document.getElementById('visual-hint');
+        visualDiv.innerHTML = "";
+        if(Game.age === 'cadet' && (op === '+' || op === '-') && !isReview) {
+            const icon = "🔵"; 
+            const g1 = document.createElement('div'); g1.className = 'hint-group'; g1.innerText = icon.repeat(n1);
+            const gOp = document.createElement('div'); gOp.innerText = op; gOp.style.margin = "0 10px";
+            const g2 = document.createElement('div'); g2.className = 'hint-group'; g2.innerText = icon.repeat(n2);
+            if(op === '-') g2.style.opacity = "0.5";
+            visualDiv.appendChild(g1); visualDiv.appendChild(gOp); visualDiv.appendChild(g2);
+        }
+
+        document.getElementById('answer-input').value = "";
+        document.getElementById('answer-input').focus();
+    }
+
+    function usePowerUp(type) {
+        if (type === 'hack') {
+            if (Game.coins >= 50) {
+                Game.coins -= 50;
+                document.getElementById('answer-input').value = Game.answer;
+                fireWeapon(); 
+                AudioSys.play(1200, 'sine', 0.1); 
+            } else { alert("¡Faltan monedas! (50💰)"); }
+        } else if (type === 'shield') {
+            if (Game.coins >= 30) {
+                if(Game.shieldActive) return;
+                Game.coins -= 30;
+                Game.shieldActive = true;
+                document.getElementById('player-sprite').style.filter = "drop-shadow(0 0 15px var(--neon-cyan))"; 
+                AudioSys.play(200, 'square', 0.1); 
+            } else { alert("¡Faltan monedas! (30💰)"); }
+        }
+        updateUI();
+    }
+
+    function fireWeapon() {
+        const input = document.getElementById('answer-input');
+        const val = parseFloat(input.value);
+        if(isNaN(val)) return;
+
+        if(val === Game.answer) {
+            // --- ACIERTO ---
+            // Si era un repaso, borramos el error de la lista
+            const display = document.getElementById('math-display').innerText;
+            if(Game.battleLog.length > 0) {
+                 // Simplificación: si acertamos, quitamos el más viejo, asumiendo que es el que salió
+                 // O mejor: comprobamos si el texto coincide.
+                 const currentQ = display.split('=')[0].trim(); // "7 x 8"
+                 if(Game.battleLog[0].q.replace(/×/g,'x').replace(/÷/g,'/') === currentQ.replace(/×/g,'x').replace(/÷/g,'/')) {
+                     Game.battleLog.shift();
+                 }
+            }
+
+            Game.combo++;
+            const comboDiv = document.getElementById('combo-display');
+            let baseDmg = Math.floor(Game.maxEnemy / 4) + 10;
+            let bonus = Game.combo > 1 ? Math.floor(baseDmg * 0.2 * (Game.combo - 1)) : 0;
+            
+            if(bonus > 0) { comboDiv.innerText = `COMBO x${Game.combo}!`; comboDiv.classList.add('combo-active'); }
+            else { comboDiv.classList.remove('combo-active'); }
+
+            fireLaser();
+            Game.hpEnemy -= (baseDmg + bonus);
+            document.getElementById('enemy-sprite').classList.add('hit-enemy');
+            setTimeout(()=>document.getElementById('enemy-sprite').classList.remove('hit-enemy'), 400);
+            
+            if(Game.hpEnemy <= 0) {
+            Game.combo = 0; 
+            comboDiv.classList.remove('combo-active');
+            
+            // 1. Ejecuta la animación de explosión
+            explodeEnemy(); 
+            
+            // 2. Espera un poco y muestra el modal
+            setTimeout(() => {
+                showDestructionModal();    
+            }, 800); // <--- ¡Esto es lo que faltaba! (Cierra la función y el tiempo)
+
+        } else {
+            nextProblem();
+        }
+        } else {
+            // --- ERROR ---
+            const currentQ = document.getElementById('math-display').innerText.split('=')[0].trim();
+            // Evitar duplicados exactos seguidos
+            if(Game.battleLog.length === 0 || Game.battleLog[Game.battleLog.length-1].q !== currentQ) {
+                Game.battleLog.push({ q: currentQ, wrong: val, right: Game.answer });
+            }
+
+            Game.combo = 0;
+            document.getElementById('combo-display').classList.remove('combo-active');
+
+            if (Game.shieldActive) {
+                Game.shieldActive = false;
+                document.getElementById('player-sprite').style.filter = "none";
+                AudioSys.play(100, 'sawtooth', 0.3);
+                const display = document.getElementById('math-display');
+                const originalText = display.innerText;
+                display.innerText = "¡ESCUDO SALVADOR!";
+                display.style.color = "var(--neon-cyan)";
+                setTimeout(() => { display.innerText = originalText; display.style.color = "white"; }, 1000);
+            } else {
+                AudioSys.hit();
+                Game.hpPlayer -= 20;
+                document.getElementById('main-frame').classList.add('shake-screen');
+                setTimeout(()=>document.getElementById('main-frame').classList.remove('shake-screen'), 500);
+            }
+            
+            input.value = ""; input.focus();
+            if(Game.hpPlayer <= 0) { alert("¡Derrota! Inténtalo de nuevo."); startBattle(); }
+        }
+        updateHealth();
+    }
+
+    function fireLaser() {
+        AudioSys.laser();
+        const p = document.getElementById('player-sprite').getBoundingClientRect();
+        const e = document.getElementById('enemy-sprite').getBoundingClientRect();
+        const f = document.getElementById('main-frame').getBoundingClientRect();
+        const x1 = p.left + p.width/2 - f.left; const y1 = p.top + p.height/2 - f.top;
+        const x2 = e.left + e.width/2 - f.left; const y2 = e.top + e.height/2 - f.top;
+        const angle = Math.atan2(y2-y1, x2-x1) * 180 / Math.PI;
+        const dist = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+
+        const l = document.createElement('div'); l.className = 'laser-beam';
+        l.style.left = x1+'px'; l.style.top = y1+'px';
+        l.style.width = '0px'; l.style.transform = `rotate(${angle}deg)`;
+        document.getElementById('screen-battle').appendChild(l);
+        setTimeout(()=>l.style.width=dist+'px', 10);
+        setTimeout(()=>l.remove(), 300);
+    }
+
+ function winChapter() {
+        AudioSys.win();
+        // Usamos el reward del nivel 9 (Capítulo 10) si ya nos pasamos del array
+        const reward = (STORY_DB.es[Game.chapter]) ? STORY_DB.es[Game.chapter].reward : 100;
+        
+        Game.coins += reward;
+        gainPetXP(20);
+        Game.chapter++; // Avanzamos de nivel
+        save();
+
+        // --- CAMBIO AQUÍ: DETECTAR FINAL DEL JUEGO ---
+        // Si acabamos de terminar el nivel 10, Game.chapter ahora vale 10 (porque empezamos en 0)
+        if(Game.chapter >= 10) {
+             playEndingVideo(); // <--- LLAMAMOS AL VIDEO
+             return; // Detenemos aquí para que no salga el menú normal
+        }
+        // ---------------------------------------------
+
+        let reportHTML = `<p style="color:var(--neon-green); font-weight:bold;">✨ ¡VICTORIA! ✨</p>`;
+        document.getElementById('modal-story').style.display = 'flex';
+        document.getElementById('story-header').innerText = "¡MISIÓN CUMPLIDA!";
+        document.getElementById('story-base').innerHTML = `Has ganado ${reward} monedas.<br>${reportHTML}`;
+        document.getElementById('story-learn').style.display = 'none';
+
+        const btn = document.getElementById('story-btn-action');
+        btn.innerText = "SIGUIENTE NIVEL >>";
+        btn.onclick = showStoryIntro;
+    }
+
+    // --- FUNCIONES NUEVAS PARA EL VIDEO ---
+
+    function playEndingVideo() {
+        // 1. Mostrar el contenedor negro del video
+        const modalVideo = document.getElementById('modal-video-ending');
+        const videoPlayer = document.getElementById('final-video-player');
+        
+        modalVideo.style.display = 'flex';
+        
+        // 2. Intentar reproducir (Autoplay)
+        videoPlayer.play().catch(error => {
+            console.log("El navegador bloqueó el autoplay, el usuario debe dar play manual.");
+        });
+
+        // 3. Cuando el video termine, ejecutamos el final del juego
+        videoPlayer.onended = function() {
+            endVideoSequence();
+        };
+    }
+
+    function endVideoSequence() {
+        // 1. Ocultar video y pausarlo (por si se le dio al botón saltar)
+        const modalVideo = document.getElementById('modal-video-ending');
+        const videoPlayer = document.getElementById('final-video-player');
+        
+        videoPlayer.pause();
+        modalVideo.style.display = 'none';
+
+        // 2. Mostrar la pantalla final estilo Matrix (tu modal-finale original)
+        document.getElementById('modal-finale').style.display = 'flex';
+    }
+
+    function openShop() { document.getElementById('modal-shop').style.display = 'flex'; renderShop(); }
+    function closeShop() { document.getElementById('modal-shop').style.display = 'none'; }
+
+    function renderShop() {
+        const grid = document.getElementById('shop-grid'); grid.innerHTML = "";
+        SHIPS_DB.forEach(ship => {
+            const owned = Game.unlockedShips.includes(ship.id);
+            const equipped = Game.currentShip === ship.id;
+            const div = document.createElement('div');
+            div.className = `shop-item ${owned?'owned':''} ${equipped?'selected':''}`;
+            div.innerHTML = `<div style="font-size:3rem">${ship.icon}</div><div style="font-weight:bold">${ship.name}</div><div class="shop-price">${owned ? (equipped?"EN USO":"DUEÑO") : ship.price + '💰'}</div>`;
+            div.onclick = () => {
+                if(owned) { Game.currentShip = ship.id; AudioSys.laser(); } 
+                else {
+                    if(Game.coins >= ship.price) { Game.coins -= ship.price; Game.unlockedShips.push(ship.id); Game.currentShip = ship.id; AudioSys.win(); } 
+                    else { AudioSys.hit(); }
+                }
+                save(); renderShop();
+            };
+            grid.appendChild(div);
+        });
+    }
+
+    function updateHealth() {
+        document.getElementById('player-hp').style.width = (Game.hpPlayer/100*100)+'%';
+        document.getElementById('enemy-hp').style.width = (Game.hpEnemy/Game.maxEnemy*100)+'%';
+    }
+function goToMenu() {
+    if(confirm("¿Volver al menú?")) {
+        // 1. Ocultar la batalla y mostrar el menú
+        document.getElementById('screen-battle').classList.remove('active');
+        document.getElementById('screen-menu').classList.add('active');
+        
+        // 2. AQUÍ VA LA LÍNEA: Restaurar el fondo original del espacio
+        document.body.style.background = "#050011";
+        
+        // 3. Detener sonidos
+        AudioSys.stop();
+        
+        // 4. Resetear estado visual si es necesario
+        Game.inStory = false;
+    } 
+}
+    document.getElementById('answer-input').addEventListener('input', function(e) {
+        const valStr = e.target.value.toString();
+        const ansStr = Game.answer.toString();
+        if(valStr.length >= ansStr.length) { setTimeout(() => fireWeapon(), 200); }
+    });
+    // --- NUEVA LÓGICA DE EVOLUCIÓN ---
+
+function closeEvoModal() {
+    document.getElementById('modal-evolution').style.display = 'none';
+}
+
+function spawnConfetti() {
+    // Crea 50 papelitos de colores
+    const colors = ['#ff0055', '#00f3ff', '#39ff14', '#ffd700'];
+    for(let i=0; i<50; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + '%'; // Posición horizontal aleatoria
+        c.style.top = '-10px';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.animationDuration = (Math.random() * 2 + 1) + 's'; // Velocidad aleatoria
+        document.getElementById('modal-evolution').appendChild(c);
+        
+        // Limpieza automática
+        setTimeout(() => c.remove(), 3000);
+    }
+}
+
+// Reemplaza tu antigua función gainPetXP con esta:
+function gainPetXP(amount) {
+    const oldLvl = Game.pet.level;
+    Game.pet.xp += amount;
+    
+    // Primero actualizamos datos silenciosamente
+    let currentStage = PET_STAGES[0];
+    for(let i = 0; i < PET_STAGES.length; i++) {
+        if(Game.pet.xp >= PET_STAGES[i].xp) currentStage = PET_STAGES[i];
+    }
+    Game.pet.level = currentStage.lvl;
+    updatePetUI(); // Actualizar barras
+
+    // Chequeamos si subió de nivel
+    if(Game.pet.level > oldLvl) {
+        // ¡MOMENTO DE EVOLUCIÓN!
+        
+        // 1. Sonidos Épicos
+        AudioSys.play(200, 'square', 0.1);
+        setTimeout(() => AudioSys.play(300, 'square', 0.1), 150);
+        setTimeout(() => AudioSys.play(400, 'square', 0.1), 300);
+        setTimeout(() => AudioSys.play(600, 'sine', 0.3), 500); // Sonido final brillante
+
+        // 2. Preparar el Modal Épico
+        const stageData = PET_STAGES.find(s => s.lvl === Game.pet.level);
+        document.getElementById('evo-icon-display').innerText = stageData.icon;
+        document.getElementById('evo-name-display').innerText = stageData.name;
+        document.getElementById('evo-msg-display').innerText = stageData.msg;
+
+        // 3. Mostrar Modal y lanzar Confeti
+        document.getElementById('modal-evolution').style.display = 'flex';
+        spawnConfetti();
+    }
+}
+function explodeEnemy() {
+    // 1. Efecto de sonido de explosión
+    AudioSys.play(100, 'sawtooth', 0.5);
+    setTimeout(() => AudioSys.play(50, 'square', 0.8), 100);
+
+    // 2. Obtener posición del enemigo
+    const enemyEl = document.getElementById('enemy-sprite');
+    const rect = enemyEl.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // 3. Crear partículas (escombros)
+    for (let i = 0; i < 30; i++) {
+        const debris = document.createElement('div');
+        debris.className = 'debris';
+        debris.style.left = centerX + 'px';
+        debris.style.top = centerY + 'px';
+        // Color aleatorio entre rojo y naranja
+        debris.style.background = Math.random() > 0.5 ? '#ff5500' : '#ffaa00';
+        document.body.appendChild(debris);
+
+        // Física simple para que salgan volando
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 100 + 50;
+        
+        const destX = Math.cos(angle) * velocity;
+        const destY = Math.sin(angle) * velocity;
+
+        debris.animate([
+            { transform: 'translate(0,0) scale(1)', opacity: 1 },
+            { transform: `translate(${destX}px, ${destY}px) scale(0)`, opacity: 0 }
+        ], { duration: 600, easing: 'ease-out' }).onfinish = () => debris.remove();
+    }
+    
+    // 4. Animar el sprite original muriendo
+    enemyEl.classList.add('enemy-die');
+}
+function showDestructionModal() {
+    // 1. Sonido de explosión fuerte
+    AudioSys.play(100, 'sawtooth', 0.5);
+    setTimeout(() => AudioSys.play(50, 'square', 0.8), 200);
+
+    // 2. Preparar el modal
+    const enemyIcon = ENEMIES[Game.chapter]; // Obtiene el icono del enemigo actual
+    const iconEl = document.getElementById('destruct-icon');
+    
+    iconEl.innerText = enemyIcon;
+    iconEl.classList.remove('glitch-die'); // Resetear animación anterior
+    
+    // 3. Mostrar modal
+    document.getElementById('modal-destruction').style.display = 'flex';
+    
+    // 4. Activar la animación un momento después para que se vea el efecto
+    setTimeout(() => {
+        iconEl.classList.add('glitch-die');
+    }, 100);
+}
+
+// Esta función se llama al dar click en el botón del modal
+function finishLevel() {
+    document.getElementById('modal-destruction').style.display = 'none';
+    winChapter(); // Llama a tu función original que da monedas y avanza
+}
+
+    init();
+</script>
+</body>
+</html>
