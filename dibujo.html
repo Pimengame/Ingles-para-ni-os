@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GOD MODE V6: Eternity Edition</title>
+    <link rel="stylesheet" href="estilos.css"> 
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --accent: #00cec9;
+            --dark: #2d3436;
+            --panel: #f5f6fa;
+            --border: #b2bec3;
+            --active-layer: #dfe6e9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #636e72;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            color: #333;
+            user-select: none;
+        }
+
+        /* --- UI GENERAL --- */
+        h3 { margin: 0; font-size: 14px; text-transform: uppercase; color: var(--primary); text-align: center; border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; }
+        
+        button {
+            padding: 6px;
+            border: 1px solid var(--border);
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.1s;
+        }
+        button:hover { background: #dfe6e9; transform: translateY(-1px); }
+        button:active { transform: translateY(1px); }
+        button.active { background: var(--primary); color: white; border-color: var(--dark); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+
+        input[type="range"] { width: 100%; cursor: pointer; margin: 5px 0; }
+        input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; padding: 0; background: none; }
+        input[type="text"] { width: 90%; font-size: 11px; padding: 3px; }
+
+        details { background: white; padding: 5px; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        summary { cursor: pointer; font-size: 12px; font-weight: bold; outline: none; margin-bottom: 5px; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+        .row { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+
+        .btn-neon { background: #2d3436; color: #55efc4; border: 1px solid #55efc4; }
+        .btn-select { border: 1px dashed red; color: #d63031; background: #fff0f0; }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .sidebar-left {
+            width: 260px;
+            background: var(--panel);
+            border-right: 3px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 5px;
+            overflow-y: auto;
+            z-index: 20;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        .viewport {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                linear-gradient(45deg, #b2bec3 25%, transparent 25%), 
+                linear-gradient(-45deg, #b2bec3 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #b2bec3 75%), 
+                linear-gradient(-45deg, transparent 75%, #b2bec3 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            cursor: grab;
+        }
+        .viewport:active { cursor: grabbing; }
+
+        .canvas-stack {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background: white;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+            transform-origin: center center;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .layer-canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+        }
+
+        #selection-canvas {
+            position: absolute;
+            z-index: 9999;
+            border: 2px dashed #0984e3;
+            cursor: move;
+            display: none;
+            pointer-events: auto;
+        }
+        
+        #grid-layer { z-index: 9000; pointer-events: none; opacity: 0.3; display: none; background-image: linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px); background-size: 50px 50px; }
+        #trace-layer { z-index: 0; pointer-events: none; background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.5; }
+
+        .sidebar-right {
+            width: 200px;
+            background: #dfe6e9;
+            border-left: 3px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            z-index: 20;
+        }
+
+        .layer-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 4px;
+            margin-top: 10px;
+            background: #b2bec3;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .layer-item {
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+        .layer-item:hover { background: #f1f2f6; }
+        .layer-item.active { background: #fff700; border: 2px solid #000; font-weight: bold; }
+        .layer-vis-btn { background: none; border: none; font-size: 14px; cursor: pointer; padding: 0 5px; }
+
+        #cursor-preview {
+            position: fixed; pointer-events: none; z-index: 10000; display: none;
+            border: 1px solid rgba(0,0,0,0.8); border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+        }
+
+        .hud {
+            position: absolute; bottom: 10px; right: 220px;
+            background: rgba(0,0,0,0.8); color: white;
+            padding: 5px 12px; border-radius: 20px; font-size: 11px;
+            pointer-events: none; z-index: 50; display: flex; gap: 10px;
+        }
+
+        .replay-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 20000;
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center; color: white;
+        }
+
+        .help-btn {
+            position: absolute; top: 10px; right: 220px;
+            width: 25px; height: 25px; background: var(--primary);
+            color: white; border-radius: 50%; display: flex;
+            justify-content: center; align-items: center; font-weight: bold;
+            cursor: pointer; z-index: 50; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .help-modal {
+            position: absolute; top: 40px; right: 230px;
+            background: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 60;
+            display: none; font-size: 12px; width: 180px;
+        }
+        
+        .color-history { display: flex; gap: 4px; justify-content: center; margin-top: 5px; }
+        .color-slot { width: 18px; height: 18px; border-radius: 3px; border: 1px solid #999; cursor: pointer; background: #fff; }
+    </style>
+</head>
+<body>
+    
+    <a href="index.html" class="btn-volver" style="position: absolute; top: 10px; right: 10px; left: auto; z-index: 99999; font-size: 14px; padding: 8px 15px;">⬅ Salir</a>
+
+    <div id="cursor-preview"></div>
+    
+    <div class="hud">
+        <span id="zoom-display">100%</span> | <span id="coords-display">X:0 Y:0</span>
+    </div>
+
+    <div class="replay-overlay" id="replay-screen">
+        <h1 style="color:var(--primary); text-shadow:0 0 10px white;">🎥 REPLAY MODE</h1>
+        <p>Reproduciendo tu obra maestra...</p>
+        <button onclick="stopReplay()" style="font-size:1.5rem; padding:10px 30px; border:2px solid white; background:red; color:white;">⏹️ DETENER</button>
+    </div>
+
+    <div class="help-btn" onclick="document.getElementById('help-modal').style.display = document.getElementById('help-modal').style.display=='block'?'none':'block'">?</div>
+    <div class="help-modal" id="help-modal">
+        <strong>ATAJOS:</strong><br><br>
+        <b>B</b> - Lápiz<br>
+        <b>E</b> - Goma<br>
+        <b>F</b> - Relleno (Cubo)<br>
+        <b>I</b> - Pipeta<br>
+        <b>S</b> - Selección<br>
+        <b>Z</b> - Deshacer (Ctrl+Z)<br>
+        <b>Espacio</b> - Panear<br>
+        <b>Rueda</b> - Zoom
+    </div>
+
+    <div class="sidebar-left">
+        <h3>GOD MODE V6</h3>
+
+        <details open>
+            <summary>🛠️ Básicos</summary>
+            <div class="grid-2">
+                <button class="active" onclick="setTool('lapiz', this)">✏️ Lápiz (B)</button>
+                <button onclick="setTool('goma', this)">🧽 Goma (E)</button>
+                <button onclick="setTool('cubo', this)">🪣 Relleno (F)</button>
+                <button onclick="setTool('pipeta', this)">🧪 Pipeta (I)</button>
+            </div>
+            <button class="btn-select" onclick="setTool('seleccion', this)" style="width:100%; margin-top:5px;">✂️ Seleccionar / Mover (S)</button>
+        </details>
+
+        <details>
+            <summary>✨ Pinceles Pro</summary>
+            <div class="grid-2">
+                <button class="btn-calligraphy" onclick="setTool('caligrafia', this)">✒️ Caligrafía</button>
+                <button onclick="setTool('spray', this)">🚿 Spray</button>
+                <button class="btn-neon" onclick="setTool('neon', this)">💡 Neón</button>
+                <button class="btn-web" onclick="setTool('telarana', this)">🕸️ Telaraña</button>
+            </div>
+            <button class="btn-rainbow" onclick="setTool('arcoiris', this)" style="width:100%; margin-top:5px;">🌈 Arcoíris</button>
+        </details>
+
+        <details>
+            <summary>📦 Formas 2D / 3D</summary>
+            <div class="grid-2">
+                <button onclick="setTool('rect', this)">⬜ Cuadro</button>
+                <button onclick="setTool('circulo', this)">⭕ Círculo</button>
+                <button onclick="setTool('estrella', this)">⭐ Estrella</button>
+                <button onclick="setTool('linea', this)">📏 Línea</button>
+                <button onclick="setTool('cubo3d', this)" style="background:#dfe6e9;">📦 Cubo 3D</button>
+                <button onclick="setTool('cilindro', this)" style="background:#dfe6e9;">🛢️ Cilindro</button>
+            </div>
+        </details>
+
+        <div style="border-top:1px solid #ccc; padding-top:10px;">
+            <div class="row">
+                <input type="color" id="color" value="#000000">
+                <div style="flex-grow:1;">
+                    <label style="font-size:10px; font-weight:bold;">Grosor</label>
+                    <input type="range" id="grosor" min="1" max="100" value="5" oninput="actualizarCursor(this.value)">
+                </div>
+            </div>
+
+            <div class="color-history" id="color-history-container">
+                <div class="color-slot" onclick="usarColorHistorial(this)"></div>
+                <div class="color-slot" onclick="usarColorHistorial(this)"></div>
+                <div class="color-slot" onclick="usarColorHistorial(this)"></div>
+                <div class="color-slot" onclick="usarColorHistorial(this)"></div>
+                <div class="color-slot" onclick="usarColorHistorial(this)"></div>
+            </div>
+
+            <div class="grid-3" style="margin-top:5px;">
+                <button onclick="zoom(-0.1)">- Zoom</button>
+                <button onclick="resetZoom()">100%</button>
+                <button onclick="zoom(0.1)">+ Zoom</button>
+            </div>
+
+            <div style="background:#e1e1e1; padding:5px; border-radius:4px; margin-top:5px;">
+                <div class="row">
+                    <input type="checkbox" id="kaleido-active">
+                    <label for="kaleido-active" style="font-size:11px; font-weight:bold;">🌀 Caleidoscopio</label>
+                </div>
+                <input type="range" id="kaleido-segments" min="2" max="24" value="8">
+            </div>
+        </div>
+
+        <details style="margin-top:5px;">
+            <summary>🧩 Extras & Archivo</summary>
+            
+            <input type="text" id="text-input" placeholder="Texto a estampar...">
+            <button onclick="setTool('texto', this)" style="width:100%; margin-top:2px;">🅰️ Estampar Texto</button>
+            
+            <div style="margin-top:5px; border-top:1px dashed #999; padding-top:5px;">
+                <label style="font-size:10px;">🧅 Calcar (Fondo)</label>
+                <button onclick="document.getElementById('trace-input').click()" style="width:100%;">📂 Cargar Imagen</button>
+                <input type="file" id="trace-input" style="display:none" accept="image/*">
+                <input type="range" min="0" max="100" value="50" oninput="document.getElementById('trace-layer').style.opacity = this.value/100">
+            </div>
+
+            <div class="grid-2" style="margin-top:5px;">
+                <button onclick="aplicarFiltro('pixel')">👾 Pixel</button>
+                <button onclick="aplicarFiltro('gris')">🌑 Gris</button>
+            </div>
+
+            <button onclick="guardarProyecto()" style="width:100%; margin-top:5px; background:#6c5ce7; color:white;">💾 Guardar Proyecto</button>
+            <button onclick="document.getElementById('json-input').click()" style="width:100%; margin-top:2px; background:#a29bfe; color:white;">📂 Cargar Proyecto</button>
+            <input type="file" id="json-input" style="display:none" accept=".json">
+        </details>
+
+        <div style="margin-top:auto;">
+            <button onclick="startReplay()" style="width:100%; margin-bottom:5px; background:#fd79a8; color:white;">🎥 VER REPLAY</button>
+            <div class="grid-2">
+                <button onclick="undo()">↩️ Undo</button>
+                <button onclick="limpiarCapaActual()" style="color:red;">🗑️ Limpiar</button>
+            </div>
+            <button onclick="exportarImagen()" style="width:100%; margin-top:5px; background:#00b894; color:white;">📷 Exportar PNG</button>
+        </div>
+    </div>
+
+    <div class="viewport" id="viewport">
+        <div class="canvas-stack" id="canvas-stack">
+            <div id="trace-layer"></div> <div id="grid-layer"></div>  <canvas id="selection-canvas"></canvas> 
+        </div>
+    </div>
+
+    <div class="sidebar-right">
+        <h3>📚 CAPAS</h3>
+        <div class="grid-2">
+            <button onclick="addLayer()">➕ Nueva</button>
+            <button onclick="deleteLayer()" style="color:red;">🗑️ Borrar</button>
+        </div>
+        
+        <div class="layer-list" id="layer-list"></div>
+
+        <div style="margin-top:10px;">
+            <button class="btn-grid" onclick="document.getElementById('grid-layer').style.display = document.getElementById('grid-layer').style.display=='block'?'none':'block'" style="width:100%;">📏 Mostrar Grilla</button>
+        </div>
+        
+        <div style="margin-top:auto; background:white; padding:5px; border-radius:4px; font-size:10px; color:#666;">
+            <strong>Importar a Capa:</strong><br>
+            <input type="file" id="img-layer-input" accept="image/*" style="width:100%;">
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURACIÓN DEL SISTEMA ---
+        const canvasStack = document.getElementById('canvas-stack');
+        const viewport = document.getElementById('viewport');
+        const layerListDiv = document.getElementById('layer-list');
+        const inputColor = document.getElementById('color');
+        const inputGrosor = document.getElementById('grosor');
+        const cursorPreview = document.getElementById('cursor-preview');
+        
+        // Elementos Flotantes
+        const selectionCanvas = document.getElementById('selection-canvas');
+        const selectionCtx = selectionCanvas.getContext('2d');
+        const traceLayer = document.getElementById('trace-layer');
+        
+        // --- ESTADO ---
+        let layers = [];           
+        let activeLayerIndex = -1; 
+        let layerCounter = 0;      
+        
+        let tool = 'lapiz';
+        let isDrawing = false;
+        let startX, startY;
+        let zoomLevel = 1;
+        let snapshot;              
+        let pointsWeb = [];        
+        let lastX=0, lastY=0, lastTime=0; 
+        let hue = 0;               
+        
+        // Selección
+        let isSelecting = false;
+        let isMovingSelection = false;
+        let selectionRect = null;  
+        
+        // Replay
+        let replayHistory = [];    
+        let currentStroke = null;
+        let isReplaying = false;
+
+        let historialColores = ["#ffffff", "#ffffff", "#ffffff", "#ffffff", "#ffffff"];
+
+        // --- 2. MATEMÁTICAS ---
+        function getPos(e) {
+            const rect = canvasStack.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            const scaleX = 800 / rect.width; 
+            const scaleY = 600 / rect.height;
+            
+            const x = (clientX - rect.left) * scaleX;
+            const y = (clientY - rect.top) * scaleY;
+            
+            document.getElementById('coords-display').innerText = `X:${Math.round(x)} Y:${Math.round(y)}`;
+            return { x, y };
+        }
+
+        function rotatePoint(x, y, cx, cy, angle) {
+            const cos = Math.cos(angle); const sin = Math.sin(angle);
+            return { x: (cos * (x - cx)) - (sin * (y - cy)) + cx, y: (sin * (x - cx)) + (cos * (y - cy)) + cy };
+        }
+
+        // --- 3. SISTEMA DE CAPAS ---
+        function addLayer() {
+            layerCounter++;
+            const canvas = document.createElement('canvas');
+            canvas.width = 800; canvas.height = 600;
+            canvas.className = 'layer-canvas';
+            canvas.id = `layer-${layerCounter}`;
+            canvasStack.insertBefore(canvas, selectionCanvas);
+            
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            
+            const newLayer = { id: layerCounter, canvas: canvas, ctx: ctx, visible: true, history: [] };
+            
+            if (layers.length === 0) {
+                ctx.fillStyle = "white"; ctx.fillRect(0, 0, 800, 600);
+            }
+            saveLayerState(newLayer);
+            layers.push(newLayer);
+            setActiveLayer(layers.length - 1);
+        }
+
+        function setActiveLayer(index) {
+            if (index < 0 || index >= layers.length) return;
+            activeLayerIndex = index;
+            renderLayerList();
+            if (selectionRect) stampSelection();
+        }
+
+        function deleteLayer() {
+            if (layers.length <= 1) return alert("⚠️ Mínimo 1 capa.");
+            if (!confirm(`¿Borrar Capa?`)) return;
+            layers[activeLayerIndex].canvas.remove();
+            layers.splice(activeLayerIndex, 1);
+            activeLayerIndex = Math.max(0, activeLayerIndex - 1);
+            setActiveLayer(activeLayerIndex);
+        }
+
+        function toggleVisibility(index, e) {
+            e.stopPropagation();
+            const layer = layers[index];
+            layer.visible = !layer.visible;
+            layer.canvas.style.display = layer.visible ? 'block' : 'none';
+            renderLayerList();
+        }
+
+        function renderLayerList() {
+            layerListDiv.innerHTML = '';
+            for (let i = layers.length - 1; i >= 0; i--) {
+                const layer = layers[i];
+                const item = document.createElement('div');
+                item.className = `layer-item ${i === activeLayerIndex ? 'active' : ''}`;
+                item.onclick = () => setActiveLayer(i);
+                item.innerHTML = `<span>Capa ${layer.id}</span><button class="layer-vis-btn" onclick="toggleVisibility(${i}, event)">${layer.visible ? '👁️' : '🙈'}</button>`;
+                layerListDiv.appendChild(item);
+            }
+        }
+
+        function getActiveCtx() {
+            if (activeLayerIndex === -1 || !layers[activeLayerIndex]) return null;
+            return layers[activeLayerIndex].ctx;
+        }
+
+        // --- 4. ZOOM ---
+        function zoom(delta) {
+            zoomLevel += delta;
+            if (zoomLevel < 0.1) zoomLevel = 0.1; if (zoomLevel > 4) zoomLevel = 4;
+            canvasStack.style.transform = `scale(${zoomLevel})`;
+            document.getElementById('zoom-display').innerText = Math.round(zoomLevel * 100) + "%";
+        }
+        function resetZoom() { zoomLevel = 1; canvasStack.style.transform = `scale(1)`; document.getElementById('zoom-display').innerText="100%"; }
+        
+        viewport.addEventListener('wheel', (e) => {
+            if (e.ctrlKey || e.metaKey) { e.preventDefault(); zoom(e.deltaY > 0 ? -0.1 : 0.1); }
+        }, { passive: false });
+
+        // --- 5. PERSISTENCIA ---
+        function saveLayerState(layer) {
+            if (layer.history.length > 15) layer.history.shift();
+            layer.history.push(layer.canvas.toDataURL());
+        }
+
+        function undo() {
+            if (activeLayerIndex === -1) return;
+            const layer = layers[activeLayerIndex];
+            if (layer.history.length > 0) {
+                layer.history.pop();
+                const previousState = layer.history[layer.history.length - 1];
+                layer.ctx.clearRect(0, 0, 800, 600);
+                if (previousState) {
+                    const img = new Image(); img.src = previousState;
+                    img.onload = () => layer.ctx.drawImage(img, 0, 0);
+                } else if (activeLayerIndex === 0) {
+                     layer.ctx.fillStyle = "white"; layer.ctx.fillRect(0, 0, 800, 600);
+                }
+                if (replayHistory.length > 0) replayHistory.pop();
+            }
+        }
+        
+        function limpiarCapaActual() {
+            if (!confirm("¿Limpiar capa?")) return;
+            const ctx = getActiveCtx();
+            ctx.clearRect(0, 0, 800, 600);
+            if (activeLayerIndex === 0) { ctx.fillStyle = "white"; ctx.fillRect(0, 0, 800, 600); }
+            saveLayerState(layers[activeLayerIndex]);
+        }
+
+        // --- 6. EVENTOS DIBUJO ---
+        function startDraw(e) {
+            if (e.cancelable) e.preventDefault();
+            if (isReplaying) return;
+
+            const pos = getPos(e);
+            startX = pos.x; startY = pos.y;
+            
+            // SELECCIÓN
+            if (tool === 'seleccion') {
+                if (e.target === selectionCanvas) return;
+                if (selectionRect) stampSelection();
+                isSelecting = true;
+                selectionCanvas.style.display = 'block';
+                selectionCanvas.style.left = startX + 'px'; selectionCanvas.style.top = startY + 'px';
+                selectionCanvas.width = 0; selectionCanvas.height = 0;
+                selectionCanvas.style.border = '1px dashed red';
+                return;
+            }
+            if (selectionRect && tool !== 'seleccion') stampSelection();
+
+            // INSTANTANEOS
+            if (tool === 'cubo') { floodFill(startX, startY, inputColor.value); return; }
+            if (tool === 'texto') {
+                const ctx = getActiveCtx(); ctx.font = `${inputGrosor.value * 3}px Arial`;
+                ctx.fillStyle = inputColor.value; ctx.fillText(document.getElementById('text-input').value, startX, startY);
+                saveLayerState(layers[activeLayerIndex]); return;
+            }
+            if (tool === 'pipeta') {
+                const ctx = getActiveCtx();
+                const p = ctx.getImageData(startX, startY, 1, 1).data;
+                inputColor.value = "#" + ((1 << 24) + (p[0] << 16) + (p[1] << 8) + p[2]).toString(16).slice(1);
+                updateColorHistory(inputColor.value); setTool('lapiz'); return;
+            }
+
+            isDrawing = true;
+            const ctx = getActiveCtx();
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = inputGrosor.value;
+            ctx.strokeStyle = inputColor.value; ctx.fillStyle = inputColor.value;
+            ctx.shadowBlur = tool === 'neon' ? 15 : 0; ctx.shadowColor = inputColor.value;
+            ctx.globalCompositeOperation = tool === 'goma' ? 'destination-out' : 'source-over';
+
+            if (tool === 'telarana') pointsWeb = [{ x: startX, y: startY }];
+            if (tool === 'caligrafia') { lastX = startX; lastY = startY; lastTime = Date.now(); }
+
+            if (['linea', 'rect', 'circulo', 'estrella', 'cubo3d', 'cilindro'].includes(tool)) {
+                snapshot = ctx.getImageData(0, 0, 800, 600);
+            } else {
+                ctx.beginPath(); ctx.moveTo(startX, startY);
+            }
+
+            currentStroke = { tool: tool, color: inputColor.value, size: inputGrosor.value, layerId: activeLayerIndex, points: [{x: startX, y: startY}], kaleido: document.getElementById('kaleido-active').checked };
+        }
+
+        function moveDraw(e) {
+            const pos = getPos(e);
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            cursorPreview.style.display = 'block';
+            cursorPreview.style.left = clientX + 'px'; cursorPreview.style.top = clientY + 'px';
+            cursorPreview.style.backgroundColor = inputColor.value; cursorPreview.style.opacity = 0.5;
+            cursorPreview.style.width = inputGrosor.value * zoomLevel + 'px'; cursorPreview.style.height = inputGrosor.value * zoomLevel + 'px';
+            
+            if (isSelecting) {
+                const w = pos.x - startX; const h = pos.y - startY;
+                selectionCanvas.style.width = Math.abs(w) + 'px'; selectionCanvas.style.height = Math.abs(h) + 'px';
+                selectionCanvas.style.left = (w < 0 ? pos.x : startX) + 'px'; selectionCanvas.style.top = (h < 0 ? pos.y : startY) + 'px';
+                return;
+            }
+
+            if (!isDrawing) return;
+            if (e.cancelable) e.preventDefault();
+
+            const ctx = getActiveCtx();
+            if (currentStroke) currentStroke.points.push({x: pos.x, y: pos.y});
+
+            if (['lapiz', 'goma', 'neon', 'spray', 'arcoiris', 'telarana', 'caligrafia'].includes(tool)) {
+                const kaleidoActive = document.getElementById('kaleido-active').checked;
+                const segments = parseInt(document.getElementById('kaleido-segments').value);
+                const loops = kaleidoActive ? segments : 1;
+                const angleStep = (Math.PI * 2) / segments;
+                let currentWidth = inputGrosor.value;
+
+                if (tool === 'caligrafia') {
+                    const now = Date.now();
+                    const dist = Math.sqrt(Math.pow(pos.x - lastX, 2) + Math.pow(pos.y - lastY, 2));
+                    const velocity = dist / (now - lastTime || 1);
+                    currentWidth = Math.max(1, inputGrosor.value - (velocity * 2));
+                    ctx.lineWidth = currentWidth;
+                    lastX = pos.x; lastY = pos.y; lastTime = now;
+                }
+
+                for (let i = 0; i < loops; i++) {
+                    const angle = i * angleStep;
+                    let pStart = kaleidoActive ? rotatePoint(startX, startY, 400, 300, angle) : { x: startX, y: startY };
+                    let pEnd = kaleidoActive ? rotatePoint(pos.x, pos.y, 400, 300, angle) : { x: pos.x, y: pos.y };
+
+                    ctx.beginPath();
+                    if (tool === 'spray') {
+                        for (let j = 0; j < 5; j++) {
+                            const offsetX = (Math.random() - 0.5) * currentWidth * 2;
+                            const offsetY = (Math.random() - 0.5) * currentWidth * 2;
+                            ctx.fillRect(pEnd.x + offsetX, pEnd.y + offsetY, 1, 1);
+                        }
+                    } else if (tool === 'arcoiris') {
+                        hue = (hue + 1) % 360; ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+                        ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y); ctx.stroke();
+                    } else if (tool !== 'telarana') {
+                        ctx.moveTo(pStart.x, pStart.y); ctx.lineTo(pEnd.x, pEnd.y); ctx.stroke();
+                    }
+                }
+
+                if (tool === 'telarana') {
+                    pointsWeb.push({ x: pos.x, y: pos.y });
+                    const lastP = pointsWeb[pointsWeb.length - 1];
+                    ctx.save(); ctx.lineWidth = 0.5; ctx.globalAlpha = 0.3;
+                    for (let i = 0; i < pointsWeb.length - 1; i++) {
+                        const dx = pointsWeb[i].x - lastP.x; const dy = pointsWeb[i].y - lastP.y;
+                        if ((dx * dx + dy * dy) < 2000) {
+                            ctx.beginPath(); ctx.moveTo(lastP.x, lastP.y); ctx.lineTo(pointsWeb[i].x, pointsWeb[i].y); ctx.stroke();
+                        }
+                    }
+                    ctx.restore();
+                }
+                startX = pos.x; startY = pos.y;
+            }
+            else if (['linea', 'rect', 'circulo', 'estrella', 'cubo3d', 'cilindro'].includes(tool)) {
+                ctx.putImageData(snapshot, 0, 0);
+                const w = pos.x - startX; const h = pos.y - startY;
+                ctx.beginPath();
+                if (tool === 'linea') { ctx.moveTo(startX, startY); ctx.lineTo(pos.x, pos.y); }
+                else if (tool === 'rect') ctx.strokeRect(startX, startY, w, h);
+                else if (tool === 'circulo') { const r = Math.sqrt(w*w + h*h); ctx.arc(startX, startY, r, 0, 2 * Math.PI); }
+                else if (tool === 'estrella') drawStar(ctx, startX, startY, 5, Math.sqrt(w*w+h*h), Math.sqrt(w*w+h*h)/2);
+                else if (tool === 'cubo3d') {
+                    const d = w * 0.5; ctx.rect(startX, startY, w, h); ctx.rect(startX + d, startY - d, w, h);
+                    ctx.moveTo(startX, startY); ctx.lineTo(startX + d, startY - d);
+                    ctx.moveTo(startX + w, startY); ctx.lineTo(startX + w + d, startY - d);
+                    ctx.moveTo(startX, startY + h); ctx.lineTo(startX + d, startY + h - d);
+                    ctx.moveTo(startX + w, startY + h); ctx.lineTo(startX + w + d, startY + h - d);
+                } else if (tool === 'cilindro') {
+                    const rx = w/2; const ry = h/5; const cx = startX+rx;
+                    ctx.moveTo(startX, startY); ctx.lineTo(startX, startY+h);
+                    ctx.moveTo(startX+w, startY); ctx.lineTo(startX+w, startY+h); ctx.stroke();
+                    ctx.beginPath(); ctx.ellipse(cx, startY, Math.abs(rx), Math.abs(ry), 0, 0, 2*Math.PI); ctx.stroke();
+                    ctx.beginPath(); ctx.ellipse(cx, startY+h, Math.abs(rx), Math.abs(ry), 0, 0, 2*Math.PI);
+                }
+                ctx.stroke();
+            }
+        }
+
+        function stopDraw() {
+            if (isSelecting) {
+                isSelecting = false;
+                const x = parseInt(selectionCanvas.style.left); const y = parseInt(selectionCanvas.style.top);
+                const w = parseInt(selectionCanvas.style.width); const h = parseInt(selectionCanvas.style.height);
+                if (w < 5 || h < 5) { selectionCanvas.style.display = 'none'; return; }
+                const ctx = getActiveCtx();
+                const imgData = ctx.getImageData(x, y, w, h);
+                ctx.clearRect(x, y, w, h);
+                selectionCanvas.width = w; selectionCanvas.height = h;
+                selectionCtx.putImageData(imgData, 0, 0);
+                selectionCanvas.style.cursor = 'move'; selectionCanvas.style.pointerEvents = 'auto';
+                selectionRect = { x, y, w, h };
+                initSelectionDrag();
+                return;
+            }
+
+            if (isDrawing) {
+                isDrawing = false;
+                saveLayerState(layers[activeLayerIndex]);
+                if (currentStroke) { replayHistory.push(currentStroke); currentStroke = null; }
+                if (tool !== 'goma') updateColorHistory(inputColor.value);
+                getActiveCtx().globalCompositeOperation = 'source-over';
+            }
+        }
+
+        function initSelectionDrag() {
+            selectionCanvas.onmousedown = function(e) {
+                e.stopPropagation(); e.preventDefault();
+                isMovingSelection = true;
+                const rect = selectionCanvas.getBoundingClientRect();
+                const scale = 1 / zoomLevel;
+                const offsetX = (e.clientX - rect.left) * scale;
+                const offsetY = (e.clientY - rect.top) * scale;
+                
+                function moveSelection(ev) {
+                    const stackRect = canvasStack.getBoundingClientRect();
+                    let newX = ((ev.clientX - stackRect.left) * scale) - offsetX;
+                    let newY = ((ev.clientY - stackRect.top) * scale) - offsetY;
+                    selectionCanvas.style.left = newX + 'px'; selectionCanvas.style.top = newY + 'px';
+                    selectionRect.x = newX; selectionRect.y = newY;
+                }
+                function stopSelectionDrag() {
+                    window.removeEventListener('mousemove', moveSelection);
+                    window.removeEventListener('mouseup', stopSelectionDrag);
+                    isMovingSelection = false;
+                }
+                window.addEventListener('mousemove', moveSelection);
+                window.addEventListener('mouseup', stopSelectionDrag);
+            };
+        }
+
+        function stampSelection() {
+            if (!selectionRect) return;
+            const ctx = getActiveCtx();
+            ctx.drawImage(selectionCanvas, parseInt(selectionCanvas.style.left), parseInt(selectionCanvas.style.top));
+            saveLayerState(layers[activeLayerIndex]);
+            selectionCanvas.style.display = 'none'; selectionCanvas.width = 0; selectionCanvas.height = 0;
+            selectionCanvas.onmousedown = null; selectionRect = null; isSelecting = false;
+        }
+
+        // --- EXTRAS: FLOOD FILL, FILTROS, REPLAY ---
+        function floodFill(startX, startY, colorHex) {
+            const ctx = getActiveCtx(); const w = 800; const h = 600;
+            const imgData = ctx.getImageData(0, 0, w, h); const data = imgData.data;
+            const r2 = parseInt(colorHex.slice(1, 3), 16), g2 = parseInt(colorHex.slice(3, 5), 16), b2 = parseInt(colorHex.slice(5, 7), 16);
+            const startPos = (Math.floor(startY) * w + Math.floor(startX)) * 4;
+            const r1 = data[startPos], g1 = data[startPos + 1], b1 = data[startPos + 2], a1 = data[startPos + 3];
+            if (r1 === r2 && g1 === g2 && b1 === b2 && a1 === 255) return;
+            const stack = [[Math.floor(startX), Math.floor(startY)]];
+            while (stack.length) {
+                const [x, y] = stack.pop();
+                const pos = (y * w + x) * 4;
+                if (x >= 0 && x < w && y >= 0 && y < h && data[pos] === r1 && data[pos + 1] === g1 && data[pos + 2] === b1 && data[pos + 3] === a1) {
+                    data[pos] = r2; data[pos + 1] = g2; data[pos + 2] = b2; data[pos + 3] = 255;
+                    stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+                }
+            }
+            ctx.putImageData(imgData, 0, 0); saveLayerState(layers[activeLayerIndex]);
+        }
+
+        function aplicarFiltro(tipo) {
+            const ctx = getActiveCtx(); const w = 800; const h = 600;
+            const imgData = ctx.getImageData(0, 0, w, h); const data = imgData.data;
+            if (tipo === 'pixel') {
+                const size = 8;
+                for (let y = 0; y < h; y += size) {
+                    for (let x = 0; x < w; x += size) {
+                        const p = ((y + Math.floor(size/2)) * w + (x + Math.floor(size/2))) * 4;
+                        const safeP = p < data.length ? p : (y * w + x) * 4;
+                        const r = data[safeP], g = data[safeP+1], b = data[safeP+2], a = data[safeP+3];
+                        if (a === 0) continue;
+                        ctx.fillStyle = `rgba(${r},${g},${b},${a/255})`; ctx.fillRect(x, y, size, size);
+                    }
+                }
+                saveLayerState(layers[activeLayerIndex]); return;
+            }
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i], g = data[i + 1], b = data[i + 2];
+                if (tipo === 'gris') { const avg = (r+g+b)/3; data[i]=avg; data[i+1]=avg; data[i+2]=avg; }
+                else if (tipo === 'invertir') { data[i]=255-r; data[i+1]=255-g; data[i+2]=255-b; }
+            }
+            ctx.putImageData(imgData, 0, 0); saveLayerState(layers[activeLayerIndex]);
+        }
+
+        function startReplay() {
+            if (replayHistory.length === 0) return alert("⚠️ Dibuja primero.");
+            isReplaying = true; document.getElementById('replay-screen').style.display = 'flex';
+            layers.forEach(l => l.ctx.clearRect(0, 0, 800, 600));
+            layers[0].ctx.fillStyle = "white"; layers[0].ctx.fillRect(0,0,800,600);
+            let stepIndex = 0;
+            function playStep() {
+                if (!isReplaying || stepIndex >= replayHistory.length) { stopReplay(); return; }
+                const action = replayHistory[stepIndex];
+                const targetLayer = layers[action.layerId] ? layers[action.layerId] : layers[0];
+                const ctx = targetLayer.ctx;
+                if (action.tool !== 'relleno') {
+                    ctx.beginPath(); ctx.lineWidth = action.size; ctx.strokeStyle = action.color;
+                    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                    ctx.globalCompositeOperation = action.tool === 'goma' ? 'destination-out' : 'source-over';
+                    const points = action.points;
+                    if (points && points.length > 0) {
+                        ctx.moveTo(points[0].x, points[0].y);
+                        for (let j = 1; j < points.length; j++) ctx.lineTo(points[j].x, points[j].y);
+                        ctx.stroke();
+                    }
+                }
+                stepIndex++; requestAnimationFrame(playStep);
+            }
+            playStep();
+        }
+
+        function stopReplay() {
+            isReplaying = false; document.getElementById('replay-screen').style.display = 'none';
+            layers.forEach(l => {
+                l.ctx.clearRect(0, 0, 800, 600);
+                if (l.history.length > 0) {
+                    const i = new Image(); i.src = l.history[l.history.length-1]; i.onload = () => l.ctx.drawImage(i, 0, 0);
+                } else if (l.id === 1) { l.ctx.fillStyle="white"; l.ctx.fillRect(0,0,800,600); }
+            });
+        }
+
+        // --- FILES & SHORTCUTS ---
+        function exportarImagen() {
+            const tempCanvas = document.createElement('canvas'); tempCanvas.width = 800; tempCanvas.height = 600;
+            const tCtx = tempCanvas.getContext('2d'); tCtx.fillStyle = "white"; tCtx.fillRect(0, 0, 800, 600);
+            layers.forEach(l => { if (l.visible) tCtx.drawImage(l.canvas, 0, 0); });
+            const link = document.createElement('a'); link.download = 'GodMode-Art.png'; link.href = tempCanvas.toDataURL(); link.click();
+        }
+
+        function guardarProyecto() {
+            const projectData = { version: "V6", layers: layers.map(l => ({ id: l.id, visible: l.visible, data: l.canvas.toDataURL() })) };
+            const blob = new Blob([JSON.stringify(projectData)], {type: "application/json"});
+            const link = document.createElement('a'); link.download = `Proyecto-${Date.now()}.json`; link.href = URL.createObjectURL(blob); link.click();
+        }
+
+        document.getElementById('json-input').addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const project = JSON.parse(ev.target.result);
+                layers.forEach(l => l.canvas.remove()); layers = []; layerCounter = 0; activeLayerIndex = -1;
+                project.layers.forEach((lData, index) => {
+                    addLayer(); const cl = layers[layers.length - 1]; cl.visible = lData.visible;
+                    const img = new Image(); img.src = lData.data;
+                    img.onload = () => { cl.ctx.drawImage(img, 0, 0); saveLayerState(cl); if (index === project.layers.length-1) renderLayerList(); };
+                    cl.canvas.style.display = lData.visible ? 'block' : 'none';
+                });
+            };
+            reader.readAsText(file);
+        });
+
+        document.getElementById('img-layer-input').addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const ctx = getActiveCtx();
+                    const scale = Math.min(800 / img.width, 600 / img.height);
+                    const w = img.width * scale; const h = img.height * scale;
+                    ctx.drawImage(img, (800-w)/2, (600-h)/2, w, h); saveLayerState(layers[activeLayerIndex]);
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file); e.target.value = '';
+        });
+
+        // UTILIDADES UI
+        function actualizarCursor(val) {
+            document.getElementById('v-grosor').innerText = val; // Assuming element exists or handled
+            cursorPreview.style.width = (val * zoomLevel) + 'px'; cursorPreview.style.height = (val * zoomLevel) + 'px';
+        }
+        function updateColorHistory(newColor) {
+            if (historialColores[0] === newColor) return;
+            historialColores.unshift(newColor); historialColores.pop();
+            document.querySelectorAll('.color-slot').forEach((s, i) => { s.style.backgroundColor = historialColores[i]; s.dataset.color = historialColores[i]; });
+        }
+        function usarColorHistorial(slot) { if (slot.dataset.color) inputColor.value = slot.dataset.color; }
+        function setTool(t, btn) { tool = t; if(btn) { document.querySelectorAll('.sidebar-left button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); } }
+        function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
+            let rot = Math.PI / 2 * 3; let x = cx; let y = cy; let step = Math.PI / spikes;
+            ctx.beginPath(); ctx.moveTo(cx, cy - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                x = cx + Math.cos(rot) * outerRadius; y = cy + Math.sin(rot) * outerRadius; ctx.lineTo(x, y); rot += step;
+                x = cx + Math.cos(rot) * innerRadius; y = cy + Math.sin(rot) * innerRadius; ctx.lineTo(x, y); rot += step;
+            }
+            ctx.lineTo(cx, cy - outerRadius); ctx.closePath(); ctx.stroke(); ctx.fill();
+        }
+
+        // LISTENERS
+        canvasStack.addEventListener('mousedown', startDraw);
+        window.addEventListener('mousemove', moveDraw);
+        window.addEventListener('mouseup', stopDraw);
+        
+        // Paneo
+        let isPanning = false; let panStart = {x:0, y:0};
+        window.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+            const k = e.key.toLowerCase();
+            if(k==='b') setTool('lapiz'); if(k==='e') setTool('goma'); if(k==='f') setTool('cubo'); if(k==='i') setTool('pipeta'); if(k==='s') setTool('seleccion');
+            if(e.key==='z' && (e.ctrlKey||e.metaKey)) undo();
+            if (e.code === 'Space' && !isPanning) { isPanning = true; viewport.style.cursor = 'grab'; }
+        });
+        window.addEventListener('keyup', (e) => { if (e.code === 'Space') { isPanning = false; viewport.style.cursor = 'default'; } });
+        viewport.addEventListener('mousedown', (e) => {
+            if (isPanning) { panStart = { x: e.clientX, y: e.clientY }; viewport.style.cursor = 'grabbing'; viewport.dataset.sx = viewport.scrollLeft; viewport.dataset.sy = viewport.scrollTop; e.preventDefault(); }
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (isPanning && e.buttons === 1) {
+                const dx = e.clientX - panStart.x; const dy = e.clientY - panStart.y;
+                viewport.scrollLeft = parseFloat(viewport.dataset.sx) - dx; viewport.scrollTop = parseFloat(viewport.dataset.sy) - dy;
+            }
+        });
+
+        // Init
+        addLayer();
+    </script>
+</body>
+</html>
