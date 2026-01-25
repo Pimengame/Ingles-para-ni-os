@@ -277,34 +277,50 @@
             'dragonball': ['g4','g4','e4','f4','g4','a4','g4','f4','e4','d4','e4','e4','c4','d4','e4','f4','e4','d4','c4','b3','a3','a3','a3','c4','a3','g3','c4','d4','e4','f4','e4','d4','c4','d4','c5','c5','c5','c5','c5','as4','gs4','as4','c5','as4','as4','as4','gs4','g4','g4','f4','f4','g4','ds4','f4','g4'],
             'slamdunk': ['f4','f4','g4','a4','a4','g4','f4','g4','a4','g4','f4','g4','a4','c5','c5','c5','c5','a4','as4','a4','f4','a4','as4','c5','d5','c5','as4','a4','g4','f4','g4','a4','a4','c5','d5','e5','f4','g4','a4','as4','a4','g4','f4'],
             'aladdin': [
-    // --- VERSO 1: "Yo te quiero enseñar..." ---
-    // Fa# - Fa# - Sol - Sol - La - La
-    'fs4','fs4','g4','g4','a4','a4', 
-    // Fa# - Mi - Re - Mi - Fa# - Fa# - Re
-    'fs4','e4','d4','e4','fs4','fs4','d4', 
-    // Sol - Sol - Fa# - Fa# - Mi - Re - Do# - Re - Mi - Do# - La(baja)
-    'g4','g4','fs4','fs4','e4','d4','cs4','d4','e4','cs4','a3',
+                // --- VERSO 1: "Yo te quiero enseñar..." ---
+                // F# - E - G - F# - D - A(baja)
+                'fs4','e4','g4','fs4','d4','a3', 
+                // "Este mundo espléndido" (Shining, shimmering, splendid)
+                'fs4','e4','g4','fs4','d4','fs4','e4', 
+                // "Ven princesa y deja a tu corazón soñar" (Tell me, princess...)
+                // Aquí está el truco: usa Re# (ds4) para que suene a la película
+                'e4','ds4','fs4','e4','cs4','e4','d4',
+                // "Yo te puedo mostrar..."
+                'cs4','d4','b3','cs4','e4','d4','a3',
 
-    // --- VERSO 2: "Yo te puedo mostrar..." ---
-    // Fa# - Fa# - Sol - Sol - La - La
-    'fs4','fs4','g4','g4','a4','a4',
-    // Fa# - Mi - Re - Mi - Fa# - Fa# - Re
-    'fs4','e4','d4','e4','fs4','fs4','d4',
-    // Sol - Sol - Fa# - Fa# - Mi - Re - Do# - Re - Mi - Sol - Fa#
-    'g4','g4','fs4','fs4','e4','d4','cs4','d4','e4','g4','fs4',
+                // --- VERSO 2: "Cosas maravillosas..." ---
+                // F# - E - G - F# - D - A(baja)
+                'fs4','e4','g4','fs4','d4','a3',
+                // "Con la magia de mi alfombra..."
+                'fs4','e4','g4','fs4','d4','fs4','e4',
+                // "...vamos a volar"
+                'e4','ds4','fs4','e4','cs4','e4','d4',
+                // "Un mundo ideal..." (Pre-coro subida)
+                'cs4','d4','b3','cs4','e4','d4',
 
-    // --- CORO: "Un mundo ideal..." (Melodía simplificada del PDF) ---
-    // Re - Mi - Fa# - Re
-    'd4','e4','fs4','d4',
-    // Re - Fa# - La - Do#5 - Si - La - Sol
-    'd4','fs4','a4','cs5','b4','a4','g4',
-    // Re - Fa# - La - Do#5
-    'd4','fs4','a4','cs5',
-    // Si - La - Sol - Fa# - Mi
-    'b4','a4','g4','fs4','e4',
-    // La - Sol - Fa# - Sol - La
-    'a4','g4','fs4','g4','a4'
-],
+                // --- CORO: "Un mundo ideal..." (A Whole New World) ---
+                // F# - G - B - A
+                'fs4','g4','b4','a4', 
+                // "Un mundo en el que tú y yo" (A new fantastic point of view)
+                'fs4','g4','b4','a4','e4','g4','fs4','fs4',
+                // "Podamos decidir, sin nadie que..." (No one to tell us no)
+                'fs4','g4','a4','cs5','b4','a4',
+                // "...nos diga no, o a dónde ir" (Or where to go)
+                'd5','cs5','d5','a4',
+                // "O a decirnos qué soñar" (Or say we're only dreaming)
+                'd4','fs4','e4','d4','b3','d4','e4',
+
+                // --- CORO 2: "Un mundo ideal..." ---
+                'fs4','g4','b4','a4',
+                // "Para compartir..."
+                'fs4','g4','b4','a4','e4','g4','fs4','fs4',
+                // "Donde ya vi al subir..." (But when I'm way up here)
+                'fs4','g4','a4','cs5','b4','a4',
+                // "...con claridad" (It's crystal clear)
+                'd5','cs5','d5','a4',
+                // "Que ahora en un mundo ideal estoy" (That now I'm in a whole new world with you)
+                'd4','fs4','e4','d4','e4','fs4','e4','d4','cs4','d4'
+            ],
         };
 
         const pianoContainer = document.getElementById('miPiano');
@@ -566,5 +582,6 @@
     </script>
 </body>
 </html>
+
 
 
