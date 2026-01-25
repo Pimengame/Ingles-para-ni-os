@@ -26,7 +26,7 @@
         }
 
         .btn-volver {
-            position: relative; /* Cambiado de fixed a relative para mejor control */
+            position: relative; 
             top: auto; left: auto;
             margin: 0;
         }
@@ -190,6 +190,8 @@
             <button class="btn-cancion" onclick="iniciarClase('himno', this)">🎼 Alegría</button>
             <button class="btn-cancion" onclick="iniciarClase('tiburon', this)">🦈 Tiburón</button>
             <button class="btn-cancion" onclick="iniciarClase('recuerdame', this)">🎸 Recuérdame</button>
+            <button class="btn-cancion" onclick="iniciarClase('aladdin', this)">🧞‍♂️ Un Mundo Ideal</button>
+            
             <button class="btn-cancion" onclick="iniciarClase('dragonball', this)">🐉 Dragon Ball</button>
             <button class="btn-cancion" onclick="iniciarClase('slamdunk', this)">🏀 Slam Dunk</button>
             
@@ -269,7 +271,14 @@
             'tiburon': ['d4','e4','g4','g4','g4','g4','g4','g4','d4','e4','g4','g4','g4','g4','g4','g4','d4','e4','g4','g4','g4','g4','g4','g4','g4','g4','f4'],
             'recuerdame': ['c4','e4','c4','c4','e4','c4','g3','e4','c4','e4','c4','e4','g4','f4','e4','d4','d4','e4','f4','e4','d4','c4','g3','a3','b3','c4','c4','c5','b4','a4','g4','f4','e4','f4','g4','f4','e4','d4','c4','e4','c4','c4','e4','c4','g3','e4','c4','e4','c4','e4','g4','f4','e4','d4','c4','c5','b4','c5','a4','a4','b4','a4','g4','f4','e4','f4','e4','f4','e4','d4','c4','c4','e4','c4'],
             'dragonball': ['g4','g4','e4','f4','g4','a4','g4','f4','e4','d4','e4','e4','c4','d4','e4','f4','e4','d4','c4','b3','a3','a3','a3','c4','a3','g3','c4','d4','e4','f4','e4','d4','c4','d4','c5','c5','c5','c5','c5','as4','gs4','as4','c5','as4','as4','as4','gs4','g4','g4','f4','f4','g4','ds4','f4','g4'],
-            'slamdunk': ['f4','f4','g4','a4','a4','g4','f4','g4','a4','g4','f4','g4','a4','c5','c5','c5','c5','a4','as4','a4','f4','a4','as4','c5','d5','c5','as4','a4','g4','f4','g4','a4','a4','c5','d5','e5','f4','g4','a4','as4','a4','g4','f4']
+            'slamdunk': ['f4','f4','g4','a4','a4','g4','f4','g4','a4','g4','f4','g4','a4','c5','c5','c5','c5','a4','as4','a4','f4','a4','as4','c5','d5','c5','as4','a4','g4','f4','g4','a4','a4','c5','d5','e5','f4','g4','a4','as4','a4','g4','f4'],
+            /* --- NUEVA CANCIÓN AGREGADA: UN MUNDO IDEAL --- */
+            'aladdin': [
+                'a3','a3','b3','b3','cs4','cs4', // Yo te quiero enseñar...
+                'a3','gs3','fs3','gs3','a3','a3','fs3', // Este mundo espléndido...
+                'a3','b3','cs4','a3','gs3', // Un mundo ideal (Coro)
+                'fs3','a3','cs4','e4','d4','cs4','b3' // Será fantástico encontrar
+            ]
         };
 
         const pianoContainer = document.getElementById('miPiano');
