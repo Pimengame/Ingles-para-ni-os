@@ -884,28 +884,53 @@
             ctx.lineTo(cx, cy - outerRadius); ctx.closePath(); ctx.stroke(); ctx.fill();
         }
 
-        // LISTENERS
+// --- LISTENERS UNIFICADOS (PC Y MÓVIL) ---
+        
+        // 1. Eventos de Mouse (PC)
         canvasStack.addEventListener('mousedown', startDraw);
         window.addEventListener('mousemove', moveDraw);
         window.addEventListener('mouseup', stopDraw);
+
+        // 2. Eventos Táctiles (Tablet/Celular)
+        // 'passive: false' es vital para poder bloquear el scroll de la pantalla mientras dibujas
+        canvasStack.addEventListener('touchstart', startDraw, { passive: false });
+        window.addEventListener('touchmove', moveDraw, { passive: false });
+        window.addEventListener('touchend', stopDraw);
         
-        // Paneo
-        let isPanning = false; let panStart = {x:0, y:0};
+        // 3. Paneo (Mover el lienzo con la barra espaciadora o gesto)
+        // Añadimos soporte táctil básico al paneo si quisieras mover el lienzo con dos dedos (opcional)
         window.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT') return;
             const k = e.key.toLowerCase();
-            if(k==='b') setTool('lapiz'); if(k==='e') setTool('goma'); if(k==='f') setTool('cubo'); if(k==='i') setTool('pipeta'); if(k==='s') setTool('seleccion');
+            if(k==='b') setTool('lapiz'); 
+            if(k==='e') setTool('goma'); 
+            if(k==='f') setTool('cubo'); 
+            if(k==='i') setTool('pipeta'); 
+            if(k==='s') setTool('seleccion');
             if(e.key==='z' && (e.ctrlKey||e.metaKey)) undo();
             if (e.code === 'Space' && !isPanning) { isPanning = true; viewport.style.cursor = 'grab'; }
         });
-        window.addEventListener('keyup', (e) => { if (e.code === 'Space') { isPanning = false; viewport.style.cursor = 'default'; } });
-        viewport.addEventListener('mousedown', (e) => {
-            if (isPanning) { panStart = { x: e.clientX, y: e.clientY }; viewport.style.cursor = 'grabbing'; viewport.dataset.sx = viewport.scrollLeft; viewport.dataset.sy = viewport.scrollTop; e.preventDefault(); }
+        
+        window.addEventListener('keyup', (e) => { 
+            if (e.code === 'Space') { isPanning = false; viewport.style.cursor = 'default'; } 
         });
+
+        viewport.addEventListener('mousedown', (e) => {
+            if (isPanning) { 
+                panStart = { x: e.clientX, y: e.clientY }; 
+                viewport.style.cursor = 'grabbing'; 
+                viewport.dataset.sx = viewport.scrollLeft; 
+                viewport.dataset.sy = viewport.scrollTop; 
+                e.preventDefault(); 
+            }
+        });
+
         window.addEventListener('mousemove', (e) => {
             if (isPanning && e.buttons === 1) {
-                const dx = e.clientX - panStart.x; const dy = e.clientY - panStart.y;
-                viewport.scrollLeft = parseFloat(viewport.dataset.sx) - dx; viewport.scrollTop = parseFloat(viewport.dataset.sy) - dy;
+                const dx = e.clientX - panStart.x; 
+                const dy = e.clientY - panStart.y;
+                viewport.scrollLeft = parseFloat(viewport.dataset.sx) - dx; 
+                viewport.scrollTop = parseFloat(viewport.dataset.sy) - dy;
             }
         });
 
@@ -913,4 +938,5 @@
         addLayer();
     </script>
 </body>
+
 </html>
